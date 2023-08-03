@@ -1,0 +1,381 @@
+/*************************** get item price  ITM1
+Url : /api/GetItemPrice
+Playload
+{
+	"ItemCode" : "I1001",
+	"PriceList" : 1
+}
+
+success response
+{
+	"ItemCode" : "I1001",
+	"PriceList" : 1,
+	"Price" : 100.00,
+	"UomEntry" : 44
+}
+
+error response
+{
+	"status" : "fail",
+	"error" : "Price list not exists"
+}
+
+/***************************** get stock
+Url : /api/GetStock
+Playload
+{
+	"ItemCode" : "FG-ART0012",
+	"WhsCode" : ["L4-G", "L2-G", "L3-G"],
+	"QuotaNo" : "B22G"
+}
+
+1. กรณีระบุ WhsCode แต่ไม่ระบุ QuotaNo ได้ ยอดรวมทั้งหมดในคลัง
+	OnHand = (SELECT SUM(Quantity) FROM {{table}} WHERE ItemCode = 'FG-ART0012' AND WhsCode = 'LG-4')
+	QuotaQty = 0;
+
+2. กรณีระบุทั้ง 2 ค่า ได้ยอดรวมของค
+	OnHand = (SELECT SUM(Quantity) FROM {{table}} WHERE ItemCode = 'FG-ART0012' AND WhsCode = 'LG-4')
+	QuotaQty = (SELECT SUM(Quantity) FROM {{table}} WHERE ItemCode = 'FG-ART0012' AND WhsCode = 'LG-4' AND QUOTA = 'B22G')
+
+success response
+{
+	"status" : "success",
+	"ItemCode" : "FG-ART0012",
+	"WhsCode" : "LG-4",
+	"QuotaNo" : "B22G",
+	"OnHand" : 1000,
+	"QuotaQty" : 200
+}
+
+error response
+{
+	"status" : "fail",
+	"error" : "Invalid ItemCode"
+}
+
+
+/*************************** Cost Center
+Url : /api/CostCenter
+Playload :
+{
+
+}
+
+Response
+{
+	"status" : "success",
+	"error" : "",
+	"costCenterList" : [
+		{
+			"PrcCode" : "CEO",
+			"PrcName" : "CEO",
+			"DimCode" : "1"
+		},
+		{
+			"PrcCode" : "COO",
+			"PrcName" : "COO/CFO",
+			"DimCode" : "2"
+		},
+		{
+			"PrcCode" : "ACC",
+			"PrcName" : "ฝ่ายบัญชี",
+			"DimCode" : "3"
+		},
+		{
+			"PrcCode" : "ACC01",
+			"PrcName" : "แผนกบัญชี",
+			"DimCode" : "4"
+		}
+	]
+}
+
+error response
+{
+	"status" : "fail",
+	"error" : "No data"
+}
+
+
+/*************************** get single item
+Url : /api/GetProduct
+Playload
+{
+	"ItemCode" : "I001"
+}
+
+response
+{
+	"status" : "success",
+	"ItemCode" : "I001",
+	"ItemName" : "Item name",
+	"CodeBars" : "88587971234567",
+	"Cost" : 100.00, //--- ตาม field ที่คุณจุ๊เคยแจ้งไว้
+	"VatGourpSa" : "S07", //-- JOIN OVTG
+	"Rate" : 7.00, //--- OVTG
+	"SUoMEntry" : 1,
+	"validFor" : "Y",
+	"U_ModelCode" : "M001",
+	"U_CategoryCode" : "C001",
+	"U_TypeCode" : "T001",
+	"U_BrandCode" : "B001"
+}
+
+/*************************** get Items By
+Url : /api/GetProducts
+Playload
+{
+	"date" : "2022-07-01",
+	"limit" : 100,
+	""
+}
+
+response
+{
+	"status" : "success",
+	"ItemCode" : "I001",
+	"ItemName" : "Item name",
+	"CodeBars" : "88587971234567",
+	"Cost" : 100.00, //--- ตาม field ที่คุณจุ๊เคยแจ้งไว้
+	"VatGourpSa" : "S07", //-- JOIN OVTG
+	"Rate" : 7.00, //--- OVTG
+	"SUoMEntry" : 1,
+	"validFor" : "Y",
+	"U_ModelCode" : "M001",
+	"U_CategoryCode" : "C001",
+	"U_TypeCode" : "T001",
+	"U_BrandCode" : "B001"
+}
+
+
+$arr = array(
+	"code" : $code,
+	"role" : "S",
+
+);
+
+
+/******************************* ADD NEW SALE ORDER
+Url : /api/SaleOrder
+Method : POST
+Playload
+{
+	"header" : {
+		"U_WEBORDER" : "WO-22070001",
+		"CardCode" : "CC1001",
+		"CardName" : "ห้างหุ้นส่วนจำกัด ศิริวัฒน์ 1445  สำนักงานใหญ่",
+		"Pricelist" : 1,
+		"SlpCode" : 27,
+		"GroupNum" : 28,
+		"DocCur" : "THB",
+		"DocRate" : 1,
+		"DocTotal" : 21667,
+		"DocDate" : "2022-07-01",
+		"DocDueDate" : "2022-07-06",
+		"TaxDate" : "2022-07-01",
+		"PayToCode" : "0000",
+		"ShipToCode" : "0000",
+		"Address" : "เลขที่ 445/3 ถ.เพชรบุรี แขวงทุ่งพญาไท เขตราชเทวี กรุงเทพมหานคร 10400",
+		"Address2" : "เลขที่ 445/3 ถ.เพชรบุรี แขวงทุ่งพญาไท เขตราชเทวี กรุงเทพมหานคร 10400",
+		"DiscPrcnt" : 0.00,
+		"DiscSum" : 0.00,
+		"VatSum" : 114.75,
+		"RoundDif" : 0.00,
+		"Comments" : "ส่งของช่วงบ่ายเท่านั้น",
+		"BatchNo" : "220614"
+	},
+	"line" : [
+		{
+			"LineNum" : 0,
+			"ItemCode" : "FG-BEL0070",
+			"ItemName" : "UFO 18W/6000K หลอดLED E27/BEC",
+			"Quantity" : 10,
+			"UomCode" : "ดวง",
+			"UomEntry" : 2,
+			"Price" : 183.36,
+			"LineTotal" : 1741.92,
+			"DiscPrcnt" : 5.00,
+			"PriceBefDi" : 183.36,
+			"Currency" : "THB",
+			"Rate" : 1.00,
+			"VatGroup" : "S07",
+			"VatPrcnt" : 7.00,
+			"PriceAfVAT" : 186.38,
+			"VatSum" : 121.93,
+			"GTotal" : 121.93,
+			"SlpCode" : 27,
+			"U_DISC_LABEL" : "10.00%+5.00%+2.00%" //--- ส่วนลดหลาย
+		},
+		{
+			"LineNum" : 1,
+			"ItemCode" : "FG-BEL0077",
+			"ItemName" : "ULTRA 7W/2700K หลอด LED Bulb A60 E27/BEC",
+			"Quantity" : 1,
+			"UomCode" : "ดวง",
+			"UomEntry" : 2,
+			"Price" : 29.80,
+			"LineTotal" : 0.00,
+			"DiscPrcnt" : 100.00,
+			"PriceBefDi" : 29.80,
+			"Currency" : "THB",
+			"Rate" : 1.00,
+			"VatGroup" : "S07",
+			"VatPrcnt" : 7.00,
+			"PriceAfVAT" : 0.00,
+			"VatSum" : 0.00,
+			"GTotal" : 0.00,
+			"SlpCode" : 27,
+			"U_DISC_LABEL" : "10.00%"
+		}
+	]
+}
+
+
+/******************************* ADD NEW Quotation
+Url : /api/SaleQuotation
+Method : POST
+Playload
+{
+	"WEBORDER" : "WQ-22070001",
+	"CardCode" : "CC1001",
+	"CardName" : "ห้างหุ้นส่วนจำกัด ศิริวัฒน์ 1445  สำนักงานใหญ่",
+	"Pricelist" : 1,
+	"SlpCode" : 27,
+	"GroupNum" : 28,
+	"DocCur" : "THB",
+	"DocRate" : 1,
+	"DocTotal" : 21667,
+	"DocDate" : "2022-07-01",
+	"DocDueDate" : "2022-07-06",
+	"TaxDate" : "2022-07-01",
+	"PayToCode" : "0000",
+	"ShipToCode" : "0000",
+	"Address" : "เลขที่ 445/3 ถ.เพชรบุรี แขวงทุ่งพญาไท เขตราชเทวี กรุงเทพมหานคร 10400",
+	"Address2" : "เลขที่ 445/3 ถ.เพชรบุรี แขวงทุ่งพญาไท เขตราชเทวี กรุงเทพมหานคร 10400",
+	"DiscPrcnt" : 0.00,
+	"DiscSum" : 0.00,
+	"VatSum" : 114.75,
+	"RoundDif" : 0.00,
+	"Comments" : "ส่งของช่วงบ่ายเท่านั้น",
+	"OwnerCode" => 24,
+	"OcrCode" => "",
+	"OcrCode2" => "",
+	"OcrCode3" => "",
+	"OcrCode4" => "",
+	"OcrCode5" => "111030",
+	"DocLine" : [
+		{
+			"LineNum" : 0,
+			"ItemCode" : "FG-BEL0070",
+			"ItemName" : "UFO 18W/6000K หลอดLED E27/BEC",
+			"Quantity" : 10,
+			"UomCode" : "ดวง",
+			"UomEntry" : 2,
+			"Price" : 183.36,
+			"LineTotal" : 1741.92,
+			"DiscPrcnt" : 5.00,
+			"PriceBefDi" : 183.36,
+			"Currency" : "THB",
+			"Rate" : 1.00,
+			"VatGroup" : "S07",
+			"VatPrcnt" : 7.00,
+			"PriceAfVAT" : 186.38,
+			"VatSum" : 121.93,
+			"GTotal" : 121.93,
+			"SlpCode" : 27,
+			"U_DISC_LABEL" : "10.00%+5.00%+2.00%",
+			"Sale_Discount1" => 10.00,
+			"Sale_Discount2" => 0.00,
+			"Sale_Discount3" => 0.00,
+			"Sale_Discount4" => 0.00,
+			"Sale_Discount5" => 0.00,
+			"OcrCode" => "",
+			"OcrCode2" => "",
+			"OcrCode3" => "",
+			"OcrCode4" => "",
+			"OcrCode5" => "111030",
+			"SaleTeam" => "A00"
+		},
+		{
+			"LineNum" : 1,
+			"ItemCode" : "FG-BEL0077",
+			"ItemName" : "ULTRA 7W/2700K หลอด LED Bulb A60 E27/BEC",
+			"Quantity" : 1,
+			"UomCode" : "ดวง",
+			"UomEntry" : 2,
+			"Price" : 29.80,
+			"LineTotal" : 0.00,
+			"DiscPrcnt" : 100.00,
+			"PriceBefDi" : 29.80,
+			"Currency" : "THB",
+			"Rate" : 1.00,
+			"VatGroup" : "S07",
+			"VatPrcnt" : 7.00,
+			"PriceAfVAT" : 0.00,
+			"VatSum" : 0.00,
+			"GTotal" : 0.00,
+			"SlpCode" : 27,
+			"U_DISC_LABEL" : "10.00%",
+			"Sale_Discount1" => 10.00,
+			"Sale_Discount2" => 0.00,
+			"Sale_Discount3" => 0.00,
+			"Sale_Discount4" => 0.00,
+			"Sale_Discount5" => 0.00,
+			"OcrCode" => "",
+			"OcrCode2" => "",
+			"OcrCode3" => "",
+			"OcrCode4" => "",
+			"OcrCode5" => "111030",
+			"SaleTeam" => "A00"
+		}
+	],
+	"TextLine" : [
+		{
+			"LineSeq" : 0,
+			"AfLineNum" : 1,
+			"LineText" : "ผลิตจากประเทศสหรัฐอเมริกา"
+		},
+		{
+			"LineSeq" : 1,
+			"AfLineNum" : 2,
+			"LineText" : "ผลิตจากประเทศญี่ปุ่น"
+		}
+	]
+}
+
+
+
+/*************************** get sales order status
+Url : /api/SalesOrderStatus
+Playload
+{
+	"DocEntry" : "101",
+	"DocNum" : "22080392"
+}
+
+success response
+{
+	"Status" : "success",
+	"DocStatus" : "O",   /*** O = Open, C = Closed, D = Cancelled **/
+	"Line" : [
+		{
+			"LineNum" : 0,
+			"LineStatus" : "O", /*** O = Open, C = Closed, D = Cancelled **/
+			"ItemCode" : "FG-BEL0634",
+			"Quantity" : 10,
+			"OpenQty" : 5
+		},
+		{
+			"LineNum" : 1,
+			"LineStatus" "C",
+			"ItemCode" : "FG-BEL0077",
+			"Quantity" : 20,
+			"OpenQty" : 0
+		}
+	]
+}
+
+error response
+{
+	"status" : "fail",
+	"error" : "Price list not exists"
+}

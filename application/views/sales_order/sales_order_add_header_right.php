@@ -1,0 +1,94 @@
+<div class="col-lg-5 col-md-5 col-sm-5 col-xs-12 padding-5 last">
+	<div class="form-horizontal">
+		<div class="form-group">
+			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 control-label no-padding-right">Web Order</label>
+			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
+				<input type="text" id="code" class="form-control input-sm" value="" disabled/>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 control-label no-padding-right">Posting Date</label>
+			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
+				<span class="input-icon input-icon-right">
+				<input type="text" id="TextDate" class="form-control input-sm" value="<?php echo date('d-m-Y'); ?>" readonly/>
+				<i class="ace-icon fa fa-calendar-o"></i>
+				</span>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 control-label no-padding-right">Delivery Date</label>
+			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
+				<span class="input-icon input-icon-right">
+				<input type="text" id="ShipDate" class="form-control input-sm" value="<?php echo date('d-m-Y'); ?>" readonly/>
+				<i class="ace-icon fa fa-calendar-o"></i>
+				</span>
+			</div>
+		</div>
+		
+
+		<div class="form-group">
+			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 control-label no-padding-right">Document Date</label>
+			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
+				<span class="input-icon input-icon-right">
+				<input type="text" id="DocDate" class="form-control input-sm" value="<?php echo date('d-m-Y'); ?>" readonly onchange="recal_all_discount()"/>
+				<i class="ace-icon fa fa-calendar-o"></i>
+				</span>
+			</div>
+		</div>
+
+
+		<div class="form-group">
+      <label class="col-lg-7 col-md-6 col-sm-6 col-xs-12 control-label no-padding-right">CEO</label>
+      <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
+				<select class="form-control input-sm" id="dimCode1" name="dimCode1" >
+					<option value="">Please Select</option>
+					<?php echo select_cost_center(1); ?>
+				</select>
+      </div>
+    </div>
+
+		<div class="form-group">
+      <label class="col-lg-7 col-md-6 col-sm-6 col-xs-12 control-label no-padding-right">COO/CFO</label>
+      <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
+				<select class="form-control input-sm" id="dimCode2" name="dimCode2" >
+					<option value="">Please Select</option>
+					<?php echo select_cost_center(2); ?>
+				</select>
+      </div>
+    </div>
+
+		<div class="form-group">
+      <label class="col-lg-7 col-md-6 col-sm-6 col-xs-12 control-label no-padding-right">สายงานขายและการตลาด</label>
+      <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
+				<select class="form-control input-sm" id="dimCode3" name="dimCode3" >
+					<option value="">Please Select</option>
+					<?php echo select_cost_center(3); ?>
+				</select>
+      </div>
+    </div>
+
+		<div class="form-group">
+      <label class="col-lg-7 col-md-6 col-sm-6 col-xs-12 control-label no-padding-right">ฝ่าย</label>
+      <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
+				<select class="form-control input-sm" id="dimCode4" name="dimCode4" >
+					<option value="">Please Select</option>
+					<?php echo select_cost_center(4); ?>
+				</select>
+      </div>
+    </div>
+
+		<div class="form-group">
+      <label class="col-lg-7 col-md-6 col-sm-6 col-xs-12 control-label no-padding-right">แผนก</label>
+      <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
+				<select class="form-control input-sm" id="dimCode5" name="dimCode5" >
+					<option value="">Please Select</option>
+					<?php echo select_cost_center(5); ?>
+				</select>
+      </div>
+    </div>
+
+	</div>
+
+</div>
