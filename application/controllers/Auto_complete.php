@@ -7,112 +7,88 @@ class Auto_complete extends CI_Controller
   public function __construct()
   {
     parent::__construct();
+    $this->ms = $this->load->database('ms', TRUE);
   }
 
 
   public function get_customer_code_and_name()
   {
-    $txt = $_REQUEST['term'];
+    $df_cust = getConfig('DEFAULT_CUSTOMER_CODE');
+    $txt = trim($_REQUEST['term']);
     $sc = array();
-    $this->db
-    ->select('CardCode AS code, CardName AS name')
-    ->where('CardType', 'C')
-		->where('Status', 1);
 
-		if($txt != '*')
-		{
-			$this->db
-			->group_start()
-			->like('CardCode', $txt)
-			->or_like('CardName', $txt)
-			->group_end();
-		}
+    $qr  = "SELECT CardCode AS code, CardName AS name ";
+    $qr .= "FROM OCRD ";
+    $qr .= "WHERE CardType IN('C', 'L') ";
 
-		$rs = $this->db
-    ->limit(50)
-    ->get('customers');
+    $qr .= "AND validFor = 'Y' ";
 
-    if($rs->num_rows() > 0)
+    if($txt !== '*')
     {
-      foreach($rs->result() as $rd)
+      $qr .= "AND (CardCode = '{$df_cust}' OR CardCode LIKE N'%{$this->ms->escape_str($txt)}%' OR CardName LIKE N'%{$this->ms->escape_str($txt)}%') ";
+    }
+
+    $qr .= "ORDER BY 1 OFFSET 0 ROWS FETCH NEXT 50 ROWS ONLY";
+
+    $qs = $this->ms->query($qr);
+
+    if($qs->num_rows() > 0)
+    {
+      foreach($qs->result() as $rs)
       {
-        $sc[] = $rd->code.' | '.$rd->name;
+        $sc[] = array('value' => $rs->code, 'name' => $rs->name, 'label' => $rs->code.' | '.$rs->name);
       }
     }
-		else
-		{
-			$sc[] = "Not found";
-		}
+
 
     echo json_encode($sc);
   }
 
 
-	public function get_customer_list()
-	{
-		$txt = $_REQUEST['term'];
+  public function get_item_code_and_name()
+  {
+
+    $txt = $_REQUEST['term'];
+    $arr = explode('*', $txt);
+
     $sc = array();
-    $this->db
-    ->select('id, CardCode AS code, CardName AS name')
-    ->where('CardType', 'C')
-		->where('Status', 1);
 
-		if($txt != '*')
-		{
-			$this->db
-			->group_start()
-			->like('CardCode', $txt)
-			->or_like('CardName', $txt)
-			->group_end();
-		}
+    $qr = "SELECT ItemCode AS code, ItemName AS name ";
+    $qr .= "FROM OITM ";
+    $qr .= "WHERE ItemType = 'I' AND validFor = 'Y' AND SellItem = 'Y' ";
 
-		$rs = $this->db
-    ->limit(50)
-    ->get('customers');
+    if(count($arr) > 1)
+    {
+      foreach($arr as $ar)
+      {
+        $qr .= "AND (ItemCode LIKE N'%{$this->ms->escape_str($ar)}%' OR ItemName LIKE N'%{$this->ms->escape_str($ar)}%') ";
+      }
+    }
+    else
+    {
+      $qr .= "AND (ItemCode LIKE N'%{$this->ms->escape_str($txt)}%' OR ItemName LIKE N'%{$this->ms->escape_str($txt)}%') ";
+    }
+
+    $qr .= "ORDER BY ItemCode ASC ";
+    $qr .= "OFFSET 0 ROWS FETCH NEXT 20 ROWS ONLY";
+
+    $rs = $this->ms->query($qr);
 
     if($rs->num_rows() > 0)
     {
       foreach($rs->result() as $rd)
       {
-        $sc[] = $rd->id.' | '.$rd->code.' | '.$rd->name;
+        $sc[] = array(
+          'code' => $rd->code,
+          'name' => $rd->name,
+          'label' => $rd->code.' | '.$rd->name
+        );
       }
     }
-		else
-		{
-			$sc[] = "Not found";
-		}
 
     echo json_encode($sc);
-	}
+  }
 
-
-
-	public function get_item_code_and_name()
-	{
-		$txt = $_REQUEST['term'];
-		$sc = array();
-
-		if($txt != '*')
-		{
-			$this->db->like('code', $txt)->or_like('name', $txt);
-		}
-
-		$rs = $this->db->limit(50)->get('products');
-
-		if($rs->num_rows() > 0)
-		{
-			foreach($rs->result() as $rd)
-			{
-				$sc[] = $rd->id.' | '.$rd->code.' | '.$rd->name;
-			}
-		}
-		else
-		{
-			$sc[] = "Not found";
-		}
-
-		echo json_encode($sc);
-	}
 
 
 	public function get_model_name()

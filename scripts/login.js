@@ -31,6 +31,7 @@ function doLogin() {
 			rs = $.trim(rs);
 
 			if(rs === 'success') {
+
 				window.location.href = BASE_URL;
 			}
 			else {

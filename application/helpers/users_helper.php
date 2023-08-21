@@ -72,7 +72,7 @@ function reject_permission()
 function select_sales_team($id = NULL)
 {
   $CI =& get_instance();
-  $CI->load->model('masters/sales_team_model');
+  $CI->load->model('users/sales_team_model');
   $result = $CI->sales_team_model->get_all();
   $ds = '';
   if(!empty($result))
@@ -125,6 +125,24 @@ function select_saleman($sale_id = '')
 }
 
 
+function select_active_saleman($sale_id = '')
+{
+  $ds = '';
+  $CI =& get_instance();
+	$CI->load->model('masters/sales_person_model');
+  $qs = $CI->sales_person_model->get_all_active();
+  if(!empty($qs))
+  {
+    foreach($qs as $rs)
+    {
+      $ds .= '<option value="'.$rs->id.'" '.is_selected($rs->id, $sale_id).'>'.$rs->name.'</option>';
+    }
+  }
+
+  return $ds;
+}
+
+
 function select_user($user_id = NULL)
 {
 	$ds = '';
@@ -136,13 +154,24 @@ function select_user($user_id = NULL)
 	{
 		foreach($option as $rs)
 		{
-			$ds .= '<option value="'.$rs->id.'" '.is_selected($rs->id, $user_id).'>'.$rs->uname.'</option>';
+			$ds .= '<option value="'.$rs->id.'" '.is_selected($rs->id, $user_id).'>'.$rs->uname.' &nbsp; | &nbsp; '.$rs->name.'</option>';
 		}
 	}
 
 	return $ds;
 }
 
+
+function select_user_group($group_id = NULL)
+{
+  $ds = '';
+  $ds .= '<option value="4" data-level="1" '.is_selected('4', $group_id).'>Sales.</option>';
+  $ds .= '<option value="5" data-level="1" '.is_selected('5', $group_id).'>Logistic.</option>';
+  $ds .= '<option value="3" data-level="10" '.is_selected('3', $group_id).'>Manager.</option>';
+  $ds .= '<option value="2" data-level="100" '.is_selected('2', $group_id).'>Administrator.</option>';
+
+  return $ds;
+}
 
 function select_profile($id_profile = '')
 {
@@ -203,24 +232,38 @@ function user_in($txt)
 }
 
 
-function select_quota($code = NULL)
+function user_group_name($group_id)
 {
-	$sc = '';
-	$ci =& get_instance();
-	$ci->load->model('masters/quota_model');
+  $groupName = array(
+		'1' => 'Super Admin',
+		'2' => 'Administrator',
+		'3' => 'Manager',
+		'4' => 'Sales',
+		'5' => 'Logistic'
+	);
 
-	$option = $ci->quota_model->get_all_listed();
-
-	if( ! empty($option))
-	{
-		foreach($option as $rs)
-		{
-			$sc .= '<option value="'.$rs->code.'" '.is_selected($rs->code, $code).'>'.$rs->code.'</option>';
-		}
-	}
-
-	return $sc;
+  return empty($groupName[$group_id]) ? NULL : $groupName[$group_id];
 }
 
 
+function action_name($action)
+{
+	$arr = array(
+    'login' => 'Login',
+		'add' => "Create",
+		'edit' => "Edit",
+    'review' => 'Reviewed',
+    'reject_review' => 'Rejected',
+		'approve' => "Approved",
+		'reject' => "Rejected",
+		'cancel' => "Canceled"
+	);
+
+	if(isset($arr[$action]))
+	{
+		return $arr[$action];
+	}
+
+	return NULL;
+}
  ?>

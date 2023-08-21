@@ -44,27 +44,22 @@ function parse_discount_text($discText, $price)
 
 
 //--- แสดงป้ายส่วนลด
-function discountLabel($disc1 = 0, $disc2 = 0, $disc3 = 0, $disc4 = 0, $disc5 = 0, $sign = NULL)
+function discountLabel($disc1 = 0, $disc2 = 0, $disc3 = 0, $sign = NULL)
 {
 	$label  = '';
 	$label  = $disc1 == 0 ? 0 : round($disc1, 2).$sign;
 	$label .= $disc2 == 0 ? '' : '+'.round($disc2, 2).$sign;
 	$label .= $disc3 == 0 ? '' : '+'.round($disc3, 2).$sign;
-	$label .= $disc4 == 0 ? '' : '+'.round($disc4, 2).$sign;
-	$label .= $disc5 == 0 ? '' : '+'.round($disc5, 2).$sign;
-
 	return $label;
 }
 
 
-function getDiscountAmount($amount, $disc1 = 0, $disc2 = 0, $disc3 = 0, $disc4 = 0, $disc5 = 0)
+function getDiscountAmount($amount, $disc1 = 0, $disc2 = 0, $disc3 = 0)
 {
 	$disc = array(
 		'disc1' => $disc1,
 		'disc2' => $disc2,
-		'disc3' => $disc3,
-		'disc4' => $disc4,
-		'disc5' => $disc5
+		'disc3' => $disc3
 	);
 
 	$discAmount = 0;

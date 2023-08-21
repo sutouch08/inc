@@ -1,7 +1,7 @@
 <?php
 class Sales_person_model extends CI_Model
 {
-	private $tb = "sale_person";
+	private $tb = "OSLP";
 
 	public function __construct()
 	{
@@ -9,32 +9,14 @@ class Sales_person_model extends CI_Model
 	}
 
 
-	public function add(array $ds = array())
-	{
-		if( ! empty($ds))
-		{
-			return $this->db->insert($this->tb, $ds);
-		}
-
-		return FALSE;
-	}
-
-
-	public function update($id, array $ds = array())
-	{
-		if( ! empty($ds))
-		{
-			return $this->db->where('id', $id)->update($this->tb, $ds);
-		}
-
-		return FALSE;
-	}
-
-
-
 	public function get($id)
 	{
-		$rs = $this->db->where('id', $id)->get($this->tb);
+		$rs = $this->ms
+		->select('SlpCode AS id, SlpName AS name, EmpID AS emp_id, Active AS active')
+		->select('Mobil AS phone, Email AS email, U_Name_Eng AS name_en')
+		->select('Telephone AS id_line, U_Positions AS position')
+		->where('SlpCode', $id)
+		->get($this->tb);
 
 		if($rs->num_rows() === 1)
 		{
@@ -47,7 +29,10 @@ class Sales_person_model extends CI_Model
 
 	public function get_name($id)
 	{
-		$rs = $this->db->where('id', $id)->get($this->tb);
+		$rs = $this->ms
+		->select('SlpName AS name')
+		->where('SlpCode', $id)
+		->get($this->tb);
 
 		if($rs->num_rows() === 1)
 		{
@@ -60,7 +45,9 @@ class Sales_person_model extends CI_Model
 
 	public function get_all()
 	{
-		$rs = $this->db->order_by('name', 'ASC')->get($this->tb);
+		$rs = $this->ms
+		->select('SlpCode AS id, SlpName AS name, EmpID AS emp_id, Active AS active')
+		->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
@@ -71,35 +58,12 @@ class Sales_person_model extends CI_Model
 	}
 
 
-	public function count_rows(array $ds = array())
+	public function get_all_active()
 	{
-		if( ! empty($ds['name']))
-		{
-			$this->db->like('name', $ds['name']);
-		}
-
-		if( isset($ds['active']) && $ds['active'] != 'all')
-		{
-			$this->db->where('active', $ds['active']);
-		}
-
-		return $this->db->count_all_results($this->tb);
-	}
-
-
-	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
-	{
-		if( ! empty($ds['name']))
-		{
-			$this->db->like('name', $ds['name']);
-		}
-
-		if( isset($ds['active']) && $ds['active'] != 'all')
-		{
-			$this->db->where('active', $ds['active']);
-		}
-
-		$rs = $this->db->limit($perpage, $offset)->get($this->tb);
+		$rs = $this->ms
+		->select('SlpCode AS id, SlpName AS name, EmpID AS emp_id, Active AS active')
+		->where('Active', 'Y')
+		->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
@@ -107,19 +71,6 @@ class Sales_person_model extends CI_Model
 		}
 
 		return NULL;
-	}
-
-
-	public function is_exists($id)
-	{
-		$rs = $this->db->where('id', $id)->count_all_results($this->tb);
-
-		if($rs > 0)
-		{
-			return TRUE;
-		}
-
-		return FALSE;
 	}
 
 } //--- end class

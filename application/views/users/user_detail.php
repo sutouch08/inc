@@ -1,13 +1,4 @@
 <?php $this->load->view('include/header'); ?>
-<style>
-  .freez > th {
-    top:0;
-    position: sticky;
-    background-color: #f0f3f7;
-    min-height: 30px;
-    z-index: 100;
-  }
-</style>
 
 <div class="row">
 	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">

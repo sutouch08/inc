@@ -78,28 +78,19 @@
 
 			</tr>
 			<tr>
-
-				<td class=" bg-grey">Sales Channels</td>
-				<td class=""><?php echo $order->channels_name; ?></td>
+				<td class=" bg-grey">Ship To (<?php echo $order->ShipToCode;?>)</td>
+				<td class=""><?php echo $order->Address2; ?></td>
 				<td class="bg-grey ">Original SQ No.</td>
 				<td class=""><?php echo $order->OriginalSQ; ?></td>
 			</tr>
 			<tr>
-				<td class=" bg-grey">Ship To (<?php echo $order->ShipToCode;?>)</td>
-				<td class=""><?php echo $order->Address2; ?></td>
-				<td class="bg-grey ">SAP NO.</td>
+				<td class="bg-grey ">Bill To (<?php echo $order->PayToCode; ?>)</td>
+				<td class=""><?php echo $order->Address; ?></td>
+				<td class="bg-grey ">SAP Doc No.</td>
 				<td class=""><?php echo $order->DocNum; ?></td>
 			</tr>
 
-			<tr>
-				<td class="bg-grey ">Bill To (<?php echo $order->PayToCode; ?>)</td>
-				<td class=""><?php echo $order->Address; ?></td>
-				<td class="bg-grey ">สายงาน</td>
-				<td class=""><?php echo $dimCode; ?></td>
-			</tr>
 		</table>
 	</div>
-
-
 </div>
 <hr class="padding-5" />

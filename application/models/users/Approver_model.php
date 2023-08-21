@@ -2,6 +2,7 @@
 class Approver_model extends CI_Model
 {
 	public $tb = "approver";
+	public $td = "approve_rule";
 
 	public function __construct()
 	{
@@ -22,6 +23,18 @@ class Approver_model extends CI_Model
 	}
 
 
+	public function get_rules($id)
+	{
+		$rs = $this->db->where('id_approver', $id)->get($this->td);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
 	public function add(array $ds = array())
 	{
 		if(!empty($ds))
@@ -38,28 +51,14 @@ class Approver_model extends CI_Model
 	}
 
 
-
-	public function add_team(array $ds = array())
+	public function add_rule(array $ds = array())
 	{
-		return $this->db->insert('approver_team', $ds);
-	}
+		if( ! empty($ds))
+		{
+			return $this->db->insert($this->td, $ds);
+		}
 
-
-	public function add_brand(array $ds = array())
-	{
-		return $this->db->insert('approver_brand', $ds);
-	}
-
-
-	public function drop_team($id_approver)
-	{
-		return $this->db->where('id_approver', $id_approver)->delete("approver_team");
-	}
-
-
-	public function drop_brand($id_approver)
-	{
-		return $this->db->where('id_approver', $id_approver)->delete("approver_brand");
+		return FALSE;
 	}
 
 
@@ -74,6 +73,11 @@ class Approver_model extends CI_Model
 	}
 
 
+	public function drop_approve_rule($id_approver)
+	{
+		return $this->db->where('id_approver', $id_approver)->delete($this->td);
+	}
+
 
 	public function delete($id)
 	{
@@ -81,15 +85,25 @@ class Approver_model extends CI_Model
 	}
 
 
+	public function doc_type_list()
+	{
+		$rs = $this->db->get('doc_type');
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
 	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
 		$this->db
-		->distinct()
-		->select('a.*, u.uname, u.name')
+		->select('a.*, u.uname, u.name, u.emp_id')
 		->from('approver AS a')
-		->join('user AS u', 'a.user_id = u.id', 'left')
-		->join('approver_brand AS ab', 'a.id = ab.id_approver', 'left')
-		->join('approver_team AS at', 'a.id = at.id_approver', 'left');
+		->join('user AS u', 'a.user_id = u.id', 'left');
 
 		if(!empty($ds['uname']))
 		{
@@ -102,16 +116,6 @@ class Approver_model extends CI_Model
 		if(isset($ds['status']) && $ds['status'] !== 'all')
 		{
 			$this->db->where('a.status', $ds['status']);
-		}
-
-		if(isset($ds['team']) && $ds['team'] != 'all')
-		{
-			$this->db->where('at.id_team', $ds['team']);
-		}
-
-		if(isset($ds['brand']) && $ds['brand'] != 'all')
-		{
-			$this->db->where('ab.id_brand', $ds['brand']);
 		}
 
 		$rs = $this->db->order_by('u.uname', 'ASC')->limit($perpage, $offset)->get();
@@ -128,13 +132,8 @@ class Approver_model extends CI_Model
 	public function count_rows(array $ds = array())
 	{
 		$this->db
-		->distinct()
-		->select('a.id')
 		->from('approver AS a')
-		->join('approver AS a2', 'a.id = a2.id', 'left')
-		->join('user AS u', 'a.user_id = u.id', 'left')
-		->join('approver_brand AS ab', 'a.id = ab.id_approver', 'left')
-		->join('approver_team AS at', 'a2.id = at.id_approver', 'left');
+		->join('user AS u', 'a.user_id = u.id', 'left');
 
 		if(!empty($ds['uname']))
 		{
@@ -147,16 +146,6 @@ class Approver_model extends CI_Model
 		if(isset($ds['status']) && $ds['status'] !== 'all')
 		{
 			$this->db->where('a.status', $ds['status']);
-		}
-
-		if(isset($ds['team']) && $ds['team'] != 'all')
-		{
-			$this->db->where('at.id_team', $ds['team']);
-		}
-
-		if(isset($ds['brand']) && $ds['brand'] != 'all')
-		{
-			$this->db->where('ab.id_brand', $ds['brand']);
 		}
 
 		return $this->db->count_all_results();
@@ -182,57 +171,39 @@ class Approver_model extends CI_Model
 	}
 
 
-	public function is_approver($user_id, $team_id)
+	public function get_rule_by_user_id($user_id, $docType)
 	{
 		$rs = $this->db
-		->distinct()
-		->select('a.id')
-		->from('approver AS a')
-		->join('approver_team AS at', 'a.id = at.id_approver', 'left')
+		->select('a.*, r.docType, r.review, r.approve, r.maxDisc, r.maxAmount')
+		->from('approve_rule AS r')
+		->join('approver AS a', 'r.id_approver = a.id', 'left')
 		->where('a.user_id', $user_id)
-		->where('at.id_team', $team_id)
+		->where('a.status', 1)
+		->where('r.docType', $docType)
 		->get();
 
-		if($rs->num_rows() > 0)
+		if($rs->num_rows() === 1)
 		{
-			return $rs->row()->id;
+			return $rs->row();
+		}
+
+		return NULL;
+	}
+
+
+	//--- เช็คว่ามีรายชื่ออยู่ในกลุ่มผู้อนุมัติหรือไม่ (ใช้ในหน้า Main เพื่อแจ้งเตือนการอนุมัติ)
+	public function is_approver($user_id)
+	{
+		$rs = $this->db->where('user_id', $user_id)->where('status', 1)->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return TRUE;
 		}
 
 		return FALSE;
 	}
 
-
-
-	public function get_approver_team($id)
-	{
-		$rs = $this->db->where('id_approver', $id)->get('approver_team');
-
-		if($rs->num_rows() > 0)
-		{
-			return $rs->result();
-		}
-
-		return NULL;
-	}
-
-
-	public function get_approver_brand($id)
-	{
-		$rs = $this->db
-		->select('ab.*')
-		->select('pb.name')
-		->from('approver_brand AS ab')
-		->join('product_brand AS pb', 'ab.id_brand = pb.id', 'left')
-		->where('ab.id_approver', $id)
-		->get();
-
-		if($rs->num_rows() > 0)
-		{
-			return $rs->result();
-		}
-
-		return NULL;
-	}
 
 } //--- end class
 

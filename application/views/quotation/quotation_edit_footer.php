@@ -16,14 +16,11 @@
 			<div class="form-group">
         <label class="col-lg-3 col-md-4 col-sm-4 col-xs-12 control-label no-padding-right">Owner</label>
         <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
-          <select class="width-100" id="owner">
-						<option value=""></option>
-						<option value="">-No Owner-</option>
-						<?php $owner = empty($order->OwnerCode) ? $this->_user->emp_id : $order->OwnerCode; ?>
-            <?php echo select_employee($owner); ?>
-					</select>
+          <input type="text" class="form-control input-sm" value="<?php echo $owner_name; ?>" disabled />
+  				<input type="hidden" id="owner" value="<?php echo $this->_user->emp_id; ?>" />
         </div>
       </div>
+
 
       <div class="form-group">
         <label class="col-lg-3 col-md-4 col-sm-4 col-xs-12 control-label no-padding-right">Remark</label>
@@ -42,6 +39,7 @@
       <div class="form-group">
         <label class="col-lg-8 col-md-8 col-sm-7 col-xs-6 control-label no-padding-right">Total Before Discount</label>
         <div class="col-lg-4 col-md-4 col-sm-5 col-xs-6 padding-5 last">
+          <input type="hidden" id="sysTotalAmount" value="<?php echo round($order->SysTotal, 2); ?>" />
 					<input type="hidden" id="totalAmount" value="<?php echo round($totalAmount, 2); ?>">
           <input type="text" class="form-control input-sm text-right" id="totalAmountLabel" value="<?php echo number($totalAmount, 2); ?>" disabled>
         </div>
@@ -98,6 +96,5 @@
 </div>
 
 <script>
-  $('#owner').select2();
 	$('#sale_id').select2();
 </script>

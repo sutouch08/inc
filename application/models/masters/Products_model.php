@@ -1,8 +1,6 @@
 <?php
 class Products_model extends CI_Model
 {
-	private $tb = "products";
-	private $fa = "favorite_item";
 
   public function __construct()
   {
@@ -10,471 +8,363 @@ class Products_model extends CI_Model
   }
 
 
-	public function get_all()
+	public function get($ItemCode, $priceList = 12)
+  {
+    $rs = $this->ms
+    ->select("P.ItemCode AS code, P.ItemName AS name, P.FrgnName AS description, P.UgpEntry, P.SUoMEntry AS uom_id")
+		->select("P.DfltWH AS dfWhsCode, P.OnHand, P.IsCommited, P.OnOrder")
+    ->select("P.VatGourpSa AS vat_group")
+    ->select("U.UomCode AS uom_code, U.UomName AS uom, P1.Price AS price")
+    ->select("T.Rate AS vat_rate")
+    ->from("OITM AS P")
+		->join("OUOM AS U", "P.SUoMEntry = U.UomEntry", "left")
+    ->join("ITM1 AS P1", "P.ItemCode = P1.ItemCode AND P1.PriceList = {$priceList}", "left")
+    ->join("OVTG AS T", "T.Code = P.VatGourpSa", "left")
+    ->where("P.ItemCode", $ItemCode)
+    ->get();
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function price_list($ItemCode, $PriceList)
+  {
+    $rs = $this->ms->select('Price, UomEntry')->where('ItemCode', $ItemCode)->where('PriceList', $PriceList)->get('ITM1');
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_special_price($ItemCode, $CardCode, $PriceList)
+  {
+    $rs = $this->ms
+    ->select('ITM1.Price AS Price')
+    ->select('OSPP.Price AS PriceAfDisc')
+    ->select('OSPP.Discount')
+    ->select('ITM1.UomEntry')
+    ->from('OSPP')
+    ->join('ITM1', 'OSPP.ItemCode = ITM1.ItemCode AND ITM1.PriceList = OSPP.ListNum', 'left')
+    ->where('OSPP.ItemCode', $ItemCode)
+    ->where('OSPP.CardCode', $CardCode)
+    ->where('OSPP.ListNum', $PriceList)
+    ->where('OSPP.Valid', 'Y')
+    ->group_start()
+    ->where('OSPP.ValidFrom <=', from_date())
+    ->or_where('OSPP.ValidFrom IS NULL', NULL, FALSE)
+    ->group_end()
+    ->group_start()
+    ->where('OSPP.ValidTo >=', to_date())
+    ->or_where('OSPP.ValidTo IS NULL', NULL, FALSE)
+    ->group_end()
+    ->get();
+
+    if($rs->num_rows() == 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+
+  public function get_uom_list($UgpEntry)
+  {
+    $rs = $this->ms
+    ->select("UGP1.UomEntry, UGP1.BaseQty, OUOM.UomCode, OUOM.UomName")
+    ->from('UGP1')
+    ->join('OUOM', 'UGP1.UomEntry = OUOM.UomEntry', 'left')
+    ->where('UGP1.UgpEntry', $UgpEntry)
+    ->get();
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_uom_list_by_item_code($ItemCode)
+  {
+    $rs = $this->ms
+    ->select('UGP1.UomEntry, UGP1.BaseQty, OUOM.UomCode, OUOM.UomName')
+    ->from('UGP1')
+    ->join('OITM', 'OITM.UgpEntry = UGP1.UgpEntry', 'left')
+    ->join('OUOM', 'UGP1.UomEntry = OUOM.UomEntry', 'left')
+    ->where('OITM.ItemCode', $ItemCode)
+    ->get();
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_base_qty($itemCode, $UomEntry)
+  {
+    $rs = $this->ms
+    ->select('BaseQty')
+    ->from('OITM')
+    ->join('UGP1', 'OITM.UgpEntry = UGP1.UgpEntry', 'left')
+    ->where('OITM.ItemCode', $itemCode)
+    ->where('UGP1.UomEntry', $UomEntry)
+    ->get();
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->BaseQty;
+    }
+
+    return 1;
+  }
+
+
+
+  public function get_uom_name($UomCode)
+  {
+    $qr = "SELECT UomName AS name FROM OUOM WHERE UomCode = N'{$UomCode}'";
+    $rs = $this->ms->query($qr);
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->name;
+    }
+
+    return NULL;
+  }
+
+
+  public function get_uom_id($UomCode)
+  {
+    $qr = "SELECT UomEntry FROM OUOM WHERE UomCode = N'{$UomCode}'";
+    $rs = $this->ms->query($qr);
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->UomEntry;
+    }
+
+    return NULL;
+  }
+
+
+
+  public function get_item_list($group = NULL)
+  {
+    $this->ms->select('ItemCode AS code, ItemName AS name, SalUnitMsr AS UoM');
+
+    if(!empty($group) && is_array($group))
+    {
+      $this->ms->where_in('ItmsGrpCod', $group);
+    }
+
+    $this->ms->order_by('ItemCode', 'ASC');
+
+    $rs = $this->ms->get('OITM');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_items_by_range($pdFrom, $pdTo, $group = NULL)
+  {
+    $this->ms
+    ->select('ItemCode AS code, ItemName AS name, SalUnitMsr AS UoM')
+    ->where('ItemCode >=', $pdFrom)
+    ->where('ItemCode <=', $pdTo);
+
+    if(!empty($group) && is_array($group))
+    {
+      $this->ms->where_in('ItmsGrpCod', $group);
+    }
+
+    $this->ms->order_by('ItemCode', 'ASC');
+
+    $rs = $this->ms->get('OITM');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return  NULL;
+  }
+
+
+
+  public function get_item_group_list()
+  {
+    $rs = $this->ms
+    ->select('ItmsGrpCod AS code, ItmsGrpNam AS name')
+    ->order_by('ItmsGrpCod', 'ASC')
+    ->get('OITB');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_average_cost($code)
 	{
-		$rs = $this->db->order_by('code', 'ASC')->get($this->tb);
-
-		if($rs->num_rows() > 0)
-		{
-			return $rs->result();
-		}
-
-		return NULL;
-	}
-
-	public function get($code)
-	{
-		$this->db
-		->select('pd.*')
-		->select('pm.id AS model_id, pm.code AS model_code, pm.name AS model')
-		->select('pc.id AS category_id, pc.code AS category_code, pc.name AS category')
-		->select('pt.id AS type_id, pt.code AS type_code, pt.name AS type')
-		->select('pb.id AS brand_id, pb.code AS brand_code, pb.name AS brand')
-		->select('u.code AS uom_code, u.name AS uom')
-		->select('vg.rate AS vat_rate')
-		->from('products AS pd')
-		->join('product_model AS pm', 'pd.model_code = pm.code', 'left')
-		->join('product_category AS pc', 'pd.category_code = pc.code', 'left')
-		->join('product_type AS pt', 'pd.type_code = pt.code', 'left')
-		->join('product_brand AS pb', 'pd.brand_code = pb.code', 'left')
-		->join('uom AS u', 'pd.uom_id = u.id', 'left')
-		->join('vat_group AS vg', 'pd.vat_group = vg.code', 'left');
-
-		$rs = $this->db->where('pd.code', $code)->get();
+		$rs = $this->ms
+    ->select('LstEvlPric AS cost')
+    ->where('ItemCode', $code)
+    ->get('OITM');
 
 		if($rs->num_rows() === 1)
-		{
-			return $rs->row();
-		}
+    {
+      return $rs->row()->cost;
+    }
 
-		return NULL;
+    return NULL;
 	}
 
 
-	public function get_by_id($id)
+  public function get_item_cost($code)
 	{
-		$this->db
-		->select('pd.*')
-		->select('pm.id AS model_id, pm.code AS model_code, pm.name AS model')
-		->select('pc.id AS category_id, pc.code AS category_code, pc.name AS category')
-		->select('pt.id AS type_id, pt.code AS type_code, pt.name AS type')
-		->select('pb.id AS brand_id, pb.code AS brand_code, pb.name AS brand')
-		->select('u.code AS uom_code, u.name AS uom')
-		->select('vg.rate AS vat_rate')
-		->from('products AS pd')
-		->join('product_model AS pm', 'pd.model_code = pm.code', 'left')
-		->join('product_category AS pc', 'pd.category_code = pc.code', 'left')
-		->join('product_type AS pt', 'pd.type_code = pt.code', 'left')
-		->join('product_brand AS pb', 'pd.brand_code = pb.code', 'left')
-		->join('uom AS u', 'pd.uom_id = u.id', 'left')
-		->join('vat_group AS vg', 'pd.vat_group = vg.code', 'left');
+		$rs = $this->ms
+    ->select('Price AS cost')
+    ->where('ItemCode', $code)
+    ->where('PriceList', $this->cost_list)
+    ->get('ITM1');
 
-		$rs = $this->db->where('pd.id', $id)->get();
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->cost;
+    }
 
-		if($rs->num_rows() === 1)
-		{
-			return $rs->row();
-		}
-
-		return NULL;
+    return 0;
 	}
 
 
-	public function get_code_and_name($id)
-	{
-		$rs = $this->db->select('id, code, name, count_stock')->where('id', $id)->get($this->tb);
-		if($rs->num_rows() === 1)
-		{
-			return $rs->row();
-		}
-
-		return NULL;
-	}
-
-
-	public function add(array $ds = array())
-	{
-		if( ! empty($ds))
-		{
-			return $this->db->insert($this->tb, $ds);
-		}
-
-		return FALSE;
-	}
-
-
-	public function update($code, array $ds = array())
-	{
-		if( ! empty($ds))
-		{
-			return $this->db->where('code', $code)->update($this->tb, $ds);
-		}
-
-		return FALSE;
-	}
-
-
-	public function update_by_id($id, array $ds = array())
-	{
-		if( ! empty($ds))
-		{
-			return $this->db->where('id', $id)->update($this->tb, $ds);
-		}
-
-		return FALSE;
-	}
-
-
-
-	public function is_exists($code)
-	{
-		$count = $this->db->where('code', $code)->count_all_results($this->tb);
-
-		if($count > 0)
-		{
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-
-	public function count_rows(array $ds = array())
-	{
-		if(isset($ds['code']) && $ds['code'] != "")
-		{
-			$this->db->like('code', $ds['code']);
-		}
-
-		if(isset($ds['name']) && $ds['name'] != "")
-		{
-			$this->db->like('name', $ds['name']);
-		}
-
-		if(isset($ds['model']) && $ds['model'] != "")
-		{
-			$this->db->where_in('model_code', model_in($ds['model']));
-		}
-
-		if(isset($ds['category']) && $ds['category'] != 'all')
-		{
-			$this->db->where('category_code', $ds['category']);
-		}
-
-		if(isset($ds['type']) && $ds['type'] != 'all')
-		{
-			$this->db->where('type_code', $ds['type']);
-		}
-
-		if(isset($ds['brand']) && $ds['brand'] != 'all')
-		{
-			$this->db->where('brand_code', $ds['brand']);
-		}
-
-		if(isset($ds['status']) && $ds['status'] != 'all')
-		{
-			$this->db->where('status', $ds['status']);
-		}
-
-		if(isset($ds['count_stock']) && $ds['count_stock'] != 'all')
-		{
-			$this->db->where('count_stock', $ds['count_stock']);
-		}
-
-		if(isset($ds['allow_change_discount']) && $ds['allow_change_discount'] != 'all')
-		{
-			$this->db->where('allow_change_discount', $ds['allow_change_discount']);
-		}
-
-		if(isset($ds['customer_view']) && $ds['customer_view'] != 'all')
-		{
-			$this->db->where('customer_view', $ds['customer_view']);
-		}
-
-		return $this->db->count_all_results($this->tb);
-	}
-
-
-	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
-	{
-		$this->db
-		->select('pd.*')
-		->select('pm.name AS model_name')
-		->select('pg.name AS category_name')
-		->select('pt.name AS type_name')
-		->select('pb.name AS brand_name')
-		->from('products AS pd')
-		->join('product_model AS pm', 'pd.model_code = pm.code', 'left')
-		->join('product_category AS pg', 'pd.category_code = pg.code', 'left')
-		->join('product_type AS pt', 'pd.type_code = pt.code', 'left')
-		->join('product_brand AS pb', 'pd.brand_code = pb.code', 'left');
-
-		if(isset($ds['code']) && $ds['code'] != "")
-		{
-			$this->db->like('pd.code', $ds['code']);
-		}
-
-		if(isset($ds['name']) && $ds['name'] != "")
-		{
-			$this->db->like('pd.name', $ds['name']);
-		}
-
-		if(isset($ds['model']) && $ds['model'] != "")
-		{
-			$this->db->where_in('pd.model_code', model_in($ds['model']));
-		}
-
-		if(isset($ds['category']) && $ds['category'] != 'all')
-		{
-			$this->db->where('pd.category_code', $ds['category']);
-		}
-
-		if(isset($ds['type']) && $ds['type'] != 'all')
-		{
-			$this->db->where('pd.type_code', $ds['type']);
-		}
-
-		if(isset($ds['brand']) && $ds['brand'] != 'all')
-		{
-			$this->db->where('pd.brand_code', $ds['brand']);
-		}
-
-		if(isset($ds['status']) && $ds['status'] != 'all')
-		{
-			$this->db->where('pd.status', $ds['status']);
-		}
-
-		if(isset($ds['count_stock']) && $ds['count_stock'] != 'all')
-		{
-			$this->db->where('count_stock', $ds['count_stock']);
-		}
-
-		if(isset($ds['allow_change_discount']) && $ds['allow_change_discount'] != 'all')
-		{
-			$this->db->where('allow_change_discount', $ds['allow_change_discount']);
-		}
-
-		if(isset($ds['customer_view']) && $ds['customer_view'] != 'all')
-		{
-			$this->db->where('customer_view', $ds['customer_view']);
-		}
-
-		$rs = $this->db->limit($perpage, $offset)->get();
-
-		if($rs->num_rows() > 0)
-		{
-			return $rs->result();
-		}
-
-		return NULL;
-	}
-
-
-	public function get_cover($model_id = NULL)
-	{
-		$rs = $this->db
-		->select('id')
-		->where('model_id', $model_id)
-		->order_by('is_cover', 'DESC')
-		->limit(1)
-		->get($this->tb);
-
-		if($rs->num_rows() === 1)
-		{
-			return $rs->row()->id;
-		}
-
-		return NULL;
-	}
-
-
-
-	public function get_last_sync_date()
-	{
-		$rs = $this->db->select_max('last_sync')->get($this->tb);
-
-		if($rs->num_rows() === 1)
-		{
-			return $rs->row()->last_sync === NULL ? date('2021-01-01') : $rs->row()->last_sync;
-		}
-
-		return date('2021-01-01');
-	}
-
-
-	public function count_filter_rows(array $ds = array())
-	{
-		if( ! empty($ds['brandCode']))
-		{
-			$this->db->where('brand_code', $ds['brandCode']);
-		}
-
-		if( ! empty($ds['cateCode']))
-		{
-			$this->db
-			->group_start()
-			->where('category_code_4', $ds['cateCode'])
-			->or_where('category_code', $ds['cateCode'])
-			->group_end();
-		}
-
-		return $this->db->count_all_results($this->tb);
-	}
-
-
-	public function get_filter(array $ds = array(), $perpage = 20, $offset = 0)
-	{
-		if( ! empty($ds['brandCode']))
-		{
-			$this->db->where('brand_code', $ds['brandCode']);
-		}
-
-		if( ! empty($ds['cateCode']))
-		{
-			$this->db
-			->group_start()
-			->where('category_code_4', $ds['cateCode'])
-			->or_where('category_code', $ds['cateCode'])
-			->group_end();
-		}
-
-		$rs = $this->db->limit($perpage, $offset)->get($this->tb);
-
-		if($rs->num_rows() > 0)
-		{
-			return $rs->result();
-		}
-
-		return NULL;
-	}
-
-
-	public function get_product_by_category($cateCode)
-	{
-		$rs = $this->db->where('category_code', $cateCode)->get($this->tb);
-
-		if($rs->num_rows() > 0)
-		{
-			return $rs->result();
-		}
-
-		return NULL;
-	}
-
-
-	public function count_customer_rows($ds = array())
-	{
-		$this->db
-		->where('status', 1)
-		->where('customer_view', 1);
-
-		if(isset($ds['code']) && $ds['code'] !== NULL && $ds['code'] != '')
-		{
-			$this->db
-			->group_start()
-			->like('code', $ds['code'])
-			->or_like('name', $ds['code'])
-			->group_end();
-		}
-
-		if(isset($ds['category']) && $ds['category'] != 'all')
-		{
-			$this->db->where('category_code', $ds['category']);
-		}
-
-		if(isset($ds['brand']) && $ds['brand'] != 'all')
-		{
-			$this->db->where('brand_code', $ds['brand']);
-		}
-
-		return $this->db->count_all_results($this->tb);
-	}
-
-
-
-	public function get_search_customer_item($ds = array(), $perpage = 20, $offset = 0)
-	{
-		$this->db
-		->where('status', 1)
-		->where('customer_view', 1);
-
-		if(isset($ds['code']) && $ds['code'] !== NULL && $ds['code'] != '')
-		{
-			$this->db
-			->group_start()
-			->like('code', $ds['code'])
-			->or_like('name', $ds['code'])
-			->group_end();
-		}
-
-		if(isset($ds['category']) && $ds['category'] != 'all')
-		{
-			$this->db->where('category_code', $ds['category']);
-		}
-
-		if(isset($ds['brand']) && $ds['brand'] != 'all')
-		{
-			$this->db->where('brand_code', $ds['brand']);
-		}
-
-		$rs = $this->db->limit($perpage, $offset)->get($this->tb);
-
-
-		if($rs->num_rows() > 0)
-		{
-			return $rs->result();
-		}
-
-		return NULL;
-	}
-
-
-	public function get_favorite_items($user_id)
-	{
-		$rs = $this->db
-		->select('fa.user_id, pd.id, pd.code, pd.name, pd.price, pd.count_stock')
-		->from('favorite_item AS fa')
-		->join('products AS pd', 'fa.product_id = pd.id', 'left')
-		->where('fa.user_id', $user_id)
-		->get();
-
-		if($rs->num_rows() > 0)
-		{
-			return $rs->result();
-		}
-
-		return NULL;
-	}
-
-
-	public function is_favorite($user_id, $product_id)
-	{
-		$rs = $this->db->where('user_id', $user_id)->where('product_id', $product_id)->get($this->fa);
-
-		if($rs->num_rows() === 1)
-		{
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-
-	public function add_to_favorite(array $ds = array())
-	{
-		if( ! empty($ds))
-		{
-			return $this->db->insert($this->fa, $ds);
-		}
-
-		return FALSE;
-	}
-
-
-	public function remove_from_favorite($user_id, $product_id)
-	{
-		return $this->db->where('user_id', $user_id)->where('product_id', $product_id)->delete($this->fa);
-	}
+  public function getItemByBarcode($barcode)
+  {
+    $rs = $this->ms
+    ->select('OITM.ItemCode, OITM.ItemName, OBCD.UomEntry, OUOM.UomCode, OUOM.UomName, UGP1.BaseQty')
+    ->from('OBCD')
+    ->join('OITM', 'OITM.ItemCode = OBCD.ItemCode')
+    ->join('UGP1', 'OITM.UgpEntry = UGP1.UgpEntry AND OBCD.UomEntry = UGP1.UomEntry', 'left')
+    ->join('OUOM', 'OBCD.UomEntry = OUOM.UomEntry', 'left')
+    ->where('OBCD.BcdCode', $barcode)
+    ->order_by('OBCD.BcdEntry', 'DESC')
+    ->limit(1)
+    ->get();
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function getItemByCode($ItemCode)
+  {
+    $rs = $this->ms
+    ->select('OITM.ItemCode, OITM.ItemName, UGP1.UomEntry, UGP1.BaseQty, OUOM.UomCode, OUOM.UomName')
+    ->from('OITM')
+    ->join('UGP1', 'OITM.UgpEntry = UGP1.UgpEntry AND OITM.IUoMEntry = UGP1.UomEntry', 'left')
+    ->join('OUOM', 'UGP1.UomEntry = OUOM.UomEntry', 'left')
+    ->where('OITM.ItemCode', $ItemCode)
+    ->get();
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_barcode_uom($ItemCode, $UomEntry)
+  {
+    $rs = $this->ms
+    ->select('BcdCode AS barcode')
+    ->where('ItemCode', $ItemCode)
+    ->where('UomEntry', $UomEntry)
+    ->get('OBCD');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row()->barcode;
+    }
+
+    return NULL;
+  }
+
+
+  public function get_barcode($ItemCode)
+  {
+    $rs = $this->ms
+    ->select('OBCD.BcdCode AS barcode')
+    ->from('OITM')
+    ->join('OBCD', 'OITM.ItemCode = OBCD.ItemCode AND OITM.IUoMEntry = OBCD.UomEntry')
+    ->where('OITM.ItemCode', $ItemCode)
+    ->get();
+
+    if($rs->num_rows() == 1)
+    {
+      return $rs->row()->barcode;
+    }
+
+    return $ItemCode;
+  }
+
+
+  public function get_item_code_uom_by_barcode($barcode)
+  {
+    $rs = $this->ms
+    ->select('ItemCode, UomEntry')
+    ->where('BcdCode', $barcode)
+    ->order_by('BcdEntry', 'DESC')
+    ->limit(1)
+    ->get('OBCD');
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function getName($ItemCode)
+  {
+    $rs = $this->ms->select('ItemName')->where('ItemCode', $ItemCode)->get('OITM');
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->ItemName;
+    }
+
+    return NULL;
+  }
 
 } //--- end classs
 ?>

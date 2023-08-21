@@ -10,12 +10,30 @@ function goBack(){
 
 
 
-function edit(code){
-  window.location.href = HOME + 'edit/' + code;
-}
 
-function goEdit(code){
-  window.location.href = HOME + 'edit/' + code;
+function goEdit(code) {
+  let uuid = get_uuid();
+  $.ajax({
+    url:HOME + 'is_document_avalible',
+    type:'GET',
+    cache:false,
+    data:{
+      'code' : code,
+      'uuid' : uuid
+    },
+    success:function(rs) {
+      if(rs === 'available') {
+        window.location.href = HOME + 'edit/'+code+'/'+uuid;
+      }
+      else {
+        swal({
+          title:'Oops!',
+          text:'เอกสารกำลังถูกเปิด/แก้ไข โดยเครื่องอื่นอยู่ ไม่สามารถแก้ไขได้ในขณะนี้',
+          type:'warning'
+        });
+      }
+    }
+  });
 }
 
 
@@ -73,21 +91,6 @@ function cancleOrder(code){
 			});
 	});
 }
-
-function toggleOnlyMe() {
-	let option = parseDefault(parseInt($('#onlyMe').val()), 0);
-
-	if(option == 1) {
-		$('#onlyMe').val(0);
-	}
-	else {
-		$('#onlyMe').val(1);
-	}
-
-	getSearch();
-}
-
-
 
 
 function cancleSap(code) {
@@ -174,9 +177,6 @@ function sendToSap(code) {
     }
   })
 }
-
-
-
 
 function leave(){
   swal({

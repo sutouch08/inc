@@ -1,32 +1,34 @@
 <?php
-function select_order_quota($option, $code = NULL)
+function select_payment_term($id = NULL)
 {
-	$ds = '';
+	$ds = "";
+	$ci =& get_instance();
+	$ci->load->model('masters/payment_term_model');
+	$option = $ci->payment_term_model->get_all();
 
-	if( ! empty($option)) //--- qurey result object
+	if( ! empty($option))
 	{
 		foreach($option as $rs)
 		{
-			$ds .= '<option value="'.$rs->code.'" '.is_selected($rs->code, $code).'>'.$rs->code.'</option>';
+			$ds .= '<option data-term="'.$rs->term.'" value="'.$rs->id.'" '.is_selected($rs->id, $id).'>'.$rs->name.'</opion>';
 		}
 	}
 
 	return $ds;
 }
 
-
-function select_listed_quota($code = NULL)
+function select_ship_to_code($CardCode, $code = NULL)
 {
 	$sc = '';
 	$ci =& get_instance();
-	$ci->load->model('masters/quota_model');
-	$option = $ci->quota_model->get_all_listed();
+	$ci->load->model('masters/customer_address_model');
+	$options = $ci->customer_address_model->get_address_ship_to_code($CardCode);
 
-	if( ! empty($option))
+	if(!empty($options))
 	{
-		foreach($option as $rs)
+		foreach($options as $rs)
 		{
-			$sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->code.'</option>';
+			$sc .= '<option value="'.$rs->code.'" '.is_selected($rs->code, $code).'>'.$rs->code.' : '.$rs->name.'</option>';
 		}
 	}
 
@@ -34,42 +36,21 @@ function select_listed_quota($code = NULL)
 }
 
 
-function select_cost_center($dimCode, $code = NULL)
+function select_bill_to_code($CardCode, $code = NULL)
 {
 	$sc = '';
 	$ci =& get_instance();
-	$ci->load->model('masters/cost_center_model');
-	$option = $ci->cost_center_model->get_by_dim_code($dimCode);
+	$ci->load->model('masters/customer_address_model');
+	$options = $ci->customer_address_model->get_address_bill_to_code($CardCode);
 
-	if(!empty($option))
+	if(!empty($options))
 	{
-		foreach($option as $rs)
+		foreach($options as $rs)
 		{
-			$sc .= '<option value="'.$rs->code.'" '.is_selected($rs->code, $code).'>'.$rs->name.'</option>';
+			$sc .= '<option value="'.$rs->code.'" '.is_selected($rs->code, $code).'>'.$rs->code.' : '.$rs->name.'</option>';
 		}
 	}
 
 	return $sc;
 }
-
-
-function action_name($action)
-{
-	$arr = array(
-		'add' => "Create",
-		'edit' => "Edit",
-		'approve' => "Approved",
-		'reject' => "Reject",
-		'cancel' => "Canceled"
-	);
-
-	if(isset($arr[$action]))
-	{
-		return $arr[$action];
-	}
-
-	return NULL;
-}
-
-
  ?>

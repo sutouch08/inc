@@ -15,12 +15,91 @@ class Main extends PS_Controller
 		$this->pm = new stdClass();
 		$this->pm->can_view = 1;
 		$this->home = base_url()."main";
+
+		$this->load->model('orders/discount_model');
 	}
 
 
 	public function index()
 	{
-		$this->load->view('main_view');
+		$this->load->model('users/approver_model');
+
+		$is_approver = $this->approver_model->is_approver($this->_user->id);
+		$aps = array();
+
+		if($is_approver)
+		{
+			$doc_list = $this->approver_model->doc_type_list();
+
+			if( ! empty($doc_list))
+			{
+				foreach($doc_list as $doc)
+				{
+					$ap = $this->approver_model->get_rule_by_user_id($this->_user->id, $doc->code);
+
+					if( ! empty($ap))
+					{
+						$ap->doc_name = $doc->name;
+						$ap->count = $this->count_doc($ap);
+						array_push($aps, $ap);
+					}
+				}
+			}
+		}
+
+		$ds = array(
+			'is_approver' => $is_approver,
+			'aps' => $aps
+		);
+
+		$this->load->view('main_view', $ds);
+	}
+
+	public function count_doc($ap)
+	{
+		if($ap->review)
+		{
+			return $this->count_unreview_sq();
+		}
+
+		if($ap->approve)
+		{
+			return $this->count_unapprove_sq($ap->maxDisc, $ap->maxAmount);
+		}
+	}
+
+	function count_sq()
+	{
+		$right = $this->input->get('right');
+		$maxDisc = $this->input->get('maxDisc');
+		$maxAmount = $this->input->get('maxAmount');
+
+		if($right == 'review')
+		{
+			echo $this->count_unreview_sq();
+		}
+		else
+		{
+			echo $this->count_unapprove_sq($maxDisc, $maxAmount);
+		}
+	}
+	
+
+	public function count_unapprove_sq($maxDisc, $maxAmount)
+	{
+		$this->db->where('Status', 0)
+		->where('must_approve', 1)->where('Approved', 'P')
+		->group_start()->where('Review', 'A')->or_where('Review', 'S')->group_end()
+		->where('disc_diff <=', $maxDisc)->where('DocTotal <=', $maxAmount);
+
+		return $this->db->count_all_results('quotation');
+	}
+
+	public function count_unreview_sq()
+	{
+		$this->db->where('Status', 0)->where('Review', 'P');
+
+		return $this->db->count_all_results('quotation');
 	}
 
 

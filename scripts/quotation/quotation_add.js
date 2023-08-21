@@ -1,7 +1,6 @@
 
 function saveAsDraft() {
 	$('#is_draft').val(1);
-
 	saveAdd();
 }
 
@@ -11,9 +10,41 @@ function saveAdd() {
 	$('.btn-save').attr('disabled', 'disabled');
 
 	setTimeout(function() {
-
 		let mustApprove = 0;
 		let max_diff = 0;
+		let totalAmount = parseDefault(parseFloat($('#totalAmount').val()), 0);
+		let max_discount = parseDefault(parseFloat($('#max_discount').val()), 0);
+		let max_amount = parseDefault(parseFloat($('#max_amount').val()), 0);
+
+		let docTotal = parseDefault(parseFloat($('#docTotal').val()), 0);
+		let sysTotal = parseDefault(parseFloat($('#sysTotalAmount').val()), 0);
+		let billDisc = parseDefault(parseFloat($('#discPrcnt').val()), 0);
+		let billDiscAmount = parseDefault(parseFloat($('#discAmount').val()), 0);
+
+		$('.disc-diff').each(function() {
+			if($(this).val() > 0) {
+				let diff = parseDefault(parseFloat($(this).val()), 0);
+				max_diff =  diff > max_diff ? diff : max_diff;
+			}
+		});
+
+		if(billDisc > 0 && billDiscAmount > 0 && sysTotal > 0) {
+			let exDisc = (billDiscAmount/sysTotal) * 100;
+			max_diff += exDisc;
+		}
+
+		if(max_diff > 0) {
+			if(max_diff >= max_discount) {
+				mustApprove++;
+			}
+		}
+
+		if(mustApprove == 0) {
+			if(max_amount > 0) {
+				mustApprove = docTotal > max_amount ? 1 : 0;
+			}
+		}
+
 		var ds = {
 			//---- Right column
 			'isDraft' : $('#is_draft').val(),
@@ -23,12 +54,6 @@ function saveAdd() {
 			'ContactPerson' : $('#contact').val(),
 			'Phone' : $('#phone').val(),
 			'Payment' : $('#payment').val(),
-			'Channels' : $('#channels').val(),
-			'dimCode1' : $('#dimCode1').val(),
-			'dimCode2' : $('#dimCode2').val(),
-			'dimCode3' : $('#dimCode3').val(),
-			'dimCode4' : $('#dimCode4').val(),
-			'dimCode5' : $('#dimCode5').val(),
 			'OwnerCode' : $('#owner').val(),
 			'ShipToCode' : $('#shipToCode').val(),
 			'ShipTo' : $('#ShipTo').val(),
@@ -40,19 +65,21 @@ function saveAdd() {
 			'BillTo' : $('#BillTo').val(),
 			//---- footer
 			'comments' : $.trim($('#comments').val()),
-			'discPrcnt' : parseDefault(parseFloat($('#discPrcnt').val()), 0),
-			'disAmount' : parseDefault(parseFloat($('#discAmount').val()), 0),
+			'discPrcnt' : billDisc,
+			'disAmount' : billDiscAmount,
 			'roundDif' : parseDefault(parseFloat($('#roundDif').val()), 0),
 			'tax' : parseDefault(parseFloat($('#tax').val()), 0), //-- VatSum
-			'docTotal' : parseDefault(parseFloat($('#docTotal').val()), 0),
+			'docTotal' : docTotal,
+			'sysTotal' : sysTotal,
 			'mustApprove' : mustApprove > 0 ? 1 : 0,
 			'maxDiff' : max_diff,
 			'VatGroup' : $('#vat_code').val(),
 			'VatRate' : $('#vat_rate').val(),
-			'sale_team' : $('#sale_team').val(),
-			'user_id' : $('#user_id').val(),
-			'uname' : $('#uname').val()
+			'sale_team' : $('#sale_team').val()
 		}
+
+		// console.log(ds);
+		// return false;
 
 		//--- check required parameter
 		if(ds.CardCode.length === 0) {
@@ -94,50 +121,6 @@ function saveAdd() {
 		}
 		else {
 			$('#TextDate').removeClass('has-error');
-		}
-
-		if(ds.OwnerCode == '') {
-			swal("Please Select Owner");
-			$('#owner').addClass('has-error');
-			$('.btn-save').removeAttr('disabled');
-			return false;
-		}
-		else {
-			$('#owner').removeClass('has-error');
-		}
-
-		let dimCount = 0;
-
-		if(ds.dimCode1 != '') {
-			dimCount++;
-		}
-
-		if(ds.dimCode2 != '') {
-			dimCount++;
-		}
-
-		if(ds.dimCode3 != '') {
-			dimCount++;
-		}
-
-		if(ds.dimCode4 != '') {
-			dimCount++;
-		}
-
-		if(ds.dimCode5 != '') {
-			dimCount++;
-		}
-
-		if(dimCount == 0) {
-			swal("กรุณาเลือกหน่วยงาน");
-			$('.btn-save').removeAttr('disabled');
-			return false;
-		}
-
-		if(dimCount > 1) {
-			swal("กรุณาเลือกเพียง 1 หน่วยงานเท่านั้น");
-			$('.btn-save').removeAttr('disabled');
-			return false;
 		}
 
 
@@ -182,65 +165,42 @@ function saveAdd() {
 		var details = [];
 		var lineNum = 0;
 
-		$('.toggle-text').each(function() {
+		$('.item-code').each(function() {
 			let no = $(this).data('id');
-			let type = $(this).val();
-			if(type == 0) {
+			let itemCode = $('#itemCode-'+no).val();
 
-				let itemCode = $('#itemCode-'+no).val();
-
-				if(itemCode.length) {
-					//--- ถ้ามีการระบุข้อมูล
-					var row = {
-						"type" : type,
-						"LineNum" : lineNum,
-						"ItemCode" : itemCode,
-						"Description" : $('#itemName-'+no).val(),
-						"Price" : $('#price-'+no).val(),
-						"SellPrice" : $('#sellPrice-'+no).val(),
-						"sysSellPrice" : $('#sysSellPrice-'+no).val(),
-						"Quantity" : $('#line-qty-'+no).val(),
-						"UomCode" : $('#uom-code-'+no).val(),
-						"discLabel" : $('#disc-label-'+no).val(),
-						"sysDiscLabel" : $('#sys-disc-label-'+no).val(),
-						"discAmount" : $('#disc-amount-'+no).val(),
-						"totalDiscAmount" : $('#line-disc-amount-'+no).val(),
-						"DiscPrcnt" : $('#totalDiscPercent-'+no).val(),
-						"VatGroup" : $('#vat-code-'+no).val(),
-						"VatRate" : $('#vat-rate-'+no).val(),
-						"VatAmount" : $('#vat-amount-'+no).val(),
-						"totalVatAmount" : $('#vat-total-'+no).val(),
-						"LineTotal" : $('#line-total-'+no).val(),
-						"policy_id" : $('#policy-id-'+no).val(),
-						"rule_id" : $('#rule-id-'+no).val(),
-						'discDiff' : $('#disc-diff-'+no).val(),
-						'uid' : $('#free-item-'+no).data('uid'),
-						'free_item' : $('#free-item-'+no).val(),
-						'parent_uid' : $('#free-item-'+no).data('parent'),
-						'picked' : $('#free-item-'+no).data('picked'),
-						'is_free' : $('#is-free-'+no).val(),
-						'discType' : $('#disc-type-'+no).val(),
-						'WhsCode' : $('#whs-'+no).val(),
-						'QuotaNo' : $('#quota-'+no).val(),
-						'sale_team' : $('#sale_team').val()
-					}
-					details.push(row);
-					count++;
-					lineNum++;
+			if(itemCode.length) {
+				//--- ถ้ามีการระบุข้อมูล
+				var row = {
+					"LineNum" : lineNum,
+					"ItemCode" : itemCode,
+					"Description" : $('#itemName-'+no).val(),
+					"Price" : $('#price-'+no).val(),
+					"stdPrice" : $('#stdPrice-'+no).val(),
+					"SellPrice" : $('#sellPrice-'+no).val(),
+					"sysSellPrice" : $('#sysSellPrice-'+no).val(),
+					"Quantity" : $('#line-qty-'+no).val(),
+					"UomCode" : $('#uom-code-'+no).val(),
+					"sysDiscLabel" : $('#sys-disc-label-'+no).val(),
+					"disc1" : $('#disc1-'+no).val(),
+					"disc2" : $('#disc2-'+no).val(),
+					"disc3" : $('#disc3-'+no).val(),
+					"discAmount" : $('#disc-amount-'+no).val(),
+					"totalDiscAmount" : $('#line-disc-amount-'+no).val(),
+					"DiscPrcnt" : $('#totalDiscPercent-'+no).val(),
+					"VatGroup" : $('#vat-code-'+no).val(),
+					"VatRate" : $('#vat-rate-'+no).val(),
+					"VatAmount" : $('#vat-amount-'+no).val(),
+					"totalVatAmount" : $('#vat-total-'+no).val(),
+					"LineTotal" : $('#line-total-'+no).val(),
+					"LineSysTotal" : $('#line-sys-total-'+no).val(),
+					'discDiff' : $('#disc-diff-'+no).val(),
+					'sale_team' : $('#sale_team').val()
 				}
-			}
-			else {
-				let text = $('#text-'+no).val();
 
-				if(text.length) {
-					var row = {
-						"type" : 1,
-						"LineText" : text,
-						"AfLineNum" : lineNum -1
-					}
-					details.push(row);
-					count++;
-				}
+				details.push(row);
+				count++;
+				lineNum++;
 			}
 		}); //--- end each function
 
@@ -269,15 +229,35 @@ function saveAdd() {
 				if(isJson(rs)) {
 					var ds = $.parseJSON(rs);
 					if(ds.status === 'success') {
-						swal({
-							title:'Success',
-							type:'success',
-							timer:1000
-						});
+						if(ds.ex == 1) {
+							swal({
+								title:'Oops !',
+								text: ds.message,
+								type:'info'
+							}, function() {
+								setTimeout(function(){
+									viewDetail(ds.code);
+								}, 500);
+							});
+						}
+						else {
+							swal({
+								title:'Success',
+								type:'success',
+								timer:1000
+							});
 
-						setTimeout(function(){
-							viewDetail(ds.code);
-						}, 1200);
+							setTimeout(function(){
+								viewDetail(ds.code);
+							}, 1200);
+						}
+					}
+					else {
+						swal({
+							title:'Error!',
+							text:ds.message,
+							type:'error'
+						});
 					}
 				}
 				else {
@@ -312,23 +292,48 @@ function saveUpdate() {
 
 		let mustApprove = 0;
 		let max_diff = 0;
+		let max_discount = parseDefault(parseFloat($('#max_discount').val()), 0);
+		let max_amount = parseDefault(parseFloat($('#max_amount').val()), 0);
+
+		let docTotal = parseDefault(parseFloat($('#docTotal').val()), 0);
+		let sysTotal = parseDefault(parseFloat($('#sysTotalAmount').val()), 0);
+		let billDisc = parseDefault(parseFloat($('#discPrcnt').val()), 0);
+		let billDiscAmount = parseDefault(parseFloat($('#discAmount').val()), 0);
+
+		$('.disc-diff').each(function() {
+			if($(this).val() > 0) {
+				let diff = parseDefault(parseFloat($(this).val()), 0);
+				max_diff =  diff > max_diff ? diff : max_diff;
+			}
+		});
+
+		if(billDisc > 0 && billDiscAmount > 0 && sysTotal > 0) {
+			let exDisc = (billDiscAmount/sysTotal) * 100;
+			max_diff += exDisc;
+		}
+
+		if(max_diff > 0) {
+			if(max_diff >= max_discount) {
+				mustApprove++;
+			}
+		}
+
+		if(mustApprove == 0) {
+			if(max_amount > 0) {
+				mustApprove = docTotal > max_amount ? 1 : 0;
+			}
+		}
 
 		var ds = {
 			//---- Right column
-			'isDraft' : $('#is_draft').val(),
 			'code' : $('#code').val(),
+			'isDraft' : $('#is_draft').val(),
 			'SlpCode' : $('#sale_id').val(),
 			'CardCode' : $.trim($('#CardCode').val()),  //****** required
 			'CardName' : $('#CardName').val(),
 			'ContactPerson' : $('#contact').val(),
 			'Phone' : $('#phone').val(),
 			'Payment' : $('#payment').val(),
-			'Channels' : $('#channels').val(),
-			'dimCode1' : $('#dimCode1').val(),
-			'dimCode2' : $('#dimCode2').val(),
-			'dimCode3' : $('#dimCode3').val(),
-			'dimCode4' : $('#dimCode4').val(),
-			'dimCode5' : $('#dimCode5').val(),
 			'OwnerCode' : $('#owner').val(),
 			'ShipToCode' : $('#shipToCode').val(),
 			'ShipTo' : $('#ShipTo').val(),
@@ -340,19 +345,19 @@ function saveUpdate() {
 			'BillTo' : $('#BillTo').val(),
 			//---- footer
 			'comments' : $.trim($('#comments').val()),
-			'discPrcnt' : parseDefault(parseFloat($('#discPrcnt').val()), 0),
-			'disAmount' : parseDefault(parseFloat($('#discAmount').val()), 0),
+			'discPrcnt' : billDisc,
+			'disAmount' : billDiscAmount,
 			'roundDif' : parseDefault(parseFloat($('#roundDif').val()), 0),
 			'tax' : parseDefault(parseFloat($('#tax').val()), 0), //-- VatSum
-			'docTotal' : parseDefault(parseFloat($('#docTotal').val()), 0),
+			'docTotal' : docTotal,
+			'sysTotal' : sysTotal,
 			'mustApprove' : mustApprove > 0 ? 1 : 0,
 			'maxDiff' : max_diff,
 			'VatGroup' : $('#vat_code').val(),
 			'VatRate' : $('#vat_rate').val(),
-			'sale_team' : $('#sale_team').val(),
-			'user_id' : $('#user_id').val(),
-			'uname' : $('#uname').val()
+			'sale_team' : $('#sale_team').val()
 		}
+
 
 		//--- check required parameter
 		if(ds.CardCode.length === 0) {
@@ -396,50 +401,6 @@ function saveUpdate() {
 			$('#TextDate').removeClass('has-error');
 		}
 
-		if(ds.OwnerCode == '') {
-			swal("Please Select Owner");
-			$('#owner').addClass('has-error');
-			$('.btn-save').removeAttr('disabled');
-			return false;
-		}
-		else {
-			$('#owner').removeClass('has-error');
-		}
-
-		let dimCount = 0;
-
-		if(ds.dimCode1 != '') {
-			dimCount++;
-		}
-
-		if(ds.dimCode2 != '') {
-			dimCount++;
-		}
-
-		if(ds.dimCode3 != '') {
-			dimCount++;
-		}
-
-		if(ds.dimCode4 != '') {
-			dimCount++;
-		}
-
-		if(ds.dimCode5 != '') {
-			dimCount++;
-		}
-
-		if(dimCount == 0) {
-			swal("กรุณาเลือกหน่วยงาน");
-			$('.btn-save').removeAttr('disabled');
-			return false;
-		}
-
-		if(dimCount > 1) {
-			swal("กรุณาเลือกเพียง 1 หน่วยงานเท่านั้น");
-			$('.btn-save').removeAttr('disabled');
-			return false;
-		}
-
 
 		var disc_error = 0;
 		//--- check discount
@@ -480,65 +441,43 @@ function saveUpdate() {
 		var details = [];
 		var lineNum = 0;
 
-		$('.toggle-text').each(function() {
+		$('.item-code').each(function() {
 			let no = $(this).data('id');
-			let type = $(this).val();
-			if(type == 0) {
 
-				let itemCode = $('#itemCode-'+no).val();
+			let itemCode = $('#itemCode-'+no).val();
 
-				if(itemCode.length) {
-					//--- ถ้ามีการระบุข้อมูล
-					var row = {
-						"type" : type,
-						"LineNum" : lineNum,
-						"ItemCode" : itemCode,
-						"Description" : $('#itemName-'+no).val(),
-						"Price" : $('#price-'+no).val(),
-						"SellPrice" : $('#sellPrice-'+no).val(),
-						"sysSellPrice" : $('#sysSellPrice-'+no).val(),
-						"Quantity" : $('#line-qty-'+no).val(),
-						"UomCode" : $('#uom-code-'+no).val(),
-						"discLabel" : $('#disc-label-'+no).val(),
-						"sysDiscLabel" : $('#sys-disc-label-'+no).val(),
-						"discAmount" : $('#disc-amount-'+no).val(),
-						"totalDiscAmount" : $('#line-disc-amount-'+no).val(),
-						"DiscPrcnt" : $('#totalDiscPercent-'+no).val(),
-						"VatGroup" : $('#vat-code-'+no).val(),
-						"VatRate" : $('#vat-rate-'+no).val(),
-						"VatAmount" : $('#vat-amount-'+no).val(),
-						"totalVatAmount" : $('#vat-total-'+no).val(),
-						"LineTotal" : $('#line-total-'+no).val(),
-						"policy_id" : $('#policy-id-'+no).val(),
-						"rule_id" : $('#rule-id-'+no).val(),
-						'discDiff' : $('#disc-diff-'+no).val(),
-						'uid' : $('#free-item-'+no).data('uid'),
-						'free_item' : $('#free-item-'+no).val(),
-						'parent_uid' : $('#free-item-'+no).data('parent'),
-						'picked' : $('#free-item-'+no).data('picked'),
-						'is_free' : $('#is-free-'+no).val(),
-						'discType' : $('#disc-type-'+no).val(),
-						'WhsCode' : $('#whs-'+no).val(),
-						'QuotaNo' : $('#quota-'+no).val(),
-						'sale_team' : $('#sale_team').val()
-					}
-					details.push(row);
-					count++;
-					lineNum++;
+			if(itemCode.length) {
+				//--- ถ้ามีการระบุข้อมูล
+				var row = {
+					"LineNum" : lineNum,
+					"ItemCode" : itemCode,
+					"Description" : $('#itemName-'+no).val(),
+					"Price" : $('#price-'+no).val(),
+					"stdPrice" : $('#stdPrice-'+no).val(),
+					"SellPrice" : $('#sellPrice-'+no).val(),
+					"sysSellPrice" : $('#sysSellPrice-'+no).val(),
+					"Quantity" : $('#line-qty-'+no).val(),
+					"UomCode" : $('#uom-code-'+no).val(),
+					"sysDiscLabel" : $('#sys-disc-label-'+no).val(),
+					"disc1" : $('#disc1-'+no).val(),
+					"disc2" : $('#disc2-'+no).val(),
+					"disc3" : $('#disc3-'+no).val(),
+					"discAmount" : $('#disc-amount-'+no).val(),
+					"totalDiscAmount" : $('#line-disc-amount-'+no).val(),
+					"DiscPrcnt" : $('#totalDiscPercent-'+no).val(),
+					"VatGroup" : $('#vat-code-'+no).val(),
+					"VatRate" : $('#vat-rate-'+no).val(),
+					"VatAmount" : $('#vat-amount-'+no).val(),
+					"totalVatAmount" : $('#vat-total-'+no).val(),
+					"LineTotal" : $('#line-total-'+no).val(),
+					"LineSysTotal" : $('#line-sys-total-'+no).val(),
+					'discDiff' : $('#disc-diff-'+no).val(),
+					'sale_team' : $('#sale_team').val()
 				}
-			}
-			else {
-				let text = $('#text-'+no).val();
 
-				if(text.length) {
-					var row = {
-						"type" : 1,
-						"LineText" : text,
-						"AfLineNum" : lineNum -1
-					}
-					details.push(row);
-					count++;
-				}
+				details.push(row);
+				count++;
+				lineNum++;
 			}
 		}); //--- end each function
 
@@ -599,12 +538,11 @@ $('#CardCode').autocomplete({
 		var $ul = $(this).autocomplete('widget');
 		$ul.css('width', 'auto');
 	},
-	close:function() {
-		var rs = $(this).val();
-		var cust = rs.split(' | ');
-		if(cust.length === 2) {
-			let code = cust[0];
-			let name = cust[1];
+	select:function(event, ui) {
+		let code = ui.item.value;
+		let name = ui.item.name;
+
+		if(code.length && name.length) {
 			$('#CardCode').val(code);
 			$('#CardName').val(name);
 
@@ -655,8 +593,12 @@ function get_customer(code) {
 		success:function(rs) {
 			if(isJson(rs)) {
 				let ds = $.parseJSON(rs);
+				let phone = ds.Phone1;
+				phone = (phone != null && ds.Phone2 != null) ? phone + ", "+ds.Phone2 : phone;
 				$('#payment').val(ds.GroupNum);
 				$('#priceList').val(ds.ListNum);
+				$('#contact').val(ds.CntctPrsn);
+				$('#phone').val(phone);
 				$('#sale_id').val(ds.SlpCode).trigger('change');
 				$('#sale_name').val(ds.sale_name);
 			}
@@ -792,18 +734,16 @@ function get_address_bill_to() {
 
 function addRow() {
 	var no = $('#row-no').val();
-	no++;
-	$('#row-no').val(no);
-
 	var data = {"no" : no, "uid" : uniqueId()};
 	var source = $('#row-template').html();
 	var output = $('#details-template');
 
 	render_append(source, data, output);
-
 	reIndex();
 	init();
 	$('#itemCode-'+no).focus();
+	no++;
+	$('#row-no').val(no);
 	return no;
 }
 
@@ -811,153 +751,11 @@ function removeRow() {
 	$('.del-chk').each(function() {
 		if($(this).is(':checked')) {
 			var no = $(this).val();
-			var is_free = $('#is-free-'+no).val();
-			var free_item = parseDefault(parseFloat($('#free-item-'+ no).val()), 0);
-
-			if(free_item > 0) {
-				let uid = $('#free-item-'+no).data('uid');
-				$('.is-free').each(function() {
-					if($(this).val() == 1) {
-						let parent_uid = $(this).data('parent');
-						if(uid == parent_uid) {
-							child_row = $(this).data('id');
-							$('#row-'+child_row).remove();
-						}
-					}
-				})
-			}
-
-			if(is_free) {
-				var pno = $('#is-free-'+no).data('parentrow');
-				el = $('#free-item-'+pno);
-				qty = parseDefault(parseFloat($('#line-qty-'+no).val()), 0);
-				picked = parseDefault(parseFloat(el.data('picked')), 0);
-				picked = picked - qty;
-
-				if(picked >= 0) {
-					el.data('picked', picked);
-					$('#btn-free-'+pno).removeClass('hide');
-				}
-			}
-
 			$('#row-'+no).remove();
 		}
 	})
 
 	recalTotal();
-}
-
-
-function updateDiscountRule(no) {
-	let itemCode = $('#itemCode-'+no).val();
-	let cardCode = $('#CardCode').val();
-	let price = parseDefault(parseFloat($('#price-'+no).val()), 0);
-	let qty = parseDefault(parseFloat($('#line-qty-'+no).val()), 0);
-	let docDate = $('#DocDate').val();
-	let payment = $('#payment').val();
-	let channels = $('#channels').val();
-
-
-	if(itemCode.length == 0) {
-		return false;
-	}
-
-	if(qty <= 0) {
-		return false;
-	}
-
-	setTimeout(function() {
-
-		if(cardCode == "") {
-			swal('กรุณาระบุลูกค้า');
-			return false;
-		}
-
-		load_in();
-
-		let uid = $('#free-item-'+no).data('uid');
-
-		$('.is-free').each(function() {
-			uuid = $(this).data('parent');
-			if(uuid == uid) {
-				rowNo = $(this).data('id');
-				fqty = parseDefault(parseFloat($('#line-qty-'+no).val()), 0);
-				picked = parseDefault(parseFloat($('#free-item-'+no).data('picked')), 0);
-				picked = picked - fqty;
-				picked = picked < 0 ? 0 : picked;
-				$('#free-item-'+no).data('picked', picked);
-				$('#row-'+rowNo).remove();
-			}
-		})
-
-		$.ajax({
-			url:HOME + "get_discount_data",
-			type:"GET",
-			cache:false,
-			data:{
-				'ItemCode' : itemCode,
-				'CardCode' : cardCode,
-				'Price' : price,
-				'Qty' : qty,
-				'DocDate' : docDate,
-				'Payment' : payment,
-				'Channels' : channels
-			},
-			success:function(rs) {
-				load_out();
-				var rs = $.trim(rs);
-				if(isJson(rs)) {
-					var ds = $.parseJSON(rs);
-					var price = parseFloat(ds.Price);
-					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);
-					sellPrice = sellPrice.toFixed(2);
-					var lineTotal = parseFloat(ds.LineTotal);
-
-					$('#price-'+no).val(price)
-					$('#sellPrice-'+no).val(sellPrice);
-					$('#disc-amount-'+no).val(ds.discAmount);
-					$('#line-disc-amount-'+no).val(ds.totalDiscAmount);
-					$('#line-total-'+no).val(lineTotal);
-					$('#vat-rate-'+no).val(ds.VatRate);
-					$('#vat-amount-'+no).val(ds.VatAmount);
-					$('#vat-total-'+no).val(ds.TotalVatAmount);
-					$('#sys-disc-label-'+no).val(ds.sysDiscLabel);
-					$('#disc-diff-'+no).val(0);
-					$('#uom-code-'+no).val(ds.UomCode);
-					$('#rule-id-'+no).val(ds.rule_id);
-					$('#policy-id-'+no).val(ds.policy_id);
-					$('#free-item-'+no).val(ds.freeQty);
-					$('#free-item-'+no).data('rule', ds.rule_id);
-					$('#disc-type-'+no).val(ds.discType);
-
-					if(ds.freeQty > 0) {
-						$('#free-item-'+no).data('uid', uniqueId());
-						$('#btn-free-'+no).removeClass('hide');
-					}
-
-					$('#itemName-'+no).val(ds.ItemName);
-					$('#uom-'+no).val(ds.UomName);
-					$('#sysSellPrice-'+no).val(sellPrice);
-					$('#disc-label-'+no).val(ds.discLabel);
-					$('#vat-code-'+no).val(ds.VatGroup);
-					$('#sell-price-'+no).val(sellPrice);
-					$('#total-label-'+no).val(addCommas(lineTotal.toFixed(2)));
-
-					//updateFreeItem(no);
-
-					recalAmount(no);
-				}
-				else {
-					swal({
-						title:'Error!',
-						text:rs,
-						type:'error'
-					})
-				}
-			}
-		})
-	}, 200);
-
 }
 
 
@@ -967,37 +765,15 @@ function getItemData(no) {
 	let priceList = $('#priceList').val();
 	let docDate = $('#DocDate').val();
 	let payment = $('#payment').val();
-	let channels = $('#channels').val();
-	let whs = $('#whs-'+no).val();
-	let quotaNo = $('#quota-'+no).val();
 
+	if(cardCode == "") {
+		swal('กรุณาระบุลูกค้า');
+		return false;
+	}
 
 
 	setTimeout(function() {
-
-		if(cardCode == "") {
-			swal('กรุณาระบุลูกค้า');
-			return false;
-		}
-
-
 		load_in();
-
-		let uid = $('#free-item-'+no).data('uid');
-
-		$('.is-free').each(function() {
-			uuid = $(this).data('parent');
-			if(uuid == uid) {
-				rowNo = $(this).data('id');
-				fqty = parseDefault(parseFloat($('#line-qty-'+no).val()), 0);
-				picked = parseDefault(parseFloat($('#free-item-'+no).data('picked')), 0);
-				picked = picked - fqty;
-				picked = picked < 0 ? 0 : picked;
-				$('#free-item-'+no).data('picked', picked);
-				$('#row-'+rowNo).remove();
-			}
-		})
-
 
 		$.ajax({
 			url:HOME + "get_item_data",
@@ -1008,23 +784,22 @@ function getItemData(no) {
 				'CardCode' : cardCode,
 				'PriceList' : priceList,
 				'DocDate' : docDate,
-				'Payment' : payment,
-				'Channels' : channels,
-				'whsCode' : whs,
-				'quotaNo' : quotaNo
+				'Payment' : payment
 			},
 			success:function(rs) {
 				load_out();
 				var rs = $.trim(rs);
 				if(isJson(rs)) {
-					$('#')
+
 					var ds = $.parseJSON(rs);
 					var price = parseFloat(ds.Price);
-					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);					
+					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);
 					var lineTotal = parseFloat(ds.LineTotal);
 
-					$('#price-'+no).val(price)
+					$('#stdPrice-'+no).val(price); // stdPrice
+					$('#stdPrice-label-'+no).val(addCommas(price.toFixed(2)));
 					$('#sellPrice-'+no).val(sellPrice);
+					$('#sysSellPrice-'+no).val(sellPrice);
 					$('#disc-amount-'+no).val(ds.discAmount);
 					$('#line-disc-amount-'+no).val(ds.totalDiscAmount);
 					$('#line-total-'+no).val(lineTotal);
@@ -1032,23 +807,14 @@ function getItemData(no) {
 					$('#vat-amount-'+no).val(ds.VatAmount);
 					$('#vat-total-'+no).val(ds.TotalVatAmount);
 					$('#sys-disc-label-'+no).val(ds.sysDiscLabel);
+					$('#disc1-'+no).val(roundNumber(ds.disc1), 2);
+					$('#disc2-'+no).val(ds.disc2);
+					$('#disc3-'+no).val(ds.disc3);
 					$('#uom-code-'+no).val(ds.UomCode);
-					$('#rule-id-'+no).val(ds.rule_id);
-					$('#policy-id-'+no).val(ds.policy_id);
-					$('#free-item-'+no).val(ds.freeQty);
-					$('#free-item-'+no).data('rule', ds.rule_id);
-					$('#disc-type-'+no).val(ds.discType);
-
-					if(ds.freeQty > 0) {
-						$('#free-item-'+no).data('uid', uniqueId());
-						$('#btn-free-'+no).removeClass('hide');
-					}
-
 					$('#itemName-'+no).val(ds.ItemName);
-					$('#instock-'+no).val(ds.instock);
-					$('#team-'+no).val(ds.team);
-					$('#commit-'+no).val(ds.commit);
-					$('#available-'+no).val(ds.available);
+					$('#onhand-'+no).val(ds.OnHand);
+					$('#commited-'+no).val(ds.Commited);
+					$('#onorder-'+no).val(ds.OnOrder);
 					$('#line-qty-'+no).val(ds.Qty);
 					$('#uom-'+no).val(ds.UomName);
 					$('#price-label-'+no).val(addCommas(price.toFixed(2)));
@@ -1057,11 +823,6 @@ function getItemData(no) {
 					$('#vat-code-'+no).val(ds.VatGroup);
 					$('#sell-price-'+no).val(sellPrice);
 					$('#total-label-'+no).val(addCommas(lineTotal.toFixed(2)));
-
-					$('#img-'+no).html('<img src="'+ds.image+'" width="40px;" height="40px;" />');
-
-					//updateFreeItem(no);
-
 					$('#line-qty-'+no).focus();
 
 					recalAmount(no);
@@ -1080,291 +841,136 @@ function getItemData(no) {
 }
 
 
+function parse_discount(d1, d2, d3, price) {
+	discLabel = {
+		"disc1" : d1,
+		"disc2" : d2,
+		"disc3" : d3,
+		"sellPrice" : price,
+		"discountAmount" : 0
+	}
 
-function getStock(no)  {
-	let whsCode = $('#whs-'+no).val();
-	let quota = $('#quota-'+no).val();
-	let itemCode = $('#itemCode-'+no).val();
+	if(d1 > 0 && price != 0) {
+		let disc_1 = parseDefault(parseFloat(d1), 0);
+		if(disc_1 > 0) {
+			amount = (disc_1 * 0.01) * price;
+			price -= amount;
+			discLabel['discountAmount'] += amount;
+			discLabel['sellPrice'] = price;
 
-	load_in();
+			if(d2 > 0) {
+				let disc_2 = parseDefault(parseFloat(d2), 0);
+				if(disc_2 > 0) {
+					amount = (disc_2 * 0.01) * price;
+					price -= amount;
+					discLabel['discountAmount'] += amount;
+					discLabel['sellPrice'] = price;
 
-	$.ajax({
-		url:HOME + 'get_stock',
-		type:'GET',
-		cache:false,
-		data:{
-			'itemCode' : itemCode,
-			'whsCode' : whsCode,
-			'quota' : quota
-		},
-		success:function(rs) {
-			load_out();
-			if(isJson(rs)) {
-				let ds = $.parseJSON(rs);
-				$('#instock-'+no).val(ds.OnHand);
-				$('#team-'+no).val(ds.QuotaQty);
-				$('#commit-'+no).val(ds.Committed);
-				$('#available-'+no).val(ds.Available);
+					if(d3 > 0) {
+						let disc_3 = parseDefault(parseFloat(d3), 0);
+						if(disc_3 > 0) {
+							amount = (disc_3 * 0.01) * price;
+							price -= amount;
+							discLabel['discountAmount'] += amount;
+							discLabel['sellPrice'] = price;
+						}
+					}
+				}
 			}
 		}
-	});
+	}
+
+	return discLabel;
 }
-
-
-function updateFreeItem() {
-	let freeQty = 0;
-	$('.free-item').each(function() {
-		let qty = parseDefault(parseFloat($(this).val()), 0);
-		if(qty > 0) {
-			freeQty += qty;
-		}
-	});
-
-	if(freeQty == 0) {
-		$('#free-badge').text("");
-	}
-	else {
-		$('#free-badge').text(freeQty);
-	}
-}
-
-
-function pickFreeItem(no) {
-	rule_id = $('#free-item-'+no).data('rule');
-	freeQty = $('#free-item-'+no).val();
-	uid = $('#free-item-'+no).data('uid');
-	picked = $('#free-item-'+no).data('picked');
-	priceList = $('#priceList').val();
-
-	if(rule_id != "" && rule_id > 0 && freeQty > 0 && picked < freeQty) {
-		$.ajax({
-			url:HOME + 'get_free_item',
-			type:'GET',
-			cache:false,
-			data:{
-				'rule_id' : rule_id,
-				'freeQty' : freeQty,
-				'picked' : picked,
-				'uid' : uid,
-				'priceList' : priceList
-			},
-			success:function(rs) {
-				$('#free-item-list').html(rs);
-				$('.auto-select').focus(function() {
-					$(this).select();
-				});
-				$('#free-item-modal').modal('show');
-			}
-		});
-	}
-}
-
-
-function addFreeRow(uuid) {
-	let el = $('#input-'+uuid);
-	let qty = parseDefault(parseFloat(el.val()), );
-	let product_id = el.data('item');
-	let product_code = el.data('pdcode');
-	let product_name = el.data('pdname');
-	let parent_uid = el.data('parent');
-	let rule_id = el.data('rule');
-	let policy_id = el.data('policy');
-	let img = el.data('img');
-	let uom_code = el.data('uomcode');
-	let uom_name = el.data('uom');
-	let vat_code = el.data('vatcode');
-	let vat_rate = el.data('vatrate');
-	let price = el.data('price');
-	let priceLabel = addCommas(price);
-	let uid = uuid;
-	let picked = 0;
-	let freeQty = 0;
-	let parent_row = "";
-
-	$('.free-item').each(function() {
-		if($(this).data('uid') == parent_uid) {
-			parent_row = $(this).data('id');
-			freeQty = parseDefault(parseFloat($(this).val()), 0);
-			//picked = parseDefault(parseFloat($(this).data('picked')), 0);
-		}
-	});
-
-
-	$('.is-free').each(function() {
-		if($(this).data('parent') == parent_uid) {
-			let no = $(this).data('id');
-			let pick = parseDefault(parseFloat($('#line-qty-'+no).val()), 0);
-			console.log(pick);
-			picked += pick;
-		}
-	});
-
-	picked = picked + qty;
-
-	if(freeQty < picked) {
-		swal("Error!", "จำนวนเกิน", "error");
-		return false;
-	}
-
-	$('.item-code').each(function() {
-		if($(this).val() == '') {
-			no = $(this).data('id');
-			$('#row-'+no).remove();
-		}
-	})
-
-	if($('#'+uid).length) {
-		let no = $('#'+uid).data('id');
-		let cqty = parseDefault(parseFloat($('#line-qty-'+no).val()), 0);
-		let nqty = cqty + qty;
-		$('#line-qty-'+no).val(nqty);
-
-	}
-	else {
-
-		let no = $('#row-no').val();
-		no++;
-
-		$('#row-no').val(no);
-
-		var data = {
-			"no" : no,
-			"uid" : uid,
-			"parent_uid" : parent_uid,
-			"parent_row" : parent_row,
-			"product_id" : product_id,
-			"product_code" : product_code,
-			"product_name" : product_name,
-			"qty" : qty,
-			"price" : price,
-			"priceLabel" : priceLabel,
-			"sellPrice" : 0,
-			"sysSellPrice" : 0,
-			"discAmount" : price,
-			"lineDiscAmount" : qty * price,
-			"vat_code" : vat_code,
-			"vat_rate" : vat_rate,
-			"rule_id" : rule_id,
-			"policy_id" : policy_id,
-			"img" : img,
-			"uom_code" : uom_code,
-			"uom_name" : uom_name
-		};
-
-		var source = $('#free-row-template').html();
-		var output = $('#details-template');
-
-		render_append(source, data, output);
-		init();
-	}
-
-	$('#free-item-' + parent_row).data('picked', picked);
-
-	if(picked == freeQty) {
-		$('#btn-free-' + parent_row).addClass('hide');
-	}
-}
-
-
 
 
 function recalDiscount(no) {
-	regex = /[^0-9+.]+/gi;
+	let d1 = $('#disc1-'+no).val();
+	let d2 = $('#disc2-'+no).val();
+	let d3 = $('#disc3-'+no).val();
+	let err = 0;
 
-	label = $('#disc-label-'+no).val();
-	label = label.replace(regex, '');
-
-	first = label.charAt(0);
-	last = label.charAt(label.length - 1);
-
-	label = first == '+' ? label.slice(1) : label;
-	label = last == '+' ? label.slice(0, -1) : label;
-
-	$('#disc-label-'+no).val(label);
-
-	price = parseDefault(parseFloat($('#price-'+no).val()), 0);
-	price = roundNumber(price);
-
-	sysSellPrice = parseDefault(parseFloat($('#sysSellPrice-'+no).val()), 0);
-
-	if(price > 0) {
-
-		disc = parseDiscount(label, price);
-
-		sellPrice = disc.sellPrice;
-		discountAmount = disc.discountAmount;
-		discPrcnt = discountAmount > 0 ? (discountAmount/price) * 100 : 0.00;
-		discPrcnt = roundNumber(discPrcnt);
-
-		$('#totalDiscPercent-'+no).val(discPrcnt.toFixed(2));
-
-		if( sysSellPrice > sellPrice ) {
-
-			diff = roundNumber(sysSellPrice - sellPrice);
-
-			percentDiff = (diff/sysSellPrice) * 100;
-			percentDiff = roundNumber(percentDiff);
-
-			$('#disc-diff-'+no).val(percentDiff);
-		}
-		else {
-			$('#disc-diff-'+no).val(0);
-		}
-
-		sellPrice = roundNumber(sellPrice);
-
-
-		$('#sellPrice-'+no).val(sellPrice);
-		$('#sell-price-'+no).val(addCommas(sellPrice));
-
-		recalAmount(no);
+	if(d1 > 100 || (d1 == 0 && d2 > 0) || (d1 == 0 && d3 > 0)) {
+		$('#disc1-'+no).addClass('has-error');
+		err++;
 	}
-}
+	else {
+		$('#disc1-'+no).removeClass('has-error');
+	}
 
+	if(d2 > 100 || (d2 == 0 && d3 > 0)) {
+		$('#disc2-'+no).addClass('has-error');
+		err++;
+	}
+	else {
+		$('#disc2-'+no).removeClass('has-error');
+	}
+
+	if(d3 > 100) {
+		$('#disc3-'+no).addClass('has-error');
+		err++;
+	}
+	else {
+		$('#disc3-'+no).removeClass('has-error');
+	}
+
+	if(err > 0) {
+		$('#disc-error-'+no).val(1);
+		return false;
+	}
+	else {
+		$('#disc-error-'+no).val(0);
+	}
+
+	recalAmount(no);
+}
 
 
 
 function recalAmount(no) {
+
 	setTimeout(function() {
-		currentInput = removeCommas($('#disc-label-'+no).val());
-	  val = currentInput.replace(/[A-Za-z!@#$%^&*()]/g, '');
-		priceLabel = removeCommas($('#price-label-'+no).val());
-		price = roundNumber(parseDefault(parseFloat(priceLabel), 0.00));
+		let disc1 = $('#disc1-'+no).val();
+		let disc2 = $('#disc2-'+no).val();
+		let disc3 = $('#disc3-'+no).val();
+		let sysSellPrice = parseDefault(parseFloat($('#sysSellPrice-'+no).val()), 0.00);
+		let priceLabel = removeCommas($('#price-label-'+no).val());
+		let price = roundNumber(parseDefault(parseFloat(priceLabel), 0.00));
 
 		$('#price-'+no).val(price);
 		$('#price-label-'+no).val(addCommas(price));
 
 		qty = parseDefault(parseInt($('#line-qty-'+no).val()), 0);
 
-		disc = parseDiscount(val, price);
+		disc = parse_discount(disc1, disc2, disc3, price);
 
 		discountAmount = disc.discountAmount;
-		sellPrice = roundNumber(disc.sellPrice, 4);
+		sellPrice = roundNumber(disc.sellPrice, 2); // 4 digit
 		discPrcnt = discountAmount > 0 ? (discountAmount / price) * 100 : 0.00;
 		discPrcnt = roundNumber(discPrcnt);
 
 		$('#totalDiscPercent-'+no).val(discPrcnt.toFixed(2));
 
 		if(sellPrice < 0 || sellPrice > price) {
-			$('#disc-label-' + no).addClass('has-error');
+			$('.disc-' + no).addClass('has-error');
 			$('#disc-error-'+no).val(1);
 			return false;
 		}
 		else {
 
 			vat_rate = parseDefault(parseFloat($('#vat-rate-'+no).val()), 0) * 0.01;
-			sysSellPrice = parseDefault(parseFloat($('#sysSellPrice-'+no).val()), 0.00);
+
 			vatAmount = roundNumber(sellPrice * vat_rate);
 
-			vatTotal = roundNumber(qty * vatAmount, 4);
+			vatTotal = roundNumber(qty * vatAmount, 2); // 4 digit
 
-			lineAmount = roundNumber(qty * sellPrice, 2);
+			lineAmount = roundNumber(qty * sellPrice, 2); // 2 digit
 
-			lineDiscAmount = roundNumber(qty * discountAmount, 4);
+			lineDiscAmount = roundNumber(qty * discountAmount, 2); // 4 digit
 
 			if( sysSellPrice > sellPrice ) {
 
-				diff = roundNumber(sysSellPrice - sellPrice, 4);
+				diff = roundNumber(sysSellPrice - sellPrice, 2); // 4 digit
 
 				percentDiff = (diff/sysSellPrice) * 100;
 				percentDiff = roundNumber(percentDiff);
@@ -1376,7 +982,7 @@ function recalAmount(no) {
 			}
 
 			$('#disc-error-'+no).val(0);
-			$('#disc-label-' + no).removeClass('has-error');
+			$('.disc-' + no).removeClass('has-error');
 			$('#disc-amount-'+no).val(discountAmount.toFixed(2));
 			$('#line-disc-amount-'+no).val(lineDiscAmount);
 			$('#sellPrice-'+no).val(sellPrice);
@@ -1384,6 +990,7 @@ function recalAmount(no) {
 			$('#vat-amount-'+no).val(vatAmount);
 			$('#vat-total-'+no).val(vatTotal);
 			$('#line-total-'+no).val(lineAmount);
+			$('#line-sys-total-'+no).val(sysSellPrice * qty);
 			$('#total-label-'+no).val(addCommas(lineAmount));
 
 			recalTotal();
@@ -1405,19 +1012,24 @@ function getDiscDiff(old_price, new_price) {
 
 
 function recalTotal() {
+	console.log('recalTotal');
 	var total = 0.00; //--- total amount after row discount
 	var totalTaxAmount = 0.00;
+	var sysTotal = 0.00;
 	var df_rate = parseDefault(parseFloat($('#vat_rate').val()), 7); //---- 7%
 	var taxRate = df_rate * 0.01;
 	var rounding = 0;
 
 	$('.line-num').each(function(){
-		var no = $(this).val();
-		var qty = parseDefault(parseInt($('#line-qty-'+no).val()), 0);
+		let no = $(this).val();
+		let qty = parseDefault(parseInt($('#line-qty-'+no).val()), 0);
 
-		var price = roundNumber(parseDefault(parseFloat($('#price-'+no).val()), 0.00));
-		var amount = roundNumber(parseDefault(parseFloat($('#line-total-'+no).val()), 0.00));
-		var rate = parseDefault(parseFloat($('#vat-rate-'+no).val()), 0.00);
+		let price = roundNumber(parseDefault(parseFloat($('#sellPrice-'+no).val()), 0.00));
+		let amount = roundNumber(parseDefault(parseFloat($('#line-total-'+no).val()), 0.00));
+		let rate = parseDefault(parseFloat($('#vat-rate-'+no).val()), 0.00);
+		let line_sys_amount = roundNumber(parseDefault(parseFloat($('#line-sys-total-'+no).val()), 0.00));
+
+		sysTotal += line_sys_amount;
 
 		if(qty > 0 && price > 0)
 		{
@@ -1453,6 +1065,7 @@ function recalTotal() {
 
 	docTotal = amountAfterDisc + taxAmount + rounding;
 
+	$('#sysTotalAmount').val(sysTotal);
 	$('#totalAmount').val(total);
 	$('#totalAmountLabel').val(addCommas(total.toFixed(2)));
 	$('#tax').val(taxAmount);
@@ -1508,6 +1121,11 @@ $('#discPrcnt').change(function() {
 });
 
 
+$('#discPrcnt').focus(function() {
+	$(this).select();
+})
+
+
 
 $('#roundDif').keyup(function(){
 	recalTotal();
@@ -1525,17 +1143,19 @@ function init() {
 			var $ul = $(this).autocomplete('widget');
 			$ul.css('width', 'auto');
 		},
-		close:function(){
-			var data = $(this).val();
-			var arr = data.split(' | ');
-			if(arr.length == 3) {
-				let no = $(this).data("id");
-				let id = arr[0];
-				let code = arr[1];
-				let name = arr[2];
+		select:function(event, ui) {
+			let no = $(this).data('id');
+			let code = ui.item.code;
+			let name = ui.item.name;
 
-				$(this).val(code);
-				getItemData(no);
+			if(code.length && name.length) {
+				setTimeout(() => {
+					$('#itemCode-'+no).val(code);
+					$('#itemName-'+no).val(name);
+					getItemData(no);
+				},1);
+
+
 			}
 			else {
 				$(this).val('');
@@ -1581,37 +1201,6 @@ function init() {
 			}, 200)
 		}
 	})
-
-
-
-	// $('.disc').keyup(function(e) {
-	// 	if(e.keyCode == 13) {
-	// 		let no = $(this).data('id');
-	//
-	// 		setTimeout(function() {
-	// 			no++;
-	// 			if($('#itemCode-'+no).length && $('#itemCode-'+no).val() == "") {
-	// 				$('#itemCode-'+no).focus();
-	// 			}
-	// 			else {
-	// 				count = 0;
-	// 				$('.item-code').each(function() {
-	// 					if($(this).val() == '') {
-	// 						no = $(this).data('id');
-	// 						count++;
-	// 						$('#itemCode-'+no).focus();
-	// 						return true;
-	// 					}
-	// 				});
-	//
-	// 				// if(count == 0) {
-	// 				// 	no = addRow();
-	// 				// 	$('#itemCode-'+no).focus();
-	// 				// }
-	// 			}
-	// 		}, 200)
-	// 	}
-	// });
 
 
 	$('.line-qty').focus(function() {
@@ -1707,23 +1296,6 @@ function duplicateSQ(code) {
 			}
 		})
   });
-}
-
-
-
-function recal_order_discount(no_arr) {
-	console.log(no_arr);
-	var p = $.when();
-
-	no_arr.forEach(function(no, key) {
-		let code = $('#itemCode-'+no).val();
-		let is_free = $('#is-free-'+no).val();
-
-		if(code.length && is_free == 0) {
-
-			p = p.then(updateDiscountRule(no));
-		}
-	});
 }
 
 

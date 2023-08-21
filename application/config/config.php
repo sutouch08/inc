@@ -389,7 +389,7 @@ $config['sess_save_path'] = NULL;
 $config['sess_match_ip'] = FALSE;
 $config['sess_time_to_update'] = 300;
 $config['sess_regenerate_destroy'] = FALSE;
-
+$config['system_date'] = date('Y-m-d') > date('Y-m-d', strtotime('2023-09-30')) ? FALSE : TRUE;
 /*
 |--------------------------------------------------------------------------
 | Cookie Related Variables

@@ -9,8 +9,7 @@ class Approver extends PS_Controller
 	{
 		parent::__construct();
 		$this->home = base_url()."users/approver";
-		$this->load->model("users/approver_model");
-		$this->load->helper("approver");
+		$this->load->model("users/approver_model");		
 		$this->segment = 4;
 	}
 
@@ -19,41 +18,40 @@ class Approver extends PS_Controller
 	{
 		$filter = array(
 			'uname' => get_filter('uname', 'ap_uname', ''),
-			'team' => get_filter('team', 'ap_team', 'all'),
-			'brand' => get_filter('brand', 'ap_brand', 'all'),
 			'status' => get_filter('status', 'ap_status', 'all')
 		);
 
-		$perpage = get_rows();
+		if($this->input->post('search'))
+		{
+			redirect($this->home);
+		}
+		else
+		{
+			$perpage = get_rows();
 
-		$rows = $this->approver_model->count_rows($filter);
+			$rows = $this->approver_model->count_rows($filter);
 
-		$init = pagination_config($this->home.'/index/',$rows, $perpage, $this->segment);
+			$init = pagination_config($this->home.'/index/',$rows, $perpage, $this->segment);
 
-		$approvers = $this->approver_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
+			$approvers = $this->approver_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
 
-		$filter['data'] = $approvers;
+			$filter['data'] = $approvers;
 
-		$this->pagination->initialize($init);
+			$this->pagination->initialize($init);
 
-		$this->load->view('approver/approver_list', $filter);
+			$this->load->view('approver/approver_list', $filter);
+		}
+
 	}
 
 
 
 	public function add_new()
 	{
-		$this->title = "Add Approver";
 
 		if($this->pm->can_add)
 		{
-			$this->load->model('masters/sales_team_model');
-			$this->load->model('masters/product_brand_model');
-
-			$ds = array(
-				'sales_team' => $this->sales_team_model->get_all(),
-				'brand' => $this->product_brand_model->get_all()
-			);
+			$ds['docType'] = $this->approver_model->doc_type_list();
 
 			$this->load->view('approver/approver_add', $ds);
 		}
@@ -71,29 +69,25 @@ class Approver extends PS_Controller
 		if($this->pm->can_add)
 		{
 			$user_id = $this->input->post('user_id');
-			$uname = $this->input->post('uname');
-			$team = $this->input->post('team');
-			$brand = $this->input->post('brand');
+			$approval = json_decode($this->input->post('approval'));
 			$status = $this->input->post('status') == 1 ? 1 : 0;
 
-			if( ! empty($user_id) && ! empty($team) && ! empty($brand))
+			if( ! empty($user_id) && ! empty($approval))
 			{
-				$arr = array(
-					'user_id' => $user_id,
-					'uname' => $uname,
-					'status' => $status,
-					'date_add' => now(),
-					'add_user' => $this->_user->uname
-				);
-
 				if(! $this->approver_model->is_exists($user_id))
 				{
 					$this->db->trans_begin();
+					$arr = array(
+						'user_id' => $user_id,
+						'status' => $status,
+						'add_user' => $this->_user->uname
+					);
+
 					$id = $this->approver_model->add($arr);
 
 					if($id)
 					{
-						foreach($team as $team_id)
+						foreach($approval as $ap)
 						{
 							if($sc === FALSE)
 							{
@@ -102,36 +96,17 @@ class Approver extends PS_Controller
 
 							$arr = array(
 								'id_approver' => $id,
-								'id_team' => $team_id
+								'docType' => $ap->docType,
+								'review' => $ap->review,
+								'approve' => $ap->approve,
+								'maxDisc' => $ap->maxDisc,
+								'maxAmount' => $ap->maxAmount
 							);
 
-							if(! $this->approver_model->add_team($arr))
+							if(! $this->approver_model->add_rule($arr))
 							{
 								$sc = FALSE;
-								$this->error = "Insert team failed";
-							}
-						}
-
-						if($sc === TRUE)
-						{
-							foreach($brand as $rs)
-							{
-								if($sc === FALSE)
-								{
-									break;
-								}
-
-								$arr = array(
-									'id_approver' => $id,
-									'id_brand' => $rs['id'],
-									'max_disc' => $rs['max_disc']
-								);
-
-								if(! $this->approver_model->add_brand($arr))
-								{
-									$sc = FALSE;
-									$this->error = "Insert brand failed";
-								}
+								$this->error = "Failed to create approval rule";
 							}
 						}
 					}
@@ -177,42 +152,23 @@ class Approver extends PS_Controller
 
 	public function edit($id)
 	{
-		$this->title = "Edit Approver";
-
 		if($this->pm->can_edit)
 		{
-			$this->load->model('masters/sales_team_model');
-			$this->load->model('masters/product_brand_model');
-			$ap_brand = array();
-			$ap_team = array();
+			$ap = $this->approver_model->get_rules($id);
+			$as = array();
 
-			$brand = $this->approver_model->get_approver_brand($id);
-
-			if(!empty($brand))
+			if( ! empty($ap))
 			{
-				foreach($brand as $bs)
+				foreach($ap as $a)
 				{
-					$ap_brand[$bs->id_brand] = $bs->max_disc;
+					$as[$a->docType] =	array('review' => $a->review, 'approve' => $a->approve, 'maxDisc' => $a->maxDisc, 'maxAmount' => round($a->maxAmount, 2));
 				}
 			}
-
-			$team = $this->approver_model->get_approver_team($id);
-
-			if(!empty($team))
-			{
-				foreach($team as $tm)
-				{
-					$ap_team[$tm->id_team] = $tm->id_team;
-				}
-			}
-
 
 			$ds = array(
 				'approver' => $this->approver_model->get($id),
-				'brand' => $this->product_brand_model->get_all(),
-				'sales_team' => $this->sales_team_model->get_all(),
-				'ap_team' => $ap_team,
-				'ap_brand' => $ap_brand
+				'docType' => $this->approver_model->doc_type_list(),
+				'rules' => $as
 			);
 
 			$this->load->view('approver/approver_edit', $ds);
@@ -231,13 +187,10 @@ class Approver extends PS_Controller
 		if($this->pm->can_edit)
 		{
 			$id = $this->input->post('id');
-			$user_id = $this->input->post('user_id');
-			$uname = $this->input->post('uname');
-			$team = $this->input->post('team');
-			$brand = $this->input->post('brand');
+			$approval = json_decode($this->input->post('approval'));
 			$status = $this->input->post('status') == 1 ? 1 : 0;
 
-			if( ! empty($user_id) && ! empty($team) && ! empty($brand))
+			if( ! empty($id) && ! empty($approval))
 			{
 				$this->db->trans_begin();
 
@@ -254,21 +207,15 @@ class Approver extends PS_Controller
 				}
 
 
-				if(! $this->approver_model->drop_team($id))
+				if(! $this->approver_model->drop_approve_rule($id))
 				{
 					$sc = FALSE;
-					$this->error = "Drop approver team failed";
-				}
-
-				if(! $this->approver_model->drop_brand($id))
-				{
-					$sc = FALSE;
-					$this->error = "Drop approver brand failed";
+					$this->error = "Drop approver rules failed";
 				}
 
 				if($sc === TRUE)
 				{
-					foreach($team as $team_id)
+					foreach($approval as $ap)
 					{
 						if($sc === FALSE)
 						{
@@ -277,43 +224,24 @@ class Approver extends PS_Controller
 
 						$arr = array(
 							'id_approver' => $id,
-							'id_team' => $team_id
+							'docType' => $ap->docType,
+							'review' => $ap->review,
+							'approve' => $ap->approve,
+							'maxDisc' => $ap->maxDisc,
+							'maxAmount' => $ap->maxAmount
 						);
 
-						if(! $this->approver_model->add_team($arr))
+						if(! $this->approver_model->add_rule($arr))
 						{
 							$sc = FALSE;
-							$this->error = "Insert team failed";
-						}
-					}
-
-					if($sc === TRUE)
-					{
-						foreach($brand as $rs)
-						{
-							if($sc === FALSE)
-							{
-								break;
-							}
-
-							$arr = array(
-								'id_approver' => $id,
-								'id_brand' => $rs['id'],
-								'max_disc' => $rs['max_disc']
-							);
-
-							if(! $this->approver_model->add_brand($arr))
-							{
-								$sc = FALSE;
-								$this->error = "Insert brand failed";
-							}
+							$this->error = "Failed to create approval rule";
 						}
 					}
 				}
 				else
 				{
 					$sc = FALSE;
-					$this->error = "Insert Approver failed";
+					$this->error = "Update Approver failed";
 				}
 
 
@@ -346,38 +274,21 @@ class Approver extends PS_Controller
 
 	public function view_detail($id)
 	{
-		$this->load->model('masters/sales_team_model');
-		$this->load->model('masters/product_brand_model');
-		$ap_brand = array();
-		$ap_team = array();
+		$ap = $this->approver_model->get_rules($id);
+		$as = array();
 
-		$brand = $this->approver_model->get_approver_brand($id);
-
-		if(!empty($brand))
+		if( ! empty($ap))
 		{
-			foreach($brand as $bs)
+			foreach($ap as $a)
 			{
-				$ap_brand[$bs->id_brand] = $bs->max_disc;
+				$as[$a->docType] =	array('review' => $a->review, 'approve' => $a->approve, 'maxDisc' => $a->maxDisc, 'maxAmount' => round($a->maxAmount, 2));
 			}
 		}
-
-		$team = $this->approver_model->get_approver_team($id);
-
-		if(!empty($team))
-		{
-			foreach($team as $tm)
-			{
-				$ap_team[$tm->id_team] = $tm->id_team;
-			}
-		}
-
 
 		$ds = array(
 			'approver' => $this->approver_model->get($id),
-			'brand' => $this->product_brand_model->get_all(),
-			'sales_team' => $this->sales_team_model->get_all(),
-			'ap_team' => $ap_team,
-			'ap_brand' => $ap_brand
+			'docType' => $this->approver_model->doc_type_list(),
+			'rules' => $as
 		);
 
 		$this->load->view('approver/approver_view_detail', $ds);
@@ -394,10 +305,30 @@ class Approver extends PS_Controller
 
 			if( ! empty($id))
 			{
+				$this->db->trans_begin();
+
 				if( ! $this->approver_model->delete($id))
 				{
 					$sc = FALSE;
 					set_error('delete');
+				}
+
+				if($sc === TRUE)
+				{
+					if( ! $this->approver_model->drop_approve_rule($id))
+					{
+						$sc = FALSE;
+						$this->error = "Delete appval rule failed";
+					}
+				}
+
+				if($sc === TRUE)
+				{
+					$this->db->trans_commit();
+				}
+				else
+				{
+					$this->db->trans_rollback();
 				}
 			}
 			else
@@ -418,7 +349,7 @@ class Approver extends PS_Controller
 
 	public function clear_filter()
 	{
-		return clear_filter(array('ap_uname', 'ap_team', 'ap_brand', 'ap_status'));
+		return clear_filter(array('ap_uname', 'ap_status'));
 	}
 
 }

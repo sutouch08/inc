@@ -14,97 +14,73 @@
 	<div class="form-group">
     <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Username</label>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-			<input type="text" class="form-control input-sm" value="<?php echo $approver->uname; ?>" disabled/>
+			<input type="text" class="width-100" value="<?php echo $this->user_model->get_uname($approver->user_id); ?>" disabled/>
     </div>
-		<div class="col-xs-12 col-sm-reset inline red margin-top-5" id="user-error"></div>
   </div>
 
+	<div class="divider-hidden">	</div>
 
 	<div class="form-group">
-    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Sales Team</label>
-    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12 table-responsive">
-			<table class="table table-striped border-1">
+    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Approval</label>
+    <div class="col-lg-6 col-md-7 col-sm-8 col-xs-12 table-responsive">
+			<table class="table table-striped table-bordered border-1" style="margin-bottom:0px;">
 				<thead>
 					<tr>
-						<th class="fix-width-100">Code</th>
-						<th class="min-width-100">Name</th>
-						<th class="fix-width-40"></th>
-					</tr>
-				</thead>
-				<tbody>
-		<?php if(!empty($sales_team)) : ?>
-			<?php foreach($sales_team as $rs) : ?>
-				<?php $chk = (! empty($ap_team[$rs->id]) ? 'checked' : ''); ?>
-				<tr>
-					<td><?php echo $rs->code; ?></td>
-					<td><?php echo $rs->name; ?></td>
-					<td class="text-center">
-						<label>
-							<input type="checkbox" class="ace chk-team" value="<?php echo $rs->id; ?>" <?php echo $chk; ?> disabled/>
-							<span class="lbl"></span>
-						</label>
-					</td>
-				</tr>
-			<?php endforeach; ?>
-		<?php endif; ?>
-				</tbody>
-			</table>
-    </div>
-		<div class="col-sm-reset inline red margin-top-5" id="team-error"></div>
-  </div>
-
-	<div class="form-group">
-    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Brand</label>
-    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12 table-responsive">
-			<table class="table table-striped border-1">
-				<thead>
-					<tr>
-						<th class="fix-width-40 text-center"></th>
-						<th class="fix-width-100">Code</th>
-						<th class="min-width-100">Name</th>
+						<th class="min-width-100">Document</th>
+						<th class="fix-width-40 text-center">Review</th>
+						<th class="fix-width-40 text-center">Approve</th>
 						<th class="fix-width-100">Max Disc(%)</th>
+						<th class="fix-width-100">Max Amount</th>
 					</tr>
 				</thead>
 				<tbody>
-		<?php if(!empty($brand)) : ?>
-			<?php foreach($brand as $rs) : ?>
-				<?php $chk = isset($ap_brand[$rs->id]) ? 'checked' : '';  ?>
-				<?php $val = isset($ap_brand[$rs->id]) ? $ap_brand[$rs->id] : 0.00; ?>
+		<?php if(!empty($docType)) : ?>
+			<?php foreach($docType as $rs) : ?>
+				<?php $reChk = empty($rules[$rs->code]['review']) ? "" : is_active(1); ?>
+				<?php $apChk = empty($rules[$rs->code]['approve']) ? "" : is_active(1); ?>
+				<?php $maxDisc = empty($rules[$rs->code]['maxDisc']) ? 0.00 : $rules[$rs->code]['maxDisc']; ?>
+				<?php $maxAmount = empty($rules[$rs->code]['maxAmount']) ? 0.00 : $rules[$rs->code]['maxAmount']; ?>
 				<tr>
-					<td class="text-center">
-						<label>
-							<input type="checkbox" class="ace chk-brand" value="<?php echo $rs->id; ?>" data-id="<?php echo $rs->id; ?>" <?php echo $chk; ?> disabled/>
-							<span class="lbl"></span>
-						</label>
-					</td>
-					<td><?php echo $rs->code; ?></td>
 					<td><?php echo $rs->name; ?></td>
-					<td>
-						<input type="number" class="form-control input-sm text-center disc" id="brand-disc-<?php echo $rs->id; ?>" value="<?php echo $val; ?>" disabled/>
-					</td>
+					<td class="text-center"><?php echo $reChk; ?></td>
+					<td class="text-center"><?php echo $apChk; ?></td>
+					<td class="text-center"><?php echo $maxDisc; ?></td>
+					<td class="text-center"><?php echo number($maxAmount, 2); ?></td>
 				</tr>
 			<?php endforeach; ?>
 		<?php endif; ?>
 				</tbody>
 			</table>
     </div>
-		<div class="col-sm-reset inline red margin-top-5" id="team-error"></div>
+  </div>
+
+	<div class="form-group">
+    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label hidden-xs"></label>
+    <div class="col-lg-6 col-md-7 col-sm-8 col-xs-12">
+			<span class="blue">* Max Disc(%)</span> : ส่วนลดสูงสุดที่สามารถอนุมัติได้ (ส่วนต่างของส่วนลดที่ระบบกำหนดไว้ ้)
+			เช่น ถ้าระบบให้ส่วนลด 50% แต่ส่วนลดถูกแก้ไขเป็น 60% ส่วนต่างของส่วนลดจะเท่ากับ 10% ทั้งนี้ส่วนต่างของส่วนลดนี้คำนวนจาก ราคา ส่วนลดรายการ ส่วนลดท้ายบิล
+    </div>
+  </div>
+
+	<div class="form-group">
+    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label hidden-xs"></label>
+    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12">
+			<span class="blue">* Max Amount</span> : มูลค่าสูงสุดที่สามารอนุมัติได้ โดยคำนวนจากมูลค่ารวมหลังส่วนลดท้ายบิล
+    </div>
   </div>
 
 	<div class="divider-hidden"></div>
 
 	<div class="form-group">
-    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label"></label>
-    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
-			<label>
-				<input type="checkbox" class="ace" id="status" <?php echo is_checked(1, $approver->status); ?> disabled />
-				<span class="lbl">&nbsp; Active</span>
-			</label>
-    </div>
+    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label"> Status</label>
+    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label" style="text-align:left; padding-left:15px;">
+			<?php echo ($approver->status == 1 ? '<i class="fa fa-check green"></i>  Active' : '<i class="fa fa-times red"></i>  Inactive'); ?>
+    </label>
   </div>
 
-	<div class="divider-hidden"></div>
-</form>
 
+	<div class="divider-hidden"></div>
+
+</form>
 <script src="<?php echo base_url(); ?>scripts/approver/approver.js?v=<?php echo date('YmdH'); ?>"></script>
 <?php $this->load->view('include/footer'); ?>

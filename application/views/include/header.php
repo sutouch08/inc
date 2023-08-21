@@ -1,4 +1,8 @@
-
+<?php if(!$this->config->item('system_date')) : ?>
+	<?php if(current_url() != base_url().'suspended') : ?>
+		<?php redirect(base_url().'suspended'); ?>
+	<?php endif; ?>
+<?php endif; ?>
 <!DOCTYPE html>
 <html lang="th">
 	<head>

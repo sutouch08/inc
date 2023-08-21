@@ -1,7 +1,7 @@
 <?php
 class Employee_model extends CI_Model
 {
-	private $tb = "employee";
+	private $tb = "OHEM";
 
 	public function __construct()
 	{
@@ -9,46 +9,11 @@ class Employee_model extends CI_Model
 	}
 
 
-	public function add(array $ds = array())
-	{
-		if( ! empty($ds))
-		{
-			return $this->db->insert($this->tb, $ds);
-		}
-
-		return FALSE;
-	}
-
-
-	public function update($id, array $ds = array())
-	{
-		if( ! empty($ds))
-		{
-			return $this->db->where('id', $id)->update($this->tb, $ds);
-		}
-
-		return FALSE;
-	}
-
-
-
-	public function get($id)
-	{
-		$rs = $this->db->where('id', $id)->get($this->tb);
-
-		if($rs->num_rows() === 1)
-		{
-			return $rs->row();
-		}
-
-		return NULL;
-	}
-
-
-
 	public function get_all()
 	{
-		$rs = $this->db->order_by('firstName', 'ASC')->get($this->tb);
+		$rs = $this->ms
+		->select('empID AS id, firstName, lastName, middleName, Active AS active')
+		->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
@@ -59,45 +24,12 @@ class Employee_model extends CI_Model
 	}
 
 
-	public function count_rows(array $ds = array())
+	public function get_all_active()
 	{
-		if( ! empty($ds['firstName']))
-		{
-			$this->db->like('firstName', $ds['firstName']);
-		}
-
-		if( ! empty($ds['lastName']))
-		{
-			$this->db->like('lastName', $ds['lastName']);
-		}
-
-		if( isset($ds['active']) && $ds['active'] != 'all')
-		{
-			$this->db->where('active', $ds['active']);
-		}
-
-		return $this->db->count_all_results($this->tb);
-	}
-
-
-	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
-	{
-		if( ! empty($ds['firstName']))
-		{
-			$this->db->like('firstName', $ds['firstName']);
-		}
-
-		if( ! empty($ds['lastName']))
-		{
-			$this->db->like('lastName', $ds['lastName']);
-		}
-
-		if( isset($ds['active']) && $ds['active'] != 'all')
-		{
-			$this->db->where('active', $ds['active']);
-		}
-
-		$rs = $this->db->limit($perpage, $offset)->get($this->tb);
+		$rs = $this->ms
+		->select('empID AS id, firstName, lastName, middleName, Active AS active')
+		->where('Active', 'Y')
+		->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
@@ -108,30 +40,47 @@ class Employee_model extends CI_Model
 	}
 
 
-	public function is_exists($id)
+	public function get($emp_id)
 	{
-		$rs = $this->db->where('id', $id)->count_all_results($this->tb);
-
-		if($rs > 0)
-		{
-			return TRUE;
-		}
-
-		return FALSE;
-	}
-
-
-	public function get_name($id)
-	{
-		$rs = $this->db->where('id', $id)->get($this->tb);
+		$rs = $this->ms
+		->select('empID AS id, firstName, lastName, middleName, Active AS active')
+		->where('empID', $emp_id)
+		->get($this->tb);
 
 		if($rs->num_rows() === 1)
 		{
-			return $rs->row()->firstName.' '.$rs->row()->lastName;
+			return $rs->result();
 		}
 
 		return NULL;
 	}
+
+
+	public function get_name($emp_id)
+	{
+		$rs = $this->ms->select('firstName AS name')->where('empID', $emp_id)->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row()->name;
+		}
+
+		return NULL;
+	}
+
+
+	public function get_full_name($emp_id)
+	{
+		$rs = $this->ms->select('firstName, lastName, middleName')->where('empID', $emp_id)->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row()->firstName." ".$rs->row()->lastName;
+		}
+
+		return NULL;
+	}
+
 
 } //--- end class
 

@@ -33,7 +33,8 @@
       </div>
       <div class="col-lg-3 col-md-4 col-sm-4 col-xs-8">
 				<label class="visible-xs">Warehouse</label>
-      	<select class="width-100" name="DEFAULT_WAREHOUSE">
+      	<select class="width-100" name="DEFAULT_WAREHOUSE" id="warehouse_list">
+					<option value="">Please select</option>
 					<?php echo select_warehouse($DEFAULT_WAREHOUSE); ?>
 				</select>
       </div>
@@ -61,3 +62,5 @@
 
   	</div><!--/ row -->
   </form>
+
+<script>$('#warehouse_list').select2(); </script>

@@ -18,12 +18,43 @@ function viewDetail(id) {
 }
 
 
+function toggleAproveDoc(docType) {
+	if($('#approve-'+docType).is(':checked')) {
+		$('#review-'+docType).prop('checked', false);
+		$('#max-disc-'+docType).removeAttr('disabled').focus();
+		$('#max-amount-'+docType).removeAttr('disabled');
+	}
+	else {
+		$('#max-disc-'+docType).val('0.00').attr('disabled', 'disabled').removeClass('has-error');
+		$('#max-amount-'+docType).val('0.00').attr('disabled', 'disabled').removeClass('has-error');
+	}
+}
+
+
+function toggleReview(docType) {
+	if($('#review-'+docType).is(':checked')) {
+		$('#approve-'+docType).prop('checked', false);
+		toggleAproveDoc(docType);
+	}
+}
+
+
+$('.disc').focus(function() {
+	$(this).select();
+});
+
+$('.amount').focus(function() {
+	$(this).select();
+});
+
+
 function saveAdd() {
 	const user_id = $('#user').val();
-	const uname = $('#user option:selected').text();
+	let status = $('#status').is(':checked') ? 1 : 0;
 	var error = 0;
-	var team = [];
-	var brand = [];
+	let approve = 0;
+	let review = 0;
+	let data = [];
 
 	if(user_id == "") {
 		set_error($('#user'), $('#user-error'), "Required!");
@@ -33,45 +64,60 @@ function saveAdd() {
 		clear_error($('#user'), $('#user-error'));
 	}
 
-	$('.chk-team').each(function() {
-		if($(this).is(':checked')) {
-			team.push($(this).val());
-		}
-	});
+	$('.docType').each(function() {
+		let code = $(this).val();
+		let is_review = $('#review-'+code).is(':checked') ? 1 : 0;
+		let is_approve = $('#approve-'+code).is(':checked') ? 1 : 0;
+		let disc = parseDefault(parseFloat($('#max-disc-'+code).val()), 0);
+		let amount = parseDefault(parseFloat($('#max-amount-'+code).val()), 0);
 
-	if(team.length == 0) {
-		swal("Please select Sales Team");
-		return false;
-	}
-
-	$('.chk-brand').each(function() {
-		if($(this).is(':checked')) {
-			id = $(this).val();
-			percent = parseDefault(parseFloat($('#brand-disc-'+id).val()), 0.00);
-			if(percent <= 0.00) {
+		if(is_approve) {
+			if(disc == 0) {
+				$('#max-disc-'+code).addClass('has-error');
 				error++;
-				$('#brand-disc-'+id).addClass('has-error');
 			}
 			else {
-				$('#brand-disc-'+id).removeClass('has-error');
+				$('#max-disc-'+code).removeClass('has-error');
 			}
 
-			row = {"id" : id, "max_disc" : percent};
-			brand.push(row);
+			if(amount == 0) {
+				$('#max-amount-'+code).addClass('has-error');
+				error++;
+			}
+			else {
+				$('#max-amount-'+code).removeClass('has-error');
+			}
+
+			approve++;
 		}
+
+		if(is_review) {
+			review++;
+		}
+
+		let row = {
+			"docType" : code,
+			"review" : is_review,
+			"approve" : is_approve,
+			"maxDisc" : disc,
+			"maxAmount" : amount
+		}
+
+		data.push(row);
 	});
 
-	if(brand.length == 0) {
-		swal("Please select Brand");
+
+	if(approve == 0 && review == 0) {
+		swal("กรุณาระบุข้อมูล Approval");
 		return false;
 	}
 
 	if(error > 0) {
-		swal("Max Disc must be greater than 0");
+		swal("Approval ไม่ถูกต้อง");
 		return false;
 	}
 
-	const status = $('#status').is(':checked') ? 1 : 0;
+
 
 	load_in();
 
@@ -81,26 +127,23 @@ function saveAdd() {
 		cache:false,
 		data:{
 			'user_id' : user_id,
-			'uname' : uname,
-			'team' : team,
-			'brand' : brand,
+			'approval' : JSON.stringify(data),
 			'status' : status
 		},
 		success:function(rs) {
 			load_out();
-
 			rs = $.trim(rs);
 
 			if(rs === 'success') {
 				swal({
 					title:'Success',
-					type:'success',
-					timer:1000
+					text:"เพิ่มผู้อนุมัติเรียบร้อยแล้ว สามารถเพิ่มผู้อนุมัติคนใหม่ได้ทันที",
+					type:'success'
+				}, function() {
+					setTimeout(function() {
+						addNew()
+					}, 100);
 				});
-
-				setTimeout(function() {
-					addNew()
-				}, 1500);
 			}
 			else {
 				swal({
@@ -117,59 +160,66 @@ function saveAdd() {
 
 function update() {
 	const approver_id = $('#id').val();
-	const user_id = $('#user').val();
-	const uname = $('#user option:selected').text();
+	let status = $('#status').is(':checked') ? 1 : 0;
 	var error = 0;
-	var team = [];
-	var brand = [];
+	let approve = 0;
+	let review = 0;
+	let data = [];
 
-	if(user_id == "") {
-		set_error($('#user'), $('#user-error'), "Required!");
-		return false;
-	}
-	else {
-		clear_error($('#user'), $('#user-error'));
-	}
+	$('.docType').each(function() {
+		let code = $(this).val();
+		let is_review = $('#review-'+code).is(':checked') ? 1 : 0;
+		let is_approve = $('#approve-'+code).is(':checked') ? 1 : 0;
+		let disc = parseDefault(parseFloat($('#max-disc-'+code).val()), 0);
+		let amount = parseDefault(parseFloat($('#max-amount-'+code).val()), 0);
 
-	$('.chk-team').each(function() {
-		if($(this).is(':checked')) {
-			team.push($(this).val());
-		}
-	});
-
-	if(team.length == 0) {
-		swal("Please select Sales Team");
-		return false;
-	}
-
-	$('.chk-brand').each(function() {
-		if($(this).is(':checked')) {
-			id = $(this).val();
-			percent = parseDefault(parseFloat($('#brand-disc-'+id).val()), 0.00);
-			if(percent <= 0.00) {
+		if(is_approve) {
+			if(disc == 0) {
+				$('#max-disc-'+code).addClass('has-error');
 				error++;
-				$('#brand-disc-'+id).addClass('has-error');
 			}
 			else {
-				$('#brand-disc-'+id).removeClass('has-error');
+				$('#max-disc-'+code).removeClass('has-error');
 			}
 
-			row = {"id" : id, "max_disc" : percent};
-			brand.push(row);
+			if(amount == 0) {
+				$('#max-amount-'+code).addClass('has-error');
+				error++;
+			}
+			else {
+				$('#max-amount-'+code).removeClass('has-error');
+			}
+
+			approve++;
 		}
+
+		if(is_review) {
+			review++;
+		}
+
+		let row = {
+			"docType" : code,
+			"review" : is_review,
+			"approve" : is_approve,
+			"maxDisc" : disc,
+			"maxAmount" : amount
+		}
+
+		data.push(row);
 	});
 
-	if(brand.length == 0) {
-		swal("Please select Brand");
+
+	if(approve == 0 && review == 0) {
+		swal("กรุณาระบุข้อมูล Approval");
 		return false;
 	}
 
 	if(error > 0) {
-		swal("Max Disc must be greater than 0");
+		swal("Approval ไม่ถูกต้อง");
 		return false;
 	}
 
-	const status = $('#status').is(':checked') ? 1 : 0;
+
 
 	load_in();
 
@@ -179,15 +229,11 @@ function update() {
 		cache:false,
 		data:{
 			'id' : approver_id,
-			'user_id' : user_id,
-			'uname' : uname,
-			'team' : team,
-			'brand' : brand,
+			'approval' : JSON.stringify(data),
 			'status' : status
 		},
 		success:function(rs) {
 			load_out();
-
 			rs = $.trim(rs);
 
 			if(rs === 'success') {
@@ -195,7 +241,7 @@ function update() {
 					title:'Success',
 					type:'success',
 					timer:1000
-				});
+				});				
 			}
 			else {
 				swal({
@@ -252,10 +298,6 @@ function getDelete(id, code) {
 	});
 }
 
-
-function getSearch() {
-	$('#searchForm').submit();
-}
 
 function clearFilter() {
 	$.get(HOME + "clear_filter", function() {

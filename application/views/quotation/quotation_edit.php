@@ -34,6 +34,8 @@
 <input type="hidden" id="uname" value="<?php echo $order->uname;?>" />
 <input type="hidden" id="sale_team" value="<?php echo $order->sale_team; ?>" />
 <input type="hidden" id="is_draft" value="0">
+<input type="hidden" id="max_amount" value="<?php echo getConfig('AMOUNT_TO_APPROVE_SQ'); ?>" />
+<input type="hidden" id="max_discount" value="<?php echo getConfig('DISCOUNT_TO_APPROVE_SQ'); ?>" />
 
 
 <?php $this->load->view('quotation/quotation_ship_to_modal'); ?>
@@ -82,6 +84,7 @@
 
 <script src="<?php echo base_url(); ?>scripts/quotation/quotation.js?v=<?php echo date('YmdH'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/quotation/quotation_add.js?v=<?php echo date('YmdH'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/quotation/quotation_edit.js?v=<?php echo date('YmdH'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/address.js"></script>
 
 

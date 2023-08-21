@@ -1,3 +1,17 @@
+window.addEventListener('load', () => {
+  let uuid = get_uuid();
+
+  if(uuid == "" || uuid == null || uuid == undefined) {
+    uid = generateUID();
+
+		localStorage.setItem('ix_uuid', uid);
+  }
+});
+
+
+function get_uuid() {
+	return localStorage.getItem('ix_uuid');
+}
 
 //--- save side bar layout to cookie
 function toggle_layout(){
@@ -361,4 +375,10 @@ function roundNumber(num, digit)
 	}
 
 	return Number(parseFloat(num).toFixed(digit));
+}
+
+
+function generateUID() {
+    return Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
 }

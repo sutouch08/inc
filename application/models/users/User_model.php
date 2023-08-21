@@ -52,8 +52,10 @@ class User_model extends CI_Model
 		$this->db
 		->select('u.*, u.name AS display_name, p.name AS profile_name')
 		->select('g.name AS group_name')
+		->select('t.name AS team_name')
 		->from('user AS u')
 		->join('user_group AS g', 'u.group_id = g.id', 'left')
+		->join('sale_team AS t', 'u.team_id = t.id', 'left')
 		->join('profile AS p', 'u.id_profile = p.id', 'left');
 
     $rs = $this->db->where('u.id', $id)->get();
@@ -70,6 +72,7 @@ class User_model extends CI_Model
   public function get_user_by_uid($uid)
   {
     $rs = $this->db->where('uid', $uid)->get($this->tb);
+
     if($rs->num_rows() === 1)
     {
       return $rs->row();
@@ -84,8 +87,10 @@ class User_model extends CI_Model
 		$this->db
 		->select('u.*, u.name AS display_name, p.name AS profile_name')
 		->select('g.name AS group_name')
+		->select('t.name AS team_name')
 		->from('user AS u')
 		->join('user_group AS g', 'u.group_id = g.id', 'left')
+		->join('sale_team AS t', 'u.team_id = t.id', 'left')
 		->join('profile AS p', 'u.id_profile = p.id', 'left');
 
     $rs = $this->db->where('u.uname', $uname)->get();
@@ -108,8 +113,20 @@ class User_model extends CI_Model
       return $rs->row()->name;
     }
 
-    return "";
+    return NULL;
   }
+
+	public function get_uname($id)
+	{
+		$rs = $this->db->where('id', $id)->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row()->uname;
+		}
+
+		return NULL;
+	}
 
 
 
@@ -138,10 +155,9 @@ class User_model extends CI_Model
 		return NULL;
 	}
 
-
-	public function get_all_batch_no()
+	public function get_all_group()
 	{
-		$rs = $this->db->distinct()->select('batch_no')->where('batch_no IS NOT NULL', NULL, FALSE)->get($this->tb);
+		$rs = $this->db->get('user_group');
 
 		if($rs->num_rows() > 0)
 		{
@@ -157,20 +173,43 @@ class User_model extends CI_Model
 	{
 		$this->db
 		->select('u.*, u.name AS display_name, p.name AS profile_name')
-		->select('g.name AS group_name')
+		->select('g.name AS group_name, t.name AS team_name')
 		->from('user AS u')
 		->join('user_group AS g', 'u.group_id = g.id', 'left')
+		->join('sale_team AS t', 'u.team_id = t.id', 'left')
 		->join('profile AS p', 'u.id_profile = p.id', 'left')
     ->where('id_profile >', 0, FALSE);
 
 		if( ! empty($ds['uname']))
 		{
-			$this->db->like('u.uname', $ds['uname']);
+			$this->db->group_start()->like('u.uname', $ds['uname'])->or_like('u.name', $ds['uname'])->group_end();
 		}
 
-		if( ! empty($ds['dname']))
+		if( ! empty($ds['group_id']) && $ds['group_id'] != 'all')
 		{
-			$this->db->like('u.name', $ds['dname']);
+			$this->db->where('u.group_id', $ds['group_id']);
+		}
+
+		if( ! empty($ds['sale_id']) && $ds['sale_id'] != 'all')
+		{
+			$this->db->where('sale_id', $ds['sale_id']);
+		}
+
+		if( ! empty($ds['emp_id']) && $ds['emp_id'] != 'all')
+		{
+			if($ds['emp_id'] == "null")
+			{
+				$this->db->where('emp_id IS NULL', NULL, FALSE);
+			}
+			else
+			{
+				$this->db->where('emp_id', $ds['emp_id']);
+			}
+		}
+
+		if( ! empty($ds['team_id']) && $ds['team_id'] != 'all')
+		{
+			$this->db->where('u.team_id', $ds['team_id']);
 		}
 
 		if(isset($ds['profile_id']) && $ds['profile_id'] != 'all')
@@ -196,33 +235,51 @@ class User_model extends CI_Model
 
   public function count_rows(array $ds = array())
   {
-		$this->db
-		->from('user AS u')
-		->join('user_group AS g', 'u.group_id = g.id', 'left')
-		->join('profile AS p', 'u.id_profile = p.id', 'left')
-    ->where('id_profile >', 0, FALSE);
+		$this->db->where('id_profile >', 0, FALSE);
 
 		if( ! empty($ds['uname']))
 		{
-			$this->db->like('u.uname', $ds['uname']);
+			$this->db->group_start()->like('u.uname', $ds['uname'])->or_like('u.name', $ds['uname'])->group_end();
 		}
 
-		if( ! empty($ds['dname']))
+		if( ! empty($ds['group_id']) && $ds['group_id'] != 'all')
 		{
-			$this->db->like('u.name', $ds['dname']);
+			$this->db->where('group_id', $ds['group_id']);
+		}
+
+		if( ! empty($ds['sale_id']) && $ds['sale_id'] != 'all')
+		{
+			$this->db->where('sale_id', $ds['sale_id']);
+		}
+
+		if( ! empty($ds['emp_id']) && $ds['emp_id'] != 'all')
+		{
+			if($ds['emp_id'] == "null")
+			{
+				$this->db->where('emp_id IS NULL', NULL, FALSE);
+			}
+			else
+			{
+				$this->db->where('emp_id', $ds['emp_id']);
+			}
+		}
+
+		if( ! empty($ds['team_id']) && $ds['team_id'] != 'all')
+		{
+			$this->db->where('team_id', $ds['team_id']);
 		}
 
 		if(isset($ds['profile_id']) && $ds['profile_id'] != 'all')
 		{
-			$this->db->where('u.id_profile', $ds['profile_id']);
+			$this->db->where('id_profile', $ds['profile_id']);
 		}
 
 		if(isset($ds['active']) && $ds['active'] != 'all')
 		{
-			$this->db->where('u.active', $ds['active']);
+			$this->db->where('active', $ds['active']);
 		}
 
-    return $this->db->count_all_results();
+    return $this->db->count_all_results($this->tb);
   }
 
 
@@ -335,13 +392,19 @@ class User_model extends CI_Model
 
 	public function has_transection($id)
 	{
-		$so = $this->db->where('user_id', $id)->or_where('upd_user_id', $id)->count_all_results('orders');
 		$sq = $this->db->where('user_id', $id)->or_where('upd_user_id', $id)->count_all_results('quotation');
-		$apv = $this->db->where('user_id', $id)->count_all_results('approver');
+		$so = 0; //$this->db->where('user_id', $id)->or_where('upd_user_id', $id)->count_all_results('orders');
+		$apv = 0; //$this->db->where('user_id', $id)->count_all_results('approver');
 
 		$total = $so + $sq + $apv;
 
 		return $total > 0 ? TRUE : FALSE;
+	}
+
+
+	public function add_logs(array $ds = array())
+	{
+		return $this->db->insert('access_logs', $ds);
 	}
 
 } //---- End class

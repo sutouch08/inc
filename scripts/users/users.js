@@ -35,10 +35,9 @@ function saveAdd() {
 	validUserName();
 	validDisplayName();
 	validProfile();
-	validCustomer();
 	validPWD();
 
-	if( !validUname || !validDname || !validCust || !validPm || !validPwd ) {
+	if( !validUname || !validDname || !validPm || !validPwd ) {
 		return false;
 	}
 
@@ -46,61 +45,13 @@ function saveAdd() {
 	const dname = $('#dname').val();
 	const sale_id = $('#sale_id').val();
 	const emp_id = $('#emp_id').val();
-	const team_id = $('#team_id').val();
-	const quota_no = $('#quota_no').val();
-	const is_customer = $('#is_customer').val();
-	const customer_code = $('#customer_code').val();
-	const channels = $('#channels').val();
+  const team_id = $('#team_id').val();
+  const group_id = $('#group_id').val();
+  const level = $('#group_id option:selected').data('level');
 	const pwd = $('#pwd').val();
 	const profile = $('#profile').val();
 	const active = $('#active').is(':checked') ? 1 : 0;
 	const force_reset = $('#force_reset').is(':checked') ? 1 : 0;
-  const warehouse = $('#warehouse').val();
-  let whList = [];
-
-  if(is_customer == 1) {
-    $('.chk-wh').each(function() {
-      if($(this).is(':checked')) {
-        whList.push({"id" : $(this).data('id'), "code" : $(this).val()});
-      }
-    });
-  }
-
-  if(is_customer == 1 && quota_no == "") {
-    set_error($('#quota_no'), $('#quota-no-error'), "Required");
-    $('#quota_no').focus();
-    return false;
-  }
-  else {
-    clear_error($('#quota_no'), $('#quota-no-error'));
-  }
-
-	if(is_customer == 1 && channels == "") {
-		set_error($('#channels'), $('#channels-error'), "Required");
-    $('#channels').focus();
-		return false;
-	}
-	else {
-		clear_error($('#channels'), $('#channels-error'));
-	}
-
-  if(is_customer == 1 && warehouse == "") {
-    set_error($('#warehouse'), $('#warehouse-error'), "Required");
-    $('#warehouse').focus();
-    return false;
-  }
-  else {
-    clear_error($('#warehouse'), $('#warehouse-error'));
-  }
-
-  if(is_customer == 1 && whList.length == 0) {
-    set_error($('#wh-table'), $('#warehouse-error'), "Required");
-    $('#wh-table').focus();
-    return false;
-  }
-  else {
-      clear_error($('#wh-table'), $('#warehouse-error'));
-  }
 
 	load_in();
 
@@ -112,13 +63,10 @@ function saveAdd() {
 			'uname' : uname,
 			'dname' : dname,
 			'sale_id' : sale_id,
-			'team_id' : team_id,
-			'quota_no' : quota_no,
-			'is_customer' : is_customer,
-			'customer_code' : customer_code,
-			'channels' : channels,
-      'warehouse' : warehouse,
-      'warehouse_list' : JSON.stringify(whList),
+      'emp_id' : emp_id,
+      'group_id' : group_id,
+      'team_id' : team_id,
+      'level' : level,
 			'pwd' : pwd,
 			'profile' : profile,
 			'active' : active,
@@ -165,9 +113,8 @@ function saveAdd() {
 function update() {
 	validDisplayName();
 	validProfile();
-	validCustomer();
 
-	if( !validDname || !validCust || !validPm ) {
+	if( !validDname || !validPm ) {
 		return false;
 	}
 
@@ -176,60 +123,11 @@ function update() {
 	const dname = $('#dname').val();
 	const sale_id = $('#sale_id').val();
 	const emp_id = $('#emp_id').val();
-	const team_id = $('#team_id').val();
-	const quota_no = $('#quota_no').val();
-	const is_customer = $('#is_customer').val();
-	const customer_code = $('#customer_code').val();
-	const channels = $('#channels').val();
+  const group_id = $('#group_id').val();
+  const team_id = $('#team_id').val();
+  const level = $('#group_id option:selected').data('level');
 	const profile = $('#profile').val();
 	const active = $('#active').is(':checked') ? 1 : 0;
-  const warehouse = $('#warehouse').val();
-
-  let whList = [];
-
-  if(is_customer == 1) {
-    $('.chk-wh').each(function() {
-      if($(this).is(':checked')) {
-        whList.push({"id" : $(this).data('id'), "code" : $(this).val()});
-      }
-    });
-  }
-
-  if(is_customer == 1 && quota_no == "") {
-    set_error($('#quota_no'), $('#quota-no-error'), "Required");
-    $('#quota_no').focus();
-    return false;
-  }
-  else {
-    clear_error($('#quota_no'), $('#quota-no-error'));
-  }
-
-	if(is_customer == 1 && channels == "") {
-		set_error($('#channels'), $('#channels-error'), "Required");
-    $('#channels').focus();
-		return false;
-	}
-	else {
-		clear_error($('#channels'), $('#channels-error'));
-	}
-
-  if(is_customer == 1 && warehouse == "") {
-    set_error($('#warehouse'), $('#warehouse-error'), "Required");
-    $('#warehouse').focus();
-    return false;
-  }
-  else {
-    clear_error($('#warehouse'), $('#warehouse-error'));
-  }
-
-  if(is_customer == 1 && whList.length == 0) {
-    set_error($('#wh-table'), $('#warehouse-error'), "Required");
-    $('#wh-table').focus();
-    return false;
-  }
-  else {
-      clear_error($('#wh-table'), $('#warehouse-error'));
-  }
 
 	load_in();
 
@@ -243,13 +141,9 @@ function update() {
 			'dname' : dname,
 			'sale_id' : sale_id,
 			'emp_id' : emp_id,
-			'team_id' : team_id,
-			'quota_no' : quota_no,
-			'is_customer' : is_customer,
-			'customer_code' : customer_code,
-			'channels' : channels,
-      'warehouse' : warehouse,
-      'warehouse_list' : JSON.stringify(whList),
+			'group_id' : group_id,
+      'team_id' : team_id,
+      'level' : level,
 			'profile' : profile,
 			'active' : active
 		},

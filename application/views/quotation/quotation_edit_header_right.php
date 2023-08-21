@@ -34,7 +34,7 @@
 			</div>
 		</div>
 
-		<div class="form-group hide">
+		<div class="form-group">
 			<label class="col-lg-8-harf col-md-8 col-sm-7 col-xs-12 control-label no-padding-right">Posting Date</label>
 			<div class="col-lg-3-harf col-md-4 col-sm-5 col-xs-12">
 				<span class="input-icon input-icon-right">
@@ -43,58 +43,21 @@
 				</span>
 			</div>
 		</div>
-
-
+		
 		<div class="form-group">
-      <label class="col-lg-7 col-md-6 col-sm-6 col-xs-12 control-label no-padding-right">CEO</label>
-      <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
-				<select class="form-control input-sm" id="dimCode1" name="dimCode1" >
-					<option value="">Please Select</option>
-					<?php echo select_cost_center(1, $order->dimCode1); ?>
-				</select>
+      <label class="col-lg-7 col-md-8 col-sm-7 col-xs-12 control-label no-padding-right">Ship To</label>
+      <div class="col-lg-5 col-md-4 col-sm-5 col-xs-12">
+        <select class="form-control input-sm" id="shipToCode" onchange="get_address_ship_to()">
+					<?php echo select_ship_to_code($order->CardCode, $order->ShipToCode); ?>
+        </select>
       </div>
     </div>
-
-		<div class="form-group">
-      <label class="col-lg-7 col-md-6 col-sm-6 col-xs-12 control-label no-padding-right">COO/CFO</label>
-      <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
-				<select class="form-control input-sm" id="dimCode2" name="dimCode2" >
-					<option value="">Please Select</option>
-					<?php echo select_cost_center(2, $order->dimCode2); ?>
-				</select>
+    <div class="form-group">
+      <label class="col-lg-2 col-md-2 control-label no-padding-right hidden-sm"></label>
+      <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12">
+        <textarea id="ShipTo" class="autosize autosize-transition form-control"><?php echo $order->Address2; ?></textarea>
       </div>
     </div>
-
-		<div class="form-group">
-      <label class="col-lg-7 col-md-6 col-sm-6 col-xs-12 control-label no-padding-right">สายงานขายและการตลาด</label>
-      <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
-				<select class="form-control input-sm" id="dimCode3" name="dimCode3" >
-					<option value="">Please Select</option>
-					<?php echo select_cost_center(3, $order->dimCode3); ?>
-				</select>
-      </div>
-    </div>
-
-		<div class="form-group">
-      <label class="col-lg-7 col-md-6 col-sm-6 col-xs-12 control-label no-padding-right">ฝ่าย</label>
-      <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
-				<select class="form-control input-sm" id="dimCode4" name="dimCode4" >
-					<option value="">Please Select</option>
-					<?php echo select_cost_center(4, $order->dimCode4); ?>
-				</select>
-      </div>
-    </div>
-
-		<div class="form-group">
-      <label class="col-lg-7 col-md-6 col-sm-6 col-xs-12 control-label no-padding-right">แผนก</label>
-      <div class="col-lg-5 col-md-6 col-sm-6 col-xs-12">
-				<select class="form-control input-sm" id="dimCode5" name="dimCode5" >
-					<option value="">Please Select</option>
-					<?php echo select_cost_center(5, $order->dimCode5); ?>
-				</select>
-      </div>
-    </div>
-
 	</div>
 
 </div>

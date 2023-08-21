@@ -8,7 +8,7 @@
     <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 padding-5">
     	<p class="pull-right top-p">
 <?php if($this->pm->can_add) : ?>
-			<button type="button" class="btn btn-xs btn-success" onclick="addNew()"><i class="fa fa-plus"></i> เพิ่มใหม่</button>
+			<button type="button" class="btn btn-sm btn-success" onclick="addNew()"><i class="fa fa-plus"></i> เพิ่มใหม่</button>
 <?php endif; ?>
       </p>
     </div>
@@ -16,17 +16,22 @@
 <hr class="padding-5"/>
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
 <div class="row">
-  <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+  <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
     <label>Web No.</label>
     <input type="text" class="width-100 search-box" name="code"  value="<?php echo $code; ?>" />
   </div>
 
-	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 		<label>Customer</label>
 		<input type="text" class="width-100 search-box" name="customer" value="<?php echo $customer; ?>" />
 	</div>
 
-	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>SQ No</label>
+		<input type="text" class="width-100 search-box" name="sqNo" value="<?php echo $sqNo; ?>" />
+	</div>
+
+	<div class="col-lg-2-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 		<label>User</label>
     <select class="width-100 filter" name="user_id" id="user_id">
 			<option value="all">ทั้งหมด</option>
@@ -34,43 +39,46 @@
 		</select>
 	</div>
 
-	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
-    <label>Channels</label>
-		<select class="width-100 filter" name="channels">
+	<div class="col-lg-2-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>Owner</label>
+		<select class="width-100 filter" name="emp_id" id="emp_id">
 			<option value="all">ทั้งหมด</option>
-			<?php echo select_channels($channels); ?>
+			<?php echo select_employee($emp_id); ?>
 		</select>
-  </div>
+	</div>
 
-	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
-    <label>Payment</label>
-		<select class="width-100 filter" name="payment">
-			<option value="all">ทั้งหมด</option>
-			<?php echo select_payment_term($payment); ?>
-		</select>
-  </div>
-
-	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-2-harf col-md-2 col-sm-2 col-xs-6 padding-5">
     <label>Sale Employee</label>
 		<select class="width-100 filter" name="sale_id" id="sale_id">
 			<option value="all">ทั้งหมด</option>
-			<?php echo select_sale($sale_id); ?>
+			<?php echo select_saleman($sale_id); ?>
 		</select>
   </div>
 
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>Review</label>
+		<select class="width-100 filter" name="review">
+			<option value="all">ทั้งหมด</option>
+			<option value="P" <?php echo is_selected('P', $review); ?>>Pending</option>
+			<option value="A" <?php echo is_selected('A', $review); ?>>Confirmed</option>
+			<option value="R" <?php echo is_selected('R', $review); ?>>Rejected</option>
+			<option value="S" <?php echo is_selected('S', $review); ?>>System</option>
+		</select>
+	</div>
 
-	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5 hide">
+
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 		<label>Approval</label>
 		<select class="width-100 filter" name="approval">
 			<option value="all">ทั้งหมด</option>
 			<option value="P" <?php echo is_selected('P', $approval); ?>>Pending</option>
 			<option value="A" <?php echo is_selected('A', $approval); ?>>Approved</option>
 			<option value="R" <?php echo is_selected('R', $approval); ?>>Rejected</option>
-			<option value="S" <?php echo is_selected('S', $approval); ?>>Approvaless</option>
+			<option value="S" <?php echo is_selected('S', $approval); ?>>System</option>
 		</select>
 	</div>
 
-	<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 		<label>สถานะ</label>
 		<select class="width-100 filter" name="status">
 			<option value="all">ทั้งหมด</option>
@@ -82,7 +90,7 @@
 		</select>
 	</div>
 
-	<div class="col-lg-2 col-md-3 col-sm-3 col-xs-6 padding-5">
+	<div class="col-lg-2-harf col-md-3 col-sm-3 col-xs-6 padding-5">
 		<label>Date</label>
 		<div class="input-daterange input-group width-100">
 			<input type="text" class="width-50 text-center from-date" name="from_date" id="fromDate" value="<?php echo $from_date; ?>" />
@@ -91,14 +99,7 @@
 	</div>
 
 	<div class="divider-hidden visible-xs"></div>
-		<div class="divider-hidden visible-xs"></div>
-
-	<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
-		<label class="display-block not-show hidden-xs">onlyMe</label>
-		<button type="submit"
-		class="btn btn-xs btn-block <?php echo ($onlyMe == 1 ? "btn-info" : ''); ?>"
-		onclick="toggleOnlyMe()"> &nbsp; Only Me</button>
-	</div>
+	<div class="divider-hidden visible-xs"></div>
 
 	<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
 		<label class="display-block not-show hidden-xs">buton</label>
@@ -110,41 +111,28 @@
 	</div>
 </div>
 
-<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 margin-top-15 text-center">
-	<label class="margin-left-15">
-		<input type="checkbox" class="ace" onchange="toggleChannels($(this))" <?php echo is_checked($chk_channels, '1'); ?> />
-		<span class="lbl">Channels</span>
-		<input type="hidden" name="chk_channels" id="chk-channels" value="<?php echo $chk_channels; ?>"/>
-	</label>
-	<label class="margin-left-15">
-		<input type="checkbox" class="ace" onchange="togglePayment($(this))" <?php echo is_checked($chk_payment, '1'); ?>/>
-		<span class="lbl">Payment</span>
-		<input type="hidden" name="chk_payment" id="chk-payment" value="<?php echo $chk_payment; ?>"/>
-	</label>
-</div>
-
 <input type="hidden" id="onlyMe" name="onlyMe" value="<?php echo $onlyMe; ?>" />
+<input type="hidden" name="search" value="1" />
 </form>
 <hr class="padding-5 margin-top-10"/>
 <?php echo $this->pagination->create_links(); ?>
 
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive" id="double-scroll">
-		<table class="table table-striped table-hover dataTable border-1" style="min-width:960px; border-collapse:inherit;">
+		<table class="table table-striped table-hover dataTable border-1" style="margin-bottom:10px; min-width:1120px; border-collapse:inherit;">
 			<thead>
 				<tr style="font-size:10px;">
-					<th class="fix-width-60 middle text-center" style="width:50px;">#</th>
+					<th class="fix-width-120 middle"></th>
+					<th class="fix-width-60 middle text-center">#</th>
 					<th class="fix-width-80 middle">Date</th>
-					<th class="fix-width-120 middle">Web No.</th>
+					<th class="fix-width-100 middle">Web No.</th>
 					<th class="fix-width-100 middle">Customer code</th>
 					<th class="min-width-200 middle">Customer name</th>
 					<th class="fix-width-100 middle text-right">Amount</th>
-					<th class="fix-width-100 middle channels <?php echo ($chk_channels == 1 ? '' : 'hide'); ?>">Channels</th>
-					<th class="fix-width-80 middle payment <?php echo ($chk_payment == 1 ? '' : 'hide'); ?>">Payment</th>
+					<th class="fix-width-80 middle text-center">Review</th>
 					<th class="fix-width-80 middle text-center">Approval</th>
 					<th class="fix-width-80 middle text-center">Status</th>
 					<th class="fix-width-100 middle text-center">User</th>
-					<th class="fix-width-120 middle"></th>
 				</tr>
 			</thead>
 			<tbody style="font-size:12px;">
@@ -152,17 +140,37 @@
 			<?php $no = $this->uri->segment($this->segment) + 1; ?>
 			<?php foreach($data as $rs) : ?>
 				<tr>
+					<td class="middle">
+						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('<?php echo $rs->code; ?>')"><i class="fa fa-eye"></i></button>
+					<?php if($this->pm->can_edit && ($rs->Status == 0 OR $rs->Status == -1 OR $rs->Status == 3)) : ?>
+						<button type="button" class="btn btn-mini btn-warning" onclick="goEdit('<?php echo $rs->code; ?>')"><i class="fa fa-pencil"></i></button>
+					<?php endif; ?>
+					<?php if($this->pm->can_delete && $rs->Status != 1 && $rs->Status != 2) : ?>
+						<button type="button" class="btn btn-mini btn-danger" onclick="cancleOrder('<?php echo $rs->code; ?>')"><i class="fa fa-trash"></i></button>
+					<?php endif; ?>
+					</td>
 					<td class="middle text-center no"><?php echo $no; ?></td>
-					<td class="middle"><?php echo thai_date($rs->DocDate, FALSE, '.'); ?></td>
+					<td class="middle"><?php echo thai_date($rs->DocDate, FALSE); ?></td>
 					<td class="middle"><?php echo $rs->code; ?></td>
 					<td class="middle"><?php echo $rs->CardCode; ?></td>
-					<td class="moddle"><?php echo $rs->CardName; ?></td>
+					<td class="middle"><?php echo $rs->CardName; ?></td>
 					<td class="middle text-right"><?php echo number($rs->DocTotal, 2); ?></td>
-					<td class="middle channels <?php echo ($chk_channels == 1 ? '' : 'hide'); ?>"><?php echo $rs->channels_name; ?></td>
-					<td class="middle payment <?php echo ($chk_payment == 1 ? '' : 'hide'); ?>"><?php echo $rs->payment_name; ?></td>
+					<td class="middle text-center">
+						<?php if($rs->Status != -1) : ?>
+							<?php if($rs->Review == 'A') : ?>
+								<span class="green">Confirmed</span>
+							<?php elseif($rs->Review == 'R') : ?>
+								<span class="red">Rejected</span>
+							<?php elseif($rs->Review == 'S') : ?>
+								<span class="green">System</span>
+							<?php else : ?>
+								<span class="orange">Pending</span>
+							<?php endif; ?>
+						<?php endif; ?>
+					</td>
 					<td class="middle text-center">
 						<?php if($rs->Status == 0 OR $rs->Status == 1) : ?>
-							<?php if($rs->must_approve == 0) : ?>
+							<?php if($rs->must_approve == 0 && $rs->Review != 'P' && $rs->Review != 'R') : ?>
 								<span class="green">System</span>
 							<?php else : ?>
 								<?php if($rs->Approved == 'P') : ?>
@@ -178,6 +186,8 @@
 					<td class="middle text-center">
 						<?php if($rs->Status == -1) : ?>
 							<span class="purple">Draft</span>
+						<?php elseif($rs->Status == 0) : ?>
+							<span class="orange">Pending</span>
 						<?php elseif($rs->Status == 1) : ?>
 							<span class="green">Success</span>
 						<?php elseif($rs->Status == 2) : ?>
@@ -187,15 +197,7 @@
 						<?php endif; ?>
 					</td>
 					<td class="middle text-center"><?php echo $rs->uname; ?></td>
-					<td class="middle text-right">
-						<button type="button" class="btn btn-mini btn-info" onclick="viewDetail('<?php echo $rs->code; ?>')"><i class="fa fa-eye"></i></button>
-					<?php if($this->pm->can_edit && ($rs->Status == 0 OR $rs->Status == -1 OR $rs->Status == 3)) : ?>
-						<button type="button" class="btn btn-mini btn-warning" onclick="edit('<?php echo $rs->code; ?>')"><i class="fa fa-pencil"></i></button>
-					<?php endif; ?>
-					<?php if($this->pm->can_delete && $rs->Status != 1 && $rs->Status != 2) : ?>
-						<button type="button" class="btn btn-mini btn-danger" onclick="cancleOrder('<?php echo $rs->code; ?>')"><i class="fa fa-trash"></i></button>
-					<?php endif; ?>
-					</td>
+
 				</tr>
 				<?php $no++; ?>
 			<?php endforeach; ?>
@@ -264,6 +266,8 @@ function togglePayment(el) {
 
 	$('#user_id').select2();
 	$('#sale_id').select2();
+	$('#emp_id').select2();
+
 </script>
 <script src="<?php echo base_url(); ?>scripts/quotation/quotation.js?v=<?php echo date('Ymd'); ?>"></script>
 

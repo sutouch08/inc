@@ -19,6 +19,7 @@ public $title				= "";
 public $title_size 		= "h4";
 public $content_border = 2;
 public $pattern			= array();
+public $show_footer = true;
 public $footer			= true;
 public $custom_header = '';
 
@@ -42,11 +43,12 @@ public function config(array $data)
 	{
 		$this->$key = $val;
 	}
-	if(!$this->footer)
+	if( ! $this->footer)
 	{
 		$this->row += $this->footer_row;
 		$this->footer_row = 0;
 	}
+
 	$this->row -= ($this->sub_total_row + $this->ex_row + $this->header_rows);
 	$this->total_page = ceil($this->total_row/$this->row);
 	return true;
@@ -93,7 +95,7 @@ public function doc_header($pageTitle = 'print pages')
 	$header .= "	<div style='width:100%;  text-align:center; margin-top:15px; font-size:12px;'><span><strong>Loading....</strong></span></div>";
 	$header .= "	</div></div></div></div></div> "; // modal fade;
 	$header .= "	<div class='hidden-print' style='margin-top:10px; padding-bottom:10px; padding-right:5mm; width:200mm; margin-left:auto; margin-right:auto; text-align:right'>";
-	
+
 	$header .= "	<button class='btn btn-primary' onclick='print()'><i class='fa fa-print'></i> &nbsp; พิมพ์</button>";
 	$header .= "	</div><div style='width:100%'>";
 

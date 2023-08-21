@@ -37,10 +37,10 @@
 		<table class="table table-striped table-bordered">
 			<thead>
 				<tr>
+					<th class="fix-width-150"></th>
 					<th class="fix-width-80 middle text-center">#</th>
 					<th class="min-width-350 middle">Profile Name</th>
 					<th class="fix-width-100 middle text-center">Members</th>
-					<th class="fix-width-150"></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -49,21 +49,21 @@
 
 				<?php foreach($data as $rs) : ?>
 					<tr>
+						<td class="middle">
+							<button type="button" class="btn btn-mini btn-info" onclick="viewPermission(<?php echo $rs->id; ?>)"><i class="fa fa-eye"></i></button>
+							<?php if($this->pm->can_edit OR $this->pm->can_add) : ?>
+								<button type="button" class="btn btn-mini btn-purple" onclick="editPermission(<?php echo $rs->id; ?>)"><i class="fa fa-lock"></i></button>
+							<?php endif; ?>
+							<?php if($this->pm->can_edit) : ?>
+								<button type="button" class="btn btn-mini btn-warning" onclick="editProfile(<?php echo $rs->id; ?>)"><i class="fa fa-pencil"></i></button>
+							<?php endif; ?>
+							<?php if($this->pm->can_delete) : ?>
+								<button type="button" class="btn btn-mini btn-danger" onclick="confirmDelete(<?php echo $rs->id; ?>, '<?php echo $rs->name; ?>')"><i class="fa fa-trash"></i></button>
+							<?php endif; ?>
+						</td>
 						<td class="middle text-center"><?php echo $no; ?></td>
 						<td class="middle"><?php echo $rs->name; ?></td>
 						<td class="middle text-center"><?php echo number($rs->member); ?></td>
-						<td class="text-right">
-							<button type="button" class="btn btn-mini btn-info" onclick="viewPermission(<?php echo $rs->id; ?>)"><i class="fa fa-eye"></i></button>
-						<?php if($this->pm->can_edit OR $this->pm->can_add) : ?>
-							<button type="button" class="btn btn-mini btn-purple" onclick="editPermission(<?php echo $rs->id; ?>)"><i class="fa fa-lock"></i></button>
-						<?php endif; ?>
-						<?php if($this->pm->can_edit) : ?>
-							<button type="button" class="btn btn-mini btn-warning" onclick="editProfile(<?php echo $rs->id; ?>)"><i class="fa fa-pencil"></i></button>
-						<?php endif; ?>
-						<?php if($this->pm->can_delete) : ?>
-							<button type="button" class="btn btn-mini btn-danger" onclick="confirmDelete(<?php echo $rs->id; ?>, '<?php echo $rs->name; ?>')"><i class="fa fa-trash"></i></button>
-						<?php endif; ?>
-						</td>
 					</tr>
 					<?php $no++; ?>
 				<?php endforeach; ?>

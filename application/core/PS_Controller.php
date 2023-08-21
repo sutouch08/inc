@@ -46,14 +46,18 @@ class PS_Controller extends CI_Controller
 		{
 			redirect(base_url().'change_password/f');
 		}
-		
+
+
     //--- get permission for user
     $this->pm = get_permission($this->menu_code, $uid, $this->_user->id_profile);
 
-		if($this->pm->can_view == 0)
-		{
-			$this->deny_page();
-		}
+    if($this->pm->can_view == 0)
+    {
+      $this->load->view('deny_page');
+    }
+    
+    $this->ms = $this->load->database('ms', TRUE);
+    $this->mc = $this->load->database('mc', TRUE);
 
   }
 
