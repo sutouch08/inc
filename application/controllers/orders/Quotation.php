@@ -323,9 +323,9 @@ class Quotation extends PS_Controller
 						$totalAmount += $rs->LineTotal;
 						$totalVat += $rs->totalVatAmount;
 						$rs->stdPrice = ! empty($pd) ? $pd->price : 0.00;
-						$rs->OnHand = ! empty($pd) ? number($pd->OnHand) : 0;
-						$rs->Commited = ! empty($pd) ? number($pd->IsCommited) : 0;
-						$rs->OnOrder = ! empty($pd) ? number($pd->OnOrder) : 0;
+						$rs->OnHand = ! empty($pd) ? $pd->OnHand : 0;
+						$rs->Commited = ! empty($pd) ? $pd->IsCommited : 0;
+						$rs->OnOrder = ! empty($pd) ? $pd->OnOrder : 0;
 					}
 				}
 
@@ -1125,7 +1125,8 @@ class Quotation extends PS_Controller
 	{
 		$this->load->model('masters/employee_model');
 		$this->load->model('masters/sales_person_model');
-		//$this->load->library('pdf_printer');
+		$this->load->model('users/signature_model');
+
 		$this->load->library('printer');
 		$doc = $this->quotation_model->get($code);
 		$details = $this->quotation_model->get_details($code);
@@ -1133,7 +1134,23 @@ class Quotation extends PS_Controller
 		$customer = $this->customers_model->get($doc->CardCode);
 		$sale = $this->sales_person_model->get($doc->SlpCode);
 		//$payment = $this->payment_term_model->get($doc->Payment);
-		$doc->OwnerName = empty($doc->OwnerCode) ? "" : $this->employee_model->get_name($doc->OwnerCode);
+		// $doc->OwnerName = empty($doc->OwnerCode) ? "" : $this->employee_model->get_name($doc->OwnerCode);
+		$owner = empty($doc->OwnerCode) ? NULL : $this->employee_model->get($doc->OwnerCode);
+		if( ! empty($owner))
+		{
+			$owner->signature = $this->signature_model->get_signature($owner->id);
+		}
+
+		$user = $this->user_model->get_by_uname($doc->Approver);
+		if( ! empty($user))
+		{
+			$doc->approver_signature = $this->signature_model->get_signature($user->emp_id);
+		}
+
+		$approv_emp = empty($user) ? NULL : $user->emp_id;
+
+		$doc->approve_emp_id = $approv_emp;
+
 		//$doc->term = empty($payment) ? 0 : $payment->term;
 		$company = new stdClass();
 		$company->name = getConfig('COMPANY_FULL_NAME');
@@ -1152,6 +1169,7 @@ class Quotation extends PS_Controller
 			'details' => $details,
 			'customer' => $customer,
 			'sale' => $sale,
+			'owner' => $owner,
 			'company' => $company
 		);
 

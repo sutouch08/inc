@@ -24,9 +24,15 @@
     }
   }
 
+  .signature-image {
+    max-width: 125px;
+    max-height: 35px;
+  }
+
 </style>
 <?php
 $this->load->helper('print');
+$this->load->helper('image');
 $footer_address = FALSE; //--- แสดงที่อยู่ท้ายแผ่นหรือไม่
 $row_per_page = 21; //--- จำนวนบรรทัด/หน้า
 $total_row 	= 0;
@@ -103,27 +109,22 @@ $pattern = array(
 
 $this->printer->set_pattern($pattern);
 
-
 //*******************************  กำหนดช่องเซ็นของ footer *******************************//
+$ownerName = empty($owner) ? NULL : $owner->firstName.' '.$owner->lastName;
+$issueBy = empty($owner) ? NULL : $owner->U_ISSUEDBY;
 $footer = "";
 $footer .="<div style='width:70mm; height:40mm; float:left; border-right:solid 1px #555555; padding:5px;'>";
-$footer .= '<table style="width:100%; margin-top:5px; font-size:10px;">
+$footer .= '<table style="width:100%; margin-top:5px; font-size:10px; table-layout:fixed;">
 							<tr><td colspan="2" class="text-center">ผู้เสนอราคา<br/>Issue By</td></tr>
 							<tr>
-                <td style="width:50%; text-align:center; height:10mm;"><img src="noimage.png" height="10mm;" style="border:solid 1px #ccc;"/></td>
-                <td style="width:50%; text-align:center; height:10mm;"><img src="noimage.png" height="10mm;" style="border:solid 1px #ccc;"/></td>
+                <td style="width:50%; text-align:center; height:10mm;">';
+$footer .= empty($owner->signature) ? '' : '<img class="signature-image" src="'.$owner->signature.'"/>';
+$footer .= '</td>
+                <td style="width:50%; text-align:center; height:10mm;">&nbsp;</td>
               </tr>
               <tr>
-                <td style="width:50%; text-align:center;">SUPPORT SALES</td>
-                <td style="width:50%; text-align:center;">'.$sale->name.'</td>
-              </tr>
-              <tr>
-                <td style="width:50%; text-align:center;">'.$doc->OwnerName.'</td>
-                <td style="width:50%; text-align:center;">'.$sale->position.'</td>
-              </tr>
-              <tr>
-                <td style="width:50%; text-align:center;">#tel</td>
-                <td style="width:50%; text-align:center;">'.$sale->phone.'</td>
+                <td style="width:50%; text-align:center; height:10mm; vertical-align:text-top;">'.$issueBy.'</td>
+                <td style="width:50%; text-align:center; height:10mm; vertical-align:text-top;">'.$sale->name.'.<br/>'.$sale->position.'<br/>'.$sale->phone.'</td>
               </tr>
 							<tr>
 								<td colspan="2" style="text-align:center;"><br/>Date ........../........../..........</td>
@@ -135,10 +136,11 @@ $footer .="<div style='width:69mm; height:40mm; float:left; border-right:solid 1
 $footer .= '<table style="width:100%; margin-top:5px; font-size:10px;">
 							<tr><td class="text-center" style="font-weight:smaller;">ITTHIRIT NICE CORPORATION PUBLIC COMPANY LIMITED<br/>Approve By</td></tr>
 							<tr>
-                <td style="text-align:center; height:10mm;"><img src="noimage.png" height="10mm;" style="border:solid 1px #ccc;"/></td>
-              </tr>
-              <tr>
-                <td><br/><br/><br/></td>
+                <td style="text-align:center; height:20mm; position:relative;">';
+$footer .=        '<div style="width:100%; text-align:center; position:absolute; top:0; left:0;">';
+$footer .= empty($doc->approve_emp_id) ? '' : (empty($doc->approver_signature) ? '' : "<img src='{$doc->approver_signature}' style='max-height:80px; max-width:245px;' />");
+$footer .=        '</div>
+                </td>
               </tr>
 							<tr>
 								<td style="text-align:center;"><br/>Date ........../........../..........</td>
@@ -148,12 +150,7 @@ $footer .="</div>";
 $footer .="<div style='width:50mm; height:40mm; float:left; padding:5px;'>";
 $footer .= '<table style="width:100%; margin-top:5px; font-size:10px;">
 							<tr><td class="text-center">อนุมิตัสั่งซื้อตามใบเสนอราคานี้<br/>Purchase approved with this quotation</td></tr>
-							<tr>
-                <td style="text-align:center; height:10mm;"><img src="noimage.png" height="10mm;" style="border:solid 1px #ccc;"/></td>
-              </tr>
-              <tr>
-                <td><br/><br/><br/></td>
-              </tr>
+              <tr><td style="text-align:center; height:20mm;">&nbsp;</td></tr>
               <tr>
 								<td style="text-align:center;"><br/>Date ........../........../..........</td>
 							</tr>
@@ -188,7 +185,7 @@ while($total_page > 0 )
 									<td style='width:140mm; font-size:10px; padding:0px 0px 0px 5px; text-align:center'>
                     <span class='display-block margin-bottom-10' style='font-size:16px;'><strong>{$company->name}</strong></span>
                     <span class='display-block margin-bottom-5'>{$company->address1} {$company->address2} {$company->postcode}</span>
-                    <span class='display-block margin-bottom-5'>TEL &nbsp;&nbsp; {$company->phone}&nbsp;&nbsp; FAX {$company->fax}&nbsp;&nbsp; TAX ID : {$company->taxId}</span>
+                    <span class='display-block margin-bottom-5'>TEL {$company->phone}&nbsp;&nbsp; FAX {$company->fax}&nbsp;&nbsp; TAX ID : {$company->taxId}</span>
                     <span class='display-block margin-bottom-5'>{$company->website} / FACEBOOK : {$company->facebook} / LINE@ : {$company->line}</span>
                   </td>
                   <td style='width:20mm; font-size:14; text-align:right; vertical-align:text-top;'>Page {$this->printer->current_page} of {$this->printer->total_page}</td>

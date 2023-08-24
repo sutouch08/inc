@@ -43,13 +43,13 @@ class Employee_model extends CI_Model
 	public function get($emp_id)
 	{
 		$rs = $this->ms
-		->select('empID AS id, firstName, lastName, middleName, Active AS active')
+		->select('empID AS id, firstName, lastName, middleName, Active AS active, attachment, U_ISSUEDBY')
 		->where('empID', $emp_id)
 		->get($this->tb);
 
 		if($rs->num_rows() === 1)
 		{
-			return $rs->result();
+			return $rs->row();
 		}
 
 		return NULL;

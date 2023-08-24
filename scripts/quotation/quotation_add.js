@@ -40,9 +40,7 @@ function saveAdd() {
 		}
 
 		if(mustApprove == 0) {
-			if(max_amount > 0) {
-				mustApprove = docTotal > max_amount ? 1 : 0;
-			}
+			mustApprove = docTotal >= max_amount ? 1 : 0;
 		}
 
 		var ds = {
@@ -319,9 +317,7 @@ function saveUpdate() {
 		}
 
 		if(mustApprove == 0) {
-			if(max_amount > 0) {
-				mustApprove = docTotal > max_amount ? 1 : 0;
-			}
+			mustApprove = docTotal > max_amount ? 1 : 0;			
 		}
 
 		var ds = {
