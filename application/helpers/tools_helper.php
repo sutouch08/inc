@@ -248,10 +248,10 @@ function add_vat($amount, $vat = NULL)
 	if( $vat != 0 )
 	{
 		$re_vat = $vat * 0.01;
-		return round(($amount * $re_vat) + $amount, 4);
+		return round(($amount * $re_vat) + $amount, 2);
 	}
 
-	return round($amount, 4);
+	return round($amount, 2);
 }
 
 

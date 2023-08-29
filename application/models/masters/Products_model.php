@@ -1,7 +1,8 @@
 <?php
 class Products_model extends CI_Model
 {
-
+  private $PriceList = 12;
+  private $CostList = 13;
   public function __construct()
   {
     parent::__construct();
@@ -11,7 +12,7 @@ class Products_model extends CI_Model
 	public function get($ItemCode, $priceList = 12)
   {
     $rs = $this->ms
-    ->select("P.ItemCode AS code, P.ItemName AS name, P.FrgnName AS description, P.UgpEntry, P.SUoMEntry AS uom_id")
+    ->select("P.ItemCode AS code, P.ItemName AS name, P.FrgnName AS description, P.UgpEntry, P.SUoMEntry AS uom_id, P.FirmCode")
 		->select("P.DfltWH AS dfWhsCode, P.OnHand, P.IsCommited, P.OnOrder")
     ->select("P.VatGourpSa AS vat_group")
     ->select("U.UomCode AS uom_code, U.UomName AS uom, P1.Price AS price")
@@ -248,7 +249,7 @@ class Products_model extends CI_Model
 		$rs = $this->ms
     ->select('Price AS cost')
     ->where('ItemCode', $code)
-    ->where('PriceList', $this->cost_list)
+    ->where('PriceList', $this->CostList)
     ->get('ITM1');
 
     if($rs->num_rows() === 1)
@@ -361,6 +362,25 @@ class Products_model extends CI_Model
     if($rs->num_rows() === 1)
     {
       return $rs->row()->ItemName;
+    }
+
+    return NULL;
+  }
+
+
+  public function getItemStock($ItemCode, $WhsCode = NULL)
+  {
+    $WhsCode = empty($WhsCode) ? getConfig('DEFAULT_WAREHOUSE') : $WhsCode;
+
+    $rs = $this->ms
+    ->select('ItemCode, WhsCode, OnHand, IsCommited, OnOrder')
+    ->where('ItemCode', $ItemCode)
+    ->where('WhsCode', $WhsCode)
+    ->get('OITW');
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
     }
 
     return NULL;

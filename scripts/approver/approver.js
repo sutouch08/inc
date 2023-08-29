@@ -20,7 +20,7 @@ function viewDetail(id) {
 
 function toggleAproveDoc(docType) {
 	if($('#approve-'+docType).is(':checked')) {
-		$('#review-'+docType).prop('checked', false);
+		//$('#review-'+docType).prop('checked', false);
 		$('#max-disc-'+docType).removeAttr('disabled').focus();
 		$('#max-amount-'+docType).removeAttr('disabled');
 	}
@@ -32,10 +32,10 @@ function toggleAproveDoc(docType) {
 
 
 function toggleReview(docType) {
-	if($('#review-'+docType).is(':checked')) {
-		$('#approve-'+docType).prop('checked', false);
-		toggleAproveDoc(docType);
-	}
+	// if($('#review-'+docType).is(':checked')) {
+	// 	$('#approve-'+docType).prop('checked', false);
+	// 	toggleAproveDoc(docType);
+	// }
 }
 
 
@@ -241,7 +241,7 @@ function update() {
 					title:'Success',
 					type:'success',
 					timer:1000
-				});				
+				});
 			}
 			else {
 				swal({

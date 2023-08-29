@@ -407,6 +407,19 @@ class User_model extends CI_Model
 		return $this->db->insert('access_logs', $ds);
 	}
 
+
+	public function docList()
+	{
+		$rs = $this->db->get('doc_type');
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
 } //---- End class
 
  ?>

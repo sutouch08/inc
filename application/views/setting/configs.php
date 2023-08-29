@@ -32,7 +32,7 @@ $system = $tab == 'system' ? 'active in' : '';
 		<ul id="myTab1" class="setting-tabs" style="margin-left:0px;">
 			<li class="li-block <?php echo $company; ?>" onclick="changeURL('company')"><a href="#company" data-toggle="tab">ข้อมูลบริษัท</a></li>
 		  <li class="li-block <?php echo $document; ?>" onclick="changeURL('document')"><a href="#document" data-toggle="tab">เลขที่เอกสาร</a></li>
-			<li class="li-block <?php echo $order; ?>" onclick="changeURL('order')"><a href="#order" data-toggle="tab">ออเดอร์</a></li>
+	<!--		<li class="li-block <?php echo $order; ?>" onclick="changeURL('order')"><a href="#order" data-toggle="tab">ออเดอร์</a></li> -->
 			<li class="li-block <?php echo $sap; ?>" onclick="changeURL('SAP')"><a href="#SAP" data-toggle="tab">ข้อมูล SAP</a></li>
 			<li class="li-block <?php echo $system; ?>" onclick="changeURL('system')"><a href="#system" data-toggle="tab">ระบบ</a></li>
 		</ul>
@@ -42,7 +42,7 @@ $system = $tab == 'system' ? 'active in' : '';
 		<ul id="myTab1" class="setting-tabs width-100" style="margin-left:0px;">
 			<li class="li-block inline border-1 margin-bottom-5 <?php echo $company; ?>" onclick="changeURL('company')"><a href="#company" data-toggle="tab">ข้อมูลบริษัท</a></li>
 		  <li class="li-block inline border-1 margin-bottom-5 <?php echo $document; ?>" onclick="changeURL('document')"><a href="#document" data-toggle="tab">เลขที่เอกสาร</a></li>
-			<li class="li-block inline border-1 margin-bottom-5 <?php echo $order; ?>" onclick="changeURL('order')"><a href="#order" data-toggle="tab">ออเดอร์</a></li>
+	<!--		<li class="li-block inline border-1 margin-bottom-5 <?php echo $order; ?>" onclick="changeURL('order')"><a href="#order" data-toggle="tab">ออเดอร์</a></li> -->
 			<li class="li-block inline border-1 margin-bottom-5 <?php echo $sap; ?>" onclick="changeURL('SAP')"><a href="#SAP" data-toggle="tab">ข้อมูล SAP</a></li>
 			<li class="li-block inline border-1 margin-bottom-5 <?php echo $system; ?>" onclick="changeURL('system')"><a href="#system" data-toggle="tab">ระบบ</a></li>
 		</ul>
@@ -61,11 +61,11 @@ $system = $tab == 'system' ? 'active in' : '';
 			<div class="tab-pane fade <?php echo $document; ?>" id="document">
 			<?php $this->load->view('setting/setting_document'); ?>
 			</div>
-
+<!--
 			<div class="tab-pane fade <?php echo $order; ?>" id="order">
-			<?php $this->load->view('setting/setting_order'); ?>
+			<?php //$this->load->view('setting/setting_order'); ?>
 			</div>
-
+-->
 			<div class="tab-pane fade <?php echo $sap; ?>" id="SAP">
 			<?php $this->load->view('setting/setting_sap'); ?>
 			</div>

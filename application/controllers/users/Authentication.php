@@ -44,7 +44,19 @@ class Authentication extends CI_Controller
 						'id_profile' => $rs->id_profile
 					);
 
-					$this->create_user_data($ds, $rem);
+					if( $this->create_user_data($ds, $rem))
+					{
+						$arr = array(
+							'user_id' => $rs->id,
+							'uname' => $rs->uname,
+							'docType' => NULL,
+							'docNum' => NULL,
+							'action' => 'login',
+							'ip_address' => $_SERVER['REMOTE_ADDR']
+						);
+
+						$this->user_model->add_logs($arr);
+					}
 				}
 			}
 			else
@@ -83,7 +95,11 @@ class Authentication extends CI_Controller
 
         $this->input->set_cookie($cookie);
       }
+
+			return TRUE;
     }
+
+		return FALSE;
   }
 
 

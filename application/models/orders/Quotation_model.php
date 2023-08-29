@@ -142,6 +142,11 @@ class Quotation_model extends CI_Model
 	}
 
 
+	public function close_details($code)
+	{
+		return $this->db->set('LineStatus', 'C')->where('quotation_code', $code)->update($this->td);
+	}
+
 	public function is_document_avalible($code, $uuid)
   {
     $rs = $this->db

@@ -1,5 +1,6 @@
 <div class="row">
 	<?php $statusName = "Unknow"; ?>
+
 	<?php
 	if($order->Status == -1)
 	{
@@ -8,6 +9,10 @@
 	elseif($order->Status == 2)
 	{
 		$statusName = 'Canceled';
+	}
+	elseif($order->Status == 3)
+	{
+		$statusName = "Failed";
 	}
 	else
 	{
@@ -70,18 +75,26 @@
 			</tr>
 			<tr>
 
-				<td class="bg-grey ">Phone No.</td>
-				<td class=""><?php echo $order->Phone; ?></td>
+				<td class="bg-grey ">Customer Reference</td>
+				<td class=""><?php echo $order->NumAtCard; ?></td>
 
 				<td class="bg-grey ">Status</td>
-				<td class=""><?php echo $statusName; ?></td>
+				<td class="">
+					<?php if($order->Status == 3) : ?>
+						<a haref="#" class="pointer red" onclick="showMessage('<?php echo $order->code; ?>')" class="red">Failed</a>						
+					<?php else : ?>
+					<?php echo $statusName; ?>
+					<?php endif; ?>
+				</td>
 
 			</tr>
 			<tr>
 				<td class=" bg-grey">Ship To (<?php echo $order->ShipToCode;?>)</td>
 				<td class=""><?php echo $order->Address2; ?></td>
-				<td class="bg-grey ">Original SQ No.</td>
-				<td class=""><?php echo $order->OriginalSQ; ?></td>
+				<td class="bg-grey ">Owner</td>
+				<td class=""><?php echo $owner; ?></td>
+				<!--<td class="bg-grey ">Original SQ No.</td>
+				<td class=""><?php echo $order->OriginalSQ; ?></td>-->
 			</tr>
 			<tr>
 				<td class="bg-grey ">Bill To (<?php echo $order->PayToCode; ?>)</td>

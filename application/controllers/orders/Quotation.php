@@ -23,6 +23,7 @@ class Quotation extends PS_Controller
 		$this->load->model('masters/payment_term_model');
 		$this->load->helper('discount');
 		$this->load->helper('order');
+		$this->load->helper('warehouse');
 
   }
 
@@ -72,7 +73,8 @@ class Quotation extends PS_Controller
 		$this->load->model('masters/employee_model');
 		$ds = array(
 			'sale_name' => $this->sales_person_model->get_name($this->_user->sale_id),
-			'owner_name' => $this->employee_model->get_name($this->_user->emp_id)
+			'owner_name' => $this->employee_model->get_name($this->_user->emp_id),
+			'whsCode' => getConfig('DEFAULT_WAREHOUSE')
 		);
 
     $this->load->view('quotation/quotation_add', $ds);
@@ -108,7 +110,9 @@ class Quotation extends PS_Controller
 						'code' => $code,
 						'CardCode' => $hd->CardCode,
 						'CardName' => $hd->CardName,
-						'ContactPerson' => $hd->ContactPerson,
+						'CntctCode' => get_null($hd->CntctCode),
+						'ContactPerson' => get_null($hd->ContactPerson),
+						'NumAtCard' => get_null($hd->NumAtCard),
 						'Phone' => trim($hd->Phone),
 						'PriceList' => get_null($customer->ListNum),
 						'SlpCode' => empty($hd->SlpCode) ? $customer->SlpCode : $hd->SlpCode,
@@ -173,6 +177,7 @@ class Quotation extends PS_Controller
 										'ItemCode' => $rs->ItemCode,
 										'ItemName' => $rs->Description,
 										'Description' => $pd->description,
+										'WhsCode' => empty($rs->whsCode) ? $pd->dfWhsCode : $rs->whsCode,
 										'Qty' => $rs->Quantity,
 										'UomCode' => $pd->uom_code,
 										'UomEntry' => $pd->uom_id,
@@ -323,9 +328,11 @@ class Quotation extends PS_Controller
 						$totalAmount += $rs->LineTotal;
 						$totalVat += $rs->totalVatAmount;
 						$rs->stdPrice = ! empty($pd) ? $pd->price : 0.00;
-						$rs->OnHand = ! empty($pd) ? $pd->OnHand : 0;
-						$rs->Commited = ! empty($pd) ? $pd->IsCommited : 0;
-						$rs->OnOrder = ! empty($pd) ? $pd->OnOrder : 0;
+						$rs->WhsCode = empty($rs->WhsCode) ? $pd->dfWhsCode : $rs->WhsCode;
+						$stock = $this->products_model->getItemStock($rs->ItemCode, $rs->WhsCode);
+						$rs->OnHand = empty($stock) ? 0 : $stock->OnHand;
+						$rs->Commited = empty($stock) ? 0 : $stock->IsCommited;
+						$rs->OnOrder = empty($stock) ? 0 : $stock->OnOrder;
 					}
 				}
 
@@ -336,7 +343,8 @@ class Quotation extends PS_Controller
 					'totalVat' => $totalVat,
 					'logs' => $this->quotation_model->get_logs($code),
 					'sale_name' => $this->sales_person_model->get_name($this->_user->sale_id),
-					'owner_name' => $this->employee_model->get_name($this->_user->emp_id)
+					'owner_name' => $this->employee_model->get_name($this->_user->emp_id),
+					'whsCode' => getConfig('DEFAULT_WAREHOUSE')
 				);
 
 				$this->quotation_model->update_uuid($code, $uuid);
@@ -395,7 +403,9 @@ class Quotation extends PS_Controller
 									'code' => $code,
 									'CardCode' => $hd->CardCode,
 									'CardName' => $hd->CardName,
-									'ContactPerson' => $hd->ContactPerson,
+									'CntctCode' => get_null($hd->CntctCode),
+									'ContactPerson' => get_null($hd->ContactPerson),
+									'NumAtCard' => get_null($hd->NumAtCard),
 									'Phone' => trim($hd->Phone),
 									'PriceList' => get_null($customer->ListNum),
 									'SlpCode' => empty($hd->SlpCode) ? $customer->SlpCode : $hd->SlpCode,
@@ -464,6 +474,7 @@ class Quotation extends PS_Controller
 														'ItemCode' => $rs->ItemCode,
 														'ItemName' => $rs->Description,
 														'Description' => $pd->description,
+														'WhsCode' => empty($rs->whsCode) ? $pd->dfWhsCode : $rs->whsCode,
 														'Qty' => $rs->Quantity,
 														'UomCode' => $pd->uom_code,
 														'UomEntry' => $pd->uom_id,
@@ -1048,14 +1059,17 @@ class Quotation extends PS_Controller
 					if($sc === TRUE)
 					{
 						$this->db->trans_commit();
+
 						$arr = array(
-							'code' => $code,
-							'action' => 'cancel',
 							'user_id' => $this->_user->id,
-							'uname' => $this->_user->uname
+							'uname' => $this->_user->uname,
+							'docType' => 'SQ',
+							'docNum' => $code,
+							'action' => 'cancel',
+							'ip_address' => $_SERVER['REMOTE_ADDR']
 						);
 
-						$this->quotation_model->add_logs($arr);
+						$this->user_model->add_logs($arr);
 					}
 					else
 					{
@@ -1193,19 +1207,26 @@ class Quotation extends PS_Controller
 
 		if(! empty($pd))
 		{
-			$price = $pd->price; //$this->getPrice($itemCode, $priceList);
-			//$stock = $this->getStock($itemCode, $whsCode, $quotaNo);
-			$disc = $this->discount_model->get_item_discount($itemCode);
+			$price = $pd->price;
+
+			$disc = $this->discount_model->getDiscountByManufacture($pd->FirmCode);
+
+			if(empty($disc))
+			{
+				$disc = $this->discount_model->get_item_discount($itemCode);
+			}
+
 			$disAmount = ($disc * 0.01) * $price;
 			$sellPrice = $price - $disAmount;
-			$available = $pd->OnHand > $pd->IsCommited ? $pd->OnHand - $pd->IsCommited : 0;
+			$stock = $this->products_model->getItemStock($pd->code, $pd->dfWhsCode);
 
 			$ds = array(
 				'ItemCode' => $pd->code,
 				'ItemName' => $pd->name,
-				'OnHand' => number($pd->OnHand),
-				'Commited' => number($pd->IsCommited),
-				'OnOrder' => number($pd->OnOrder),
+				'dfWhsCode' => $pd->dfWhsCode,
+				'OnHand' => empty($stock) ? number($pd->OnHand) : number($stock->OnHand),
+				'Commited' => empty($stock) ? number($pd->IsCommited) : number($stock->IsCommited),
+				'OnOrder' => empty($stock) ? number($pd->OnOrder) : number($stock->OnOrder),
 				'Qty' => $qty,
 				'UomCode' => $pd->uom_code,
 				'UomName' => $pd->uom,
@@ -1233,6 +1254,25 @@ class Quotation extends PS_Controller
 		}
 
 		echo $sc === TRUE ? json_encode($ds) : $this->error;
+	}
+
+
+	public function get_stock()
+	{
+		$ItemCode = $this->input->get('ItemCode');
+		$WhsCode = $this->input->get('WhsCode');
+
+		$stock = $this->products_model->getItemStock($ItemCode, $WhsCode);
+
+		$arr = array(
+			'ItemCode' => $ItemCode,
+			'WhsCode' => $WhsCode,
+			'OnHand' => (empty($stock) ? 0 : number($stock->OnHand)),
+			'Commited' => (empty($stock) ? 0 : number($stock->IsCommited)),
+			'OnOrder' => (empty($stock) ? 0 : number($stock->OnOrder))
+		);
+
+		echo json_encode($arr);
 	}
 
 
@@ -1272,6 +1312,10 @@ class Quotation extends PS_Controller
 
 		if(! empty($rs))
 		{
+			$cnt = $this->customers_model->get_contact($code);
+			$rs->CntctPrsn = empty($cnt) ? $rs->CntctPrsn : $cnt->contactName;
+			$rs->CntctCode = empty($cnt) ? NULL : $cnt->CntctCode;
+
 			echo json_encode($rs);
 		}
 		else {

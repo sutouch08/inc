@@ -119,15 +119,15 @@
 
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive" id="double-scroll">
-		<table class="table table-striped table-hover dataTable border-1" style="margin-bottom:10px; min-width:1120px; border-collapse:inherit;">
+		<table class="table table-striped table-hover dataTable border-1" style="margin-bottom:10px; min-width:1170px; border-collapse:inherit;">
 			<thead>
 				<tr style="font-size:10px;">
-					<th class="fix-width-120 middle"></th>
+					<th class="middle" style="width:110px;"></th>
 					<th class="fix-width-60 middle text-center">#</th>
 					<th class="fix-width-80 middle">Date</th>
 					<th class="fix-width-100 middle">Web No.</th>
 					<th class="fix-width-100 middle">Customer code</th>
-					<th class="min-width-200 middle">Customer name</th>
+					<th class="min-width-250 middle">Customer name</th>
 					<th class="fix-width-100 middle text-right">Amount</th>
 					<th class="fix-width-80 middle text-center">Review</th>
 					<th class="fix-width-80 middle text-center">Approval</th>
@@ -156,7 +156,7 @@
 					<td class="middle"><?php echo $rs->CardName; ?></td>
 					<td class="middle text-right"><?php echo number($rs->DocTotal, 2); ?></td>
 					<td class="middle text-center">
-						<?php if($rs->Status != -1) : ?>
+						<?php if($rs->Status != -1 && $rs->Status != 2) : ?>
 							<?php if($rs->Review == 'A') : ?>
 								<span class="green">Confirmed</span>
 							<?php elseif($rs->Review == 'R') : ?>

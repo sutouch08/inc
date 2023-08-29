@@ -210,6 +210,10 @@ while($total_page > 0 )
 	$top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Address</td>";
 	$top .=					"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: {$doc->Address}</td>";
 	$top .= 			"</tr>";
+  $top .= 			"<tr>";
+  $top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Phone</td>";
+  $top .= 				"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: {$doc->Phone}</td>";
+  $top .= 			"</tr>";
 	$top .= 			"<tr>";
 	$top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Email</td>";
 	$top .= 				"<td style=''>: {$customer->E_Mail}</td>";
@@ -220,12 +224,12 @@ while($total_page > 0 )
   $top .= 			"</tr>";
   $top .= 			"<tr>";
   $top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Attn</td>";
-  $top .= 				"<td style=''>: </td>";
+  $top .= 				"<td style=''>: {$doc->NumAtCard}</td>";
   $top .= 			"</tr>";
-	$top .= 			"<tr>";
-	$top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Project</td>";
-	$top .= 				"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: </td>";
-	$top .= 			"</tr>";
+	// $top .= 			"<tr>";
+	// $top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Project</td>";
+	// $top .= 				"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: </td>";
+	// $top .= 			"</tr>";
 	$top .= 		"</table>";
 	$top .= 	"</div>";
 

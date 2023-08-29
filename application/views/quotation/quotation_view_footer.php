@@ -5,9 +5,9 @@
 			<tr>
 				<td class="no-border">Sales Employee : <?php echo $sale_name; ?></td>
 			</tr>
-			<tr>
+			<!--<tr>
 				<td class="no-border">Owner : <?php echo $owner; ?></td>
-			</tr>
+			</tr> -->
 			<tr>
 				<td class="no-border">Remark : <?php echo $order->Comments; ?></td>
 			</tr>
@@ -57,7 +57,7 @@
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5">
     <?php if(!empty($logs)) : ?>
 			<?php foreach($logs as $lg) : ?>
-				<p class="p-logs text-right">
+				<p class="p-logs">
 					<?php echo action_name($lg->action); ?>  โดย <?php echo $lg->uname; ?> วันที่ <?php echo thai_date($lg->date_upd, TRUE); ?>
 				</p>
 			<?php endforeach; ?>

@@ -13,12 +13,13 @@
 
   </div>
   <div class="col-sm-12 col-xs-12 padding-5 table-responsive">
-    <table class="table table-bordered border-1" style="min-width:1700px;">
+    <table class="table table-bordered border-1" style="min-width:1850px;">
       <thead>
         <tr class="font-size-10">
           <th class="fix-width-40 middle text-center"></th>
           <th class="fix-width-150 middle text-center">Item Code</th>
           <th class="min-width-250 middle text-center">Description.</th>
+          <th class="fix-width-150 middle text-center">Warehouse</th>
 					<th class="fix-width-80 middle text-center">OnHand</th>
           <th class="fix-width-80 middle text-center">Commited</th>
           <th class="fix-width-80 middle text-center">OnOrder</th>
@@ -68,6 +69,13 @@
             <input type="text" class="form-control input-sm item-name" data-id="<?php echo $no; ?>" id="itemName-<?php echo $no; ?>" value="" />
           </td>
 
+          <td class="middle">
+            <select id="whs-<?php echo $no; ?>" onchange="getStock(<?php echo $no; ?>)">
+              <option value="">Please select</option>
+              <?php echo select_warehouse_code($whsCode); ?>
+            </select>
+          </td>
+
 					<td class="middle">
             <input type="text" class="form-control input-sm" id="onhand-<?php echo $no; ?>" value="" disabled/>
           </td>
@@ -90,7 +98,7 @@
           </td>
 
           <td class="middle">
-            <input type="number" class="form-control input-sm text-right" id="stdPrice-label-<?php echo $no; ?>" value="" disabled/>
+            <input type="text" class="form-control input-sm text-right" id="stdPrice-label-<?php echo $no; ?>" value="" disabled/>
           </td>
 
           <td class="middle">
@@ -171,6 +179,13 @@
 		<input type="text" class="form-control input-sm item-name" data-id="{{no}}" id="itemName-{{no}}" />
 	</td>
 
+  <td class="middle">
+    <select id="whs-{{no}}" onchange="getStock({{no}})">
+      <option value="">Please select</option>
+      <?php echo select_warehouse_code($whsCode); ?>
+    </select>
+  </td>
+
 	<td class="middle">
 		<input type="text" class="form-control input-sm" id="onhand-{{no}}" disabled/>
 	</td>
@@ -190,7 +205,7 @@
 	</td>
 
   <td class="middle">
-    <input type="number" class="form-control input-sm text-right" id="stdPrice-label-{{no}}" value="" disabled/>
+    <input type="text" class="form-control input-sm text-right" id="stdPrice-label-{{no}}" value="" disabled/>
   </td>
 
 	<td class="middle">

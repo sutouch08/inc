@@ -49,7 +49,9 @@ function saveAdd() {
 			'SlpCode' : $('#sale_id').val(),
 			'CardCode' : $.trim($('#CardCode').val()),  //****** required
 			'CardName' : $('#CardName').val(),
+			'CntctCode' : $('#CntctCode').val(),
 			'ContactPerson' : $('#contact').val(),
+			'NumAtCard' : $('#NumAtCard').val(),
 			'Phone' : $('#phone').val(),
 			'Payment' : $('#payment').val(),
 			'OwnerCode' : $('#owner').val(),
@@ -193,7 +195,8 @@ function saveAdd() {
 					"LineTotal" : $('#line-total-'+no).val(),
 					"LineSysTotal" : $('#line-sys-total-'+no).val(),
 					'discDiff' : $('#disc-diff-'+no).val(),
-					'sale_team' : $('#sale_team').val()
+					'sale_team' : $('#sale_team').val(),
+					'whsCode' : $('#whs-'+no).val()
 				}
 
 				details.push(row);
@@ -317,7 +320,7 @@ function saveUpdate() {
 		}
 
 		if(mustApprove == 0) {
-			mustApprove = docTotal > max_amount ? 1 : 0;			
+			mustApprove = docTotal > max_amount ? 1 : 0;
 		}
 
 		var ds = {
@@ -327,7 +330,9 @@ function saveUpdate() {
 			'SlpCode' : $('#sale_id').val(),
 			'CardCode' : $.trim($('#CardCode').val()),  //****** required
 			'CardName' : $('#CardName').val(),
+			'CntctCode' : $('#CntctCode').val(),
 			'ContactPerson' : $('#contact').val(),
+			'NumAtCard' : $('#NumAtCard').val(),
 			'Phone' : $('#phone').val(),
 			'Payment' : $('#payment').val(),
 			'OwnerCode' : $('#owner').val(),
@@ -468,7 +473,8 @@ function saveUpdate() {
 					"LineTotal" : $('#line-total-'+no).val(),
 					"LineSysTotal" : $('#line-sys-total-'+no).val(),
 					'discDiff' : $('#disc-diff-'+no).val(),
-					'sale_team' : $('#sale_team').val()
+					'sale_team' : $('#sale_team').val(),
+					'whsCode' : $('#whs-'+no).val()
 				}
 
 				details.push(row);
@@ -594,6 +600,7 @@ function get_customer(code) {
 				$('#payment').val(ds.GroupNum);
 				$('#priceList').val(ds.ListNum);
 				$('#contact').val(ds.CntctPrsn);
+				$('#CntctCode').val(ds.CntctCode);
 				$('#phone').val(phone);
 				$('#sale_id').val(ds.SlpCode).trigger('change');
 				$('#sale_name').val(ds.sale_name);
@@ -602,6 +609,37 @@ function get_customer(code) {
 	})
 }
 
+
+
+function getStock(no) {
+	let whsCode = $('#whs-'+no).val();
+	let itemCode = $('#itemCode-'+no).val();
+
+	if(whsCode != '' && itemCode.length) {
+		$.ajax({
+			url:HOME + 'get_stock',
+			type:'GET',
+			cache:false,
+			data:{
+				'ItemCode' : itemCode,
+				'WhsCode' : whsCode
+			},
+			success:function(rs) {
+				if(isJson(rs)) {
+					let ds = JSON.parse(rs);
+					$('#onhand-'+no).val(ds.OnHand);
+					$('#commited-'+no).val(ds.Commited);
+					$('#onorder-'+no).val(ds.OnOrder);
+				}
+				else {
+					$('#onhand-'+no).val(0);
+					$('#commited-'+no).val(0);
+					$('#onorder-'+no).val(0);
+				}
+			}
+		})
+	}
+}
 
 
 function editShipTo() {
@@ -808,6 +846,7 @@ function getItemData(no) {
 					$('#disc3-'+no).val(ds.disc3);
 					$('#uom-code-'+no).val(ds.UomCode);
 					$('#itemName-'+no).val(ds.ItemName);
+					$('#whs-'+no).val(ds.dfWhsCode);
 					$('#onhand-'+no).val(ds.OnHand);
 					$('#commited-'+no).val(ds.Commited);
 					$('#onorder-'+no).val(ds.OnOrder);
@@ -1160,6 +1199,13 @@ function init() {
 	});
 
 
+	$('.item-code').change(function() {
+		let no = $(this).data('id');
+		let code = $(this).val();
+		if(code.length) {
+			getItemData(no);
+		}
+	});
 
 	$('.line-qty').change(function() {
 		let no = $(this).data('id');

@@ -28,14 +28,17 @@ class Api
 		$sc = TRUE;
 		$order = $this->ci->quotation_model->get($code);
 		$details = $this->ci->quotation_model->get_details($code);
+    $dfWhsCode = getConfig('DEFAULT_WAREHOUSE');
 
 		if(! empty($order) && ! empty($details))
 		{
-			$ds = array(
-				"WEBORDER" => $order->code,
+      $ds = array();
+			$sq = array(
+				"WEBNumber" => $order->code,
 				"CardCode" => $order->CardCode,
 				"CardName" => $order->CardName,
 				"SlpCode" => intval($order->SlpCode),
+        "SalesEmployee" => intval($order->SlpCode),
 				"GroupNum" => intval($order->Payment),
 				"DocCur" => $order->DocCur,
 				"DocRate" => round($order->DocRate, 2),
@@ -43,11 +46,16 @@ class Api
 				"DocDate" => $order->DocDate,
 				"DocDueDate" => $order->DocDueDate,
 				"TaxDate" => $order->TextDate,
+        "NumAtCard" => $order->NumAtCard,
+        "CntctCode" => $order->CntctCode,
+        "Seires" => NULL,
+        "SeriesName" => NULL,
 				"PayToCode" => $order->PayToCode,
 				"ShipToCode" => $order->ShipToCode,
 				"Address" => $order->Address,
 				"Address2" =>$order->Address2,
 				"DiscPrcnt" => round($order->DiscPrcnt, 2),
+        "DiscSum" => $order->DiscAmount,
 				"RoundDif" => round($order->RoundDif, 2),
 				"Comments" => $order->Comments,
 				"OwnerCode" => intval($order->OwnerCode)
@@ -61,26 +69,36 @@ class Api
 				$line = array(
 					"LineNum" => intval($rs->LineNum),
 					"ItemCode" => $rs->ItemCode,
-					"ItemName" => $rs->ItemName,
+					"ItemDescription" => $rs->ItemName,
+          "FreeText" => NULL,
 					"Quantity" => round($rs->Qty, 2),
-					"UomEntry" => intval($rs->UomEntry),
-					"Price" => round($rs->Price, 2),
+					//"UomEntry" => intval($rs->UomEntry),
+          "UnitPrice" => round($rs->Price, 2),
+          "DiscPrcnt" => round($rs->DiscPrcnt, 2),
+          "VatGroup" => $rs->VatGroup,
+          "ShipDate" => NULL,
+          "UomCode" => intval($rs->UomEntry),
+          "OcrCode" => NULL,
+          "AcctCode" => NULL,
+          "WhsCode" => empty($rs->WhsCode) ? $dfWhsCode : $rs->WhsCode,
 					"LineTotal" => round($rs->LineTotal, 2),
-					"DiscPrcnt" => round($rs->DiscPrcnt, 2),
 					"PriceBefDi" => round($rs->Price, 2),
 					"Currency" => $order->DocCur,
 					"Rate" => round($order->DocRate, 2),
-					"VatGroup" => $rs->VatGroup,
 					"VatPrcnt" => round($rs->VatRate, 2),
 					"PriceAfVAT" => round(add_vat($rs->SellPrice, $rs->VatRate), 2),
 					"VatSum" => round($rs->totalVatAmount, 2),
-					"SlpCode" => intval($order->SlpCode)
+					"SlpCode" => intval($order->SlpCode),
+          "NoInvTryMv" => NULL,
+          "CoGsOcrCode" => NULL
 				);
 
 				array_push($orderLine, $line);
 			}
 
-			$ds['DocLine'] = $orderLine;
+			$sq['Line'] = $orderLine;
+
+      array_push($ds, $sq);
 
       if($testMode)
   		{
@@ -102,8 +120,20 @@ class Api
   			return TRUE;
   		}
 
+      $json = json_encode($ds, JSON_UNESCAPED_UNICODE);
+      // echo $json; exit();
+
+      $logs = array(
+        'code' => $code,
+        'status' => 'send',
+        'json' => $json
+      );
+
+      $this->ci->logs_model->order_logs($logs);
+
 
 			$url = getConfig('SAP_API_HOST');
+
 			if($url[-1] != '/')
 			{
 				$url .'/';
@@ -114,8 +144,8 @@ class Api
 			$curl = curl_init();
 			curl_setopt($curl, CURLOPT_URL, $url);
 			curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
-      curl_setopt($curl, CURLOPT_TIMEOUT, 0);
-			curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($ds));
+      curl_setopt($curl, CURLOPT_TIMEOUT, 60);
+			curl_setopt($curl, CURLOPT_POSTFIELDS, $json);
 			curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
 			curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
 			curl_setopt($curl, CURLOPT_HTTPHEADER, array("Content-Type: application/json"));
@@ -129,11 +159,13 @@ class Api
 
 			curl_close($curl);
 
-			$rs = json_decode($response);
+			$ra = json_decode($response);
 
-			if(! empty($rs) && ! empty($rs->status))
+			if(! empty($ra) && ! empty($ra[0]->Status))
 			{
-				if($rs->status == 'success')
+        $rs = $ra[0];
+
+				if($rs->Status == 'success' OR $rs->Status == 'Success')
 				{
 					$arr = array(
 						'Status' => 1,
@@ -149,7 +181,7 @@ class Api
 						$logs = array(
 							'code' => $code,
 							'status' => 'success',
-							'json' => json_encode($ds)
+							'json' => $response
 						);
 
 						$this->ci->logs_model->order_logs($logs);
@@ -160,18 +192,18 @@ class Api
 				{
 					$arr = array(
 						'Status' => 3,
-						'message' => $rs->error
+						'message' => $rs->errMsg
 					);
 
 					$this->ci->quotation_model->update($code, $arr);
 
 					$sc = FALSE;
-					$this->error = $rs->error;
+					$this->ci->error = $rs->errMsg;
 
           $logs = array(
             'code' => $code,
             'status' => 'error',
-            'json' => json_encode($ds)
+            'json' => $rs->errMsg
           );
 
           $this->ci->logs_model->order_logs($logs);
@@ -187,12 +219,12 @@ class Api
 					'message' => $response
 				);
 
-				$this->ci->orders_model->update($code, $arr);
+				$this->ci->quotation_model->update($code, $arr);
 
         $logs = array(
           'code' => $code,
-          'status' => 'success',
-          'json' => json_encode($ds)
+          'status' => 'response',
+          'json' => $response
         );
 
         $this->ci->logs_model->order_logs($logs);

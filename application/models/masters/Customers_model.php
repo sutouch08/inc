@@ -24,6 +24,23 @@ class Customers_model extends CI_Model
 		return NULL;
 	}
 
+
+	public function get_contact($code)
+	{
+		$rs = $this->ms
+		->select('CntctCode, Name as contactName')
+		->where('CardCode', $code)
+		->order_by('CntctCode', 'DESC')
+		->get('OCPR');
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->row();
+		}
+
+		return NULL;
+	}
+
 	public function get($CardCode)
 	{
 		$rs = $this->ms->where('CardCode', $CardCode)->get($this->tb);

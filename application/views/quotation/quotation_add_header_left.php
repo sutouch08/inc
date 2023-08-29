@@ -16,15 +16,17 @@
 
 		<div class="form-group">
       <label class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-12 control-label no-padding-right">Contact</label>
-      <div class="col-lg-5 col-md-5 col-sm-6 col-xs-12">
-        <input type="text" id="contact" class="form-control input-sm" maxlength="100" value="" />
+      <div class="col-lg-7 col-md-7 col-sm-8 col-xs-12">
+        <input type="text" id="contact" class="form-control input-sm" maxlength="100" value="" readonly/>
+        <input type="hidden" id="CntctCode" value="" />
       </div>
     </div>
 
 		<div class="form-group">
-      <label class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-12 control-label no-padding-right">Phone No</label>
-      <div class="col-lg-3-harf col-md-4 col-sm-4-harf col-xs-12">
-        <input type="text" id="phone" class="form-control input-sm" maxlength="50" value="" />
+      <label class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-12 control-label no-padding-right">Customer Ref</label>
+      <div class="col-lg-7 col-md-7 col-sm-8 col-xs-12">
+        <input type="text" id="NumAtCard" class="form-control input-sm" maxlength="100" value="" />
+        <input type="hidden" id="phone" value="" />
       </div>
     </div>
 
@@ -51,9 +53,5 @@
         <textarea id="BillTo" class="autosize autosize-transition form-control"></textarea>
       </div>
     </div>
-
-
-
-
   </div>
 </div>
