@@ -29,7 +29,6 @@
 		<?php endif; ?>
 	</div>
 
-
 <input type="hidden" id="is_approver" value="<?php echo $is_approver; ?>" />
 
 <?php if($is_approver) : ?>

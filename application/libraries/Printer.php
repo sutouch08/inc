@@ -354,7 +354,7 @@ public function print_row($data)
 	}
 	foreach($data as $n=>$value)
 	{
-		$row .= "<td class='middle' style='".$pattern[$n]."'>".$value."</td>";
+		$row .= "<td class='' style='".$pattern[$n]."'>".$value."</td>";
 	}
 	$row .= "</tr>";
 	return $row;

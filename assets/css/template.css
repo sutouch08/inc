@@ -33,6 +33,13 @@ width:100%;
 }
 
 
+.control-label-xs {
+  font-size: 12px;
+  font-weight: bold;
+  padding-top:0px;
+  text-align: right;
+}
+
 
 input[type=date]::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -1310,7 +1317,7 @@ hr.padding-5 {
 
 .p-logs {
   font-size: 12px;
-  font-style: italic; 
+  font-style: italic;
   color:#9e9e9e;
 }
 
@@ -1699,6 +1706,14 @@ input[type=number]::-webkit-outer-spin-button {
 
 .fix-width-40 {
 	width:40px !important;
+}
+
+.fix-width-45 {
+  width:45px !important;
+}
+
+.fix-width-50 {
+  width:50px !important;
 }
 
 .fix-width-60 {

@@ -3,7 +3,7 @@
 
     <div class="row">
 			<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12"><h4 class="title">Quotation</h4></div>
-				<div class="divider" style="margin-top:5px;">	</div>
+			<div class="divider" style="margin-top:5px;">	</div>
       <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5">
 				<label>Prefix</label>
 				<input type="text" class="form-control input-sm text-center prefix" name="PREFIX_QUOTATION" required value="<?php echo $PREFIX_QUOTATION; ?>" />
@@ -40,6 +40,14 @@
 			<div class="col-lg-2 col-md-2 col-sm-2 col-xs-4 padding-5">
 				<label>Begin Amount</label>
 				<input type="number" class="form-control input-sm text-center" required name="AMOUNT_TO_APPROVE_SQ" value="<?php echo $AMOUNT_TO_APPROVE_SQ; ?>" />
+			</div>
+
+			<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5">
+				<label>Auto Interface</label>
+				<select class="form-control input-sm" name="QUOTATION_AUTO_INTERFACE">
+					<option value="1" <?php echo is_selected('1', $QUOTATION_AUTO_INTERFACE); ?>>ON</option>
+					<option value="0" <?php echo is_selected('0', $QUOTATION_AUTO_INTERFACE); ?>>OFF</option>
+				</select>
 			</div>
 		</div>
 

@@ -1,3 +1,4 @@
+var isRequesting = 0;
 
 function saveAsDraft() {
 	$('#is_draft').val(1);
@@ -52,6 +53,10 @@ function saveAdd() {
 			'CntctCode' : $('#CntctCode').val(),
 			'ContactPerson' : $('#contact').val(),
 			'NumAtCard' : $('#NumAtCard').val(),
+			'Attn1' : $('#Attn1').val(),
+			'Attn2' : $('#Attn2').val(),
+			'Type' : $('#Type').val(),
+			'Project' : $('#Project').val(),
 			'Phone' : $('#phone').val(),
 			'Payment' : $('#payment').val(),
 			'OwnerCode' : $('#owner').val(),
@@ -75,7 +80,27 @@ function saveAdd() {
 			'maxDiff' : max_diff,
 			'VatGroup' : $('#vat_code').val(),
 			'VatRate' : $('#vat_rate').val(),
-			'sale_team' : $('#sale_team').val()
+			'sale_team' : $('#sale_team').val(),
+			'Address' : {
+				'bAddress' : $('#billToCode').val(),
+				'bAddress2' : $('#billToCode option:selected').data('name'),
+				'sAddress' : $('#shipToCode').val(),
+				'sAddress2' : $('#shipToCode option:selected').data('name'),
+				'sStreet' : $('#Street-s').val(),
+				'bStreet' : $('#Street-b').val(),
+				'bStreetNo' : $('#StreetNo-b').val(),
+				'bBlock' : $('#Block-b').val(),
+				'bCity' : $('#City-b').val(),
+				'bCounty' : $('#County-b').val(),
+				'bZipCode' : $('#ZipCode-b').val(),
+				'bCountry' : $('#Country-b').val(),
+				'sStreetNo' : $('#StreetNo-s').val(),
+				'sBlock' : $('#Block-s').val(),
+				'sCity' : $('#City-s').val(),
+				'sCounty' : $('#County-s').val(),
+				'sZipCode' : $('#ZipCode-s').val(),
+				'sCountry' : $('#Country-s').val()
+			}
 		}
 
 		// console.log(ds);
@@ -174,7 +199,8 @@ function saveAdd() {
 				var row = {
 					"LineNum" : lineNum,
 					"ItemCode" : itemCode,
-					"Description" : $('#itemName-'+no).val(),
+					"ItemName" : $('#itemName-'+no).val(),
+					"Description" : $('#itemDetail-'+no).val(),
 					"Price" : $('#price-'+no).val(),
 					"stdPrice" : $('#stdPrice-'+no).val(),
 					"SellPrice" : $('#sellPrice-'+no).val(),
@@ -196,7 +222,10 @@ function saveAdd() {
 					"LineSysTotal" : $('#line-sys-total-'+no).val(),
 					'discDiff' : $('#disc-diff-'+no).val(),
 					'sale_team' : $('#sale_team').val(),
-					'whsCode' : $('#whs-'+no).val()
+					'whsCode' : $('#whs-'+no).val(),
+					'TreeType' : $('#tree-type-'+no).val(),
+					'uid' : $('#uid-'+no).val(),
+					'father_uid' : $('#father-uid-'+no).val()
 				}
 
 				details.push(row);
@@ -333,6 +362,10 @@ function saveUpdate() {
 			'CntctCode' : $('#CntctCode').val(),
 			'ContactPerson' : $('#contact').val(),
 			'NumAtCard' : $('#NumAtCard').val(),
+			'Attn1' : $('#Attn1').val(),
+			'Attn2' : $('#Attn2').val(),
+			'Type' : $('#Type').val(),
+			'Project' : $('#Project').val(),
 			'Phone' : $('#phone').val(),
 			'Payment' : $('#payment').val(),
 			'OwnerCode' : $('#owner').val(),
@@ -356,7 +389,27 @@ function saveUpdate() {
 			'maxDiff' : max_diff,
 			'VatGroup' : $('#vat_code').val(),
 			'VatRate' : $('#vat_rate').val(),
-			'sale_team' : $('#sale_team').val()
+			'sale_team' : $('#sale_team').val(),
+			'Address' : {
+				'bAddress' : $('#billToCode').val(),
+				'bAddress2' : $('#billToCode option:selected').data('name'),
+				'sAddress' : $('#shipToCode').val(),
+				'sAddress2' : $('#shipToCode option:selected').data('name'),
+				'bStreet' : $('#Street-b').val(),
+				'bStreetNo' : $('#StreetNo-b').val(),
+				'bBlock' : $('#Block-b').val(),
+				'bCity' : $('#City-b').val(),
+				'bCounty' : $('#County-b').val(),
+				'bZipCode' : $('#ZipCode-b').val(),
+				'bCountry' : $('#Country-b').val(),
+				'sStreet' : $('#Street-s').val(),
+				'sStreetNo' : $('#StreetNo-s').val(),
+				'sBlock' : $('#Block-s').val(),
+				'sCity' : $('#City-s').val(),
+				'sCounty' : $('#County-s').val(),
+				'sZipCode' : $('#ZipCode-s').val(),
+				'sCountry' : $('#Country-s').val()
+			}
 		}
 
 
@@ -452,7 +505,8 @@ function saveUpdate() {
 				var row = {
 					"LineNum" : lineNum,
 					"ItemCode" : itemCode,
-					"Description" : $('#itemName-'+no).val(),
+					"ItemName" : $('#itemName-'+no).val(),
+					"Description" : $('#itemDetail-'+no).val(),
 					"Price" : $('#price-'+no).val(),
 					"stdPrice" : $('#stdPrice-'+no).val(),
 					"SellPrice" : $('#sellPrice-'+no).val(),
@@ -474,7 +528,10 @@ function saveUpdate() {
 					"LineSysTotal" : $('#line-sys-total-'+no).val(),
 					'discDiff' : $('#disc-diff-'+no).val(),
 					'sale_team' : $('#sale_team').val(),
-					'whsCode' : $('#whs-'+no).val()
+					'whsCode' : $('#whs-'+no).val(),
+					'TreeType' : $('#tree-type-'+no).val(),
+					'uid' : $('#uid-'+no).val(),
+					'father_uid' : $('#father-uid-'+no).val()
 				}
 
 				details.push(row);
@@ -617,7 +674,7 @@ function getStock(no) {
 
 	if(whsCode != '' && itemCode.length) {
 		$.ajax({
-			url:HOME + 'get_stock',
+			url:BASE_URL + 'items/get_stock',
 			type:'GET',
 			cache:false,
 			data:{
@@ -645,6 +702,74 @@ function getStock(no) {
 function editShipTo() {
 	$('#shipToModal').modal('show');
 }
+
+
+function updateShipTo() {
+	let street = $('#s-Street').val();
+	let streetNo = $('#s-StreetNo').val();
+	let block = $('#s-Block').val();
+	let city = $('#s-City').val();
+	let county = $('#s-County').val();
+	let zipCode = $('#s-ZipCode').val();
+	let country = $('#s-Country').val();
+
+	$('#Street-s').val(street);
+	$('#StreetNo-s').val(streetNo);
+	$('#Block-s').val(block);
+	$('#City-s').val(city);
+	$('#County-s').val(county);
+	$('#ZipCode-s').val(zipCode);
+
+	street = street === "" ? "" : street + " ";
+	streetNo = streetNo === "" ? "" : streetNo + " ";
+	block = block === "" ? "" : block + " ";
+	city = city === "" ? "" : city + " ";
+	county = county === "" ? "" : county + " ";
+	zipCode = zipCode === "" ? "" : zipCode + " ";
+	country = country === "" ? "" : country + " ";
+
+	let adr = street + streetNo + block + city + county + zipCode + country;
+
+	adr = $.trim(adr);
+
+	$('#ShipTo').val(adr);
+
+	$('#shipToModal').modal('hide');
+}
+
+
+function updateBillTo() {
+	let street = $('#b-Street').val();
+	let streetNo = $('#b-StreetNo').val();
+	let block = $('#b-Block').val();
+	let city = $('#b-City').val();
+	let county = $('#b-County').val();
+	let zipCode = $('#b-ZipCode').val();
+	let country = $('#b-Country').val();
+
+	$('#Street-b').val(street);
+	$('#StreetNo-b').val(streetNo);
+	$('#Block-b').val(block);
+	$('#City-b').val(city);
+	$('#County-b').val(county);
+	$('#ZipCode-b').val(zipCode);
+
+	street = street === "" ? "" : street + " ";
+	streetNo = streetNo === "" ? "" : streetNo + " ";
+	block = block === "" ? "" : block + " ";
+	city = city === "" ? "" : city + " ";
+	county = county === "" ? "" : county + " ";
+	zipCode = zipCode === "" ? "" : zipCode + " ";
+	country = country === "" ? "" : country + " ";
+
+	let adr = street + streetNo + block + city + county + zipCode + country;
+
+	adr = $.trim(adr);
+
+	$('#BillTo').val(adr);
+	$('#billToModal').modal('hide');
+}
+
 
 
 function get_address_ship_to_code(code)
@@ -676,6 +801,7 @@ function get_address_ship_to_code(code)
 function get_address_ship_to() {
 	var code = $('#CardCode').val()
 	var adr_code = $('#shipToCode').val();
+
 	$.ajax({
 		url:HOME + 'get_address_ship_to',
 		type:'GET',
@@ -688,13 +814,21 @@ function get_address_ship_to() {
 			var rs = $.trim(rs);
 			if(isJson(rs)) {
 				var ds = $.parseJSON(rs);
-				let address = ds.address === "" ? "" : ds.address + " ";
-				let sub_district = ds.sub_district === "" ? "" : ds.sub_district + " ";
-				let district = ds.district === "" ? "" : ds.district + " ";
-				let province = ds.province === "" ? "" : ds.province + " ";
-				let postcode = ds.postcode === "" ? "" : ds.postcode + " "
-				let country = ds.country === 'TH' ? '' : ds.countryName;
-				let adr = address + sub_district + district + province + postcode + country;
+				let street = ds.street === "" ? "" : ds.street + " ";
+				let streetNo = ds.streetNo === "" ? "" : ds.streetNo + " ";
+				let block = ds.block === "" ? "" : ds.block + " ";
+				let city = ds.city === "" ? "" : ds.city + " ";
+				let county = ds.county === "" ? "" : ds.county + " ";
+				let zipCode = ds.zipCode === "" ? "" : ds.zipCode;
+
+				let adr = street+streetNo+block+city+county+zipCode;
+
+				$('#Street-s').val(ds.street);
+				$('#StreetNo-s').val(ds.streetNo);
+				$('#Block-s').val(ds.block);
+				$('#City-s').val(ds.city);
+				$('#County-s').val(ds.county);
+				$('#ZipCode-s').val(ds.zipCode);
 
 				$('#ShipTo').val(adr);
 			}
@@ -750,14 +884,22 @@ function get_address_bill_to() {
 			var rs = $.trim(rs);
 			if(isJson(rs)) {
 				var ds = $.parseJSON(rs);
+				let street = ds.street === "" ? "" : ds.street + " ";
+				let streetNo = ds.streetNo === "" ? "" : ds.streetNo + " ";
+				let block = ds.block === "" ? "" : ds.block + " ";
+				let city = ds.city === "" ? "" : ds.city + " ";
+				let county = ds.county === "" ? "" : ds.county + " ";
+				let zipCode = ds.zipCode === "" ? "" : ds.zipCode;
 
-				let address = ds.address === "" ? "" : ds.address + " ";
-				let sub_district = ds.sub_district === "" ? "" : ds.sub_district + " ";
-				let district = ds.district === "" ? "" : ds.district + " ";
-				let province = ds.province === "" ? "" : ds.province + " ";
-				let postcode = ds.postcode === "" ? "" : ds.postcode + " "
-				let country = ds.country === 'TH' ? '' : ds.countryName;
-				let adr = address + sub_district + district + province + postcode + country;
+				let adr = street+streetNo+block+city+county+zipCode;
+
+				$('#Street-b').val(ds.street);
+				$('#StreetNo-b').val(ds.streetNo);
+				$('#Block-b').val(ds.block);
+				$('#City-b').val(ds.city);
+				$('#County-b').val(ds.county);
+				$('#ZipCode-b').val(ds.zipCode);
+				$('#Country-b').val(ds.country);
 
 				$('#BillTo').val(adr);
 			}
@@ -767,33 +909,103 @@ function get_address_bill_to() {
 
 
 function addRow() {
-	var no = $('#row-no').val();
-	var data = {"no" : no, "uid" : uniqueId()};
-	var source = $('#row-template').html();
-	var output = $('#details-template');
+	setTimeout(() => {
+		var no = $('#row-no').val();
+		var data = {"no" : no, "uid" : uniqueId()};
+		var source = $('#row-template').html();
+		var output = $('#details-template');
 
-	render_append(source, data, output);
+		render_append(source, data, output);
+		reIndex();
+		init();
+		//$('#itemCode-'+no).focus();
+		no++;
+		$('#row-no').val(no);
+		return no;
+	}, 100)
+}
+
+function addChildRows(childs, fno) {
+	var row = fno;
+	childs.forEach(function(ds, index) {
+		let no = $('#row-no').val();
+		let price = parseDefault(parseFloat(ds.Price), 0.00);
+		let sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);
+		let lineTotal = parseDefault(parseFloat(ds.LineTotal), 0.00);
+		let qty = parseDefault(parseFloat(ds.Qty), 1);
+		let disc1 = parseDefault(parseFloat(ds.disc1), 0.00);
+
+		ds.no = no;
+		ds.Price = price;
+		ds.SellPrice = sellPrice;
+		ds.LineTotal = lineTotal;
+		ds.stdPriceLabel = price.toFixed(2);
+		ds.priceLabel = price.toFixed(2);
+		ds.sellPriceLabel = sellPrice.toFixed(2);
+		ds.lineTotalLabel = lineTotal.toFixed(2);
+		ds.Qty = qty;
+
+		let source = $('#childRow-template').html();
+		let output = $('#row-'+row);
+
+		render_after(source, ds, output);
+		$('#whs-'+no).val(ds.dfWhsCode);
+		row = no;
+		no++;
+		$('#row-no').val(no);
+		console.log(row);
+	})
+
 	reIndex();
 	init();
-	$('#itemCode-'+no).focus();
-	no++;
-	$('#row-no').val(no);
-	return no;
 }
+
 
 function removeRow() {
 	$('.del-chk').each(function() {
 		if($(this).is(':checked')) {
 			var no = $(this).val();
+			var type = $('#tree-type-'+no).val();
+
+			if(type == 'S') {
+				let uid = $('#uid-'+no).val();
+
+				if(uid.length) {
+					$('.child-'+uid).each(function() {
+						let rowNo = $(this).data('no');
+						$('#row-'+rowNo).remove();
+					});
+				}
+			}
+
 			$('#row-'+no).remove();
 		}
 	})
 
+	reIndex();
 	recalTotal();
 }
 
 
+function removeChildRows(no, recal) {
+	let uid = $('#uid-'+no).val();
+
+	if(uid.length) {
+		$('.'+uid).each(function() {
+			rowNo = $(this).data('id');
+			$('#row-'+rowNo).remove();
+		});
+
+		reIndex();
+		if(recal) {
+			recalTotal();
+		}
+	}
+}
+
+
 function getItemData(no) {
+	isRequesting = 1;
 	let itemCode = $('#itemCode-'+no).val();
 	let cardCode = $('#CardCode').val();
 	let priceList = $('#priceList').val();
@@ -801,16 +1013,28 @@ function getItemData(no) {
 	let payment = $('#payment').val();
 
 	if(cardCode == "") {
-		swal('กรุณาระบุลูกค้า');
+		swal({
+			title:'Oops',
+			text:'กรุณาระบุลูกค้า',
+			type:'warning'
+		}, function() {
+			setTimeout(() => {
+				$('#CardCode').focus();
+			}, 200);
+		});
+
+		$('#itemCode-'+no).val('');
+		isRequesting = 0;
 		return false;
 	}
 
+	removeChildRows(no, 0);
 
 	setTimeout(function() {
 		load_in();
 
 		$.ajax({
-			url:HOME + "get_item_data",
+			url:BASE_URL + "items/get_item_data",
 			type:"GET",
 			cache:false,
 			data:{
@@ -822,6 +1046,7 @@ function getItemData(no) {
 			},
 			success:function(rs) {
 				load_out();
+				isRequesting = 0;
 				var rs = $.trim(rs);
 				if(isJson(rs)) {
 
@@ -833,6 +1058,7 @@ function getItemData(no) {
 					$('#stdPrice-'+no).val(price); // stdPrice
 					$('#stdPrice-label-'+no).val(addCommas(price.toFixed(2)));
 					$('#sellPrice-'+no).val(sellPrice);
+					$('#price-'+no).val(price);
 					$('#sysSellPrice-'+no).val(sellPrice);
 					$('#disc-amount-'+no).val(ds.discAmount);
 					$('#line-disc-amount-'+no).val(ds.totalDiscAmount);
@@ -846,6 +1072,7 @@ function getItemData(no) {
 					$('#disc3-'+no).val(ds.disc3);
 					$('#uom-code-'+no).val(ds.UomCode);
 					$('#itemName-'+no).val(ds.ItemName);
+					$('#itemDetail-'+no).val(ds.Description);
 					$('#whs-'+no).val(ds.dfWhsCode);
 					$('#onhand-'+no).val(ds.OnHand);
 					$('#commited-'+no).val(ds.Commited);
@@ -859,6 +1086,24 @@ function getItemData(no) {
 					$('#sell-price-'+no).val(sellPrice);
 					$('#total-label-'+no).val(addCommas(lineTotal.toFixed(2)));
 					$('#line-qty-'+no).focus();
+					$('#uid-'+no).val(ds.uid);
+					$('#tree-type-'+no).val(ds.TreeType);
+
+					if(ds.childs.length) {
+						$('#row-'+no).addClass('father');
+						$('#price-label-'+no).attr('disabled', 'disabled');
+						$('#disc1-'+no).attr('disabled', 'disabled');
+						$('#disc2-'+no).attr('disabled', 'disabled');
+						$('#disc3-'+no).attr('disabled', 'disabled');
+						addChildRows(ds.childs, no);
+					}
+					else {
+						$('#row-'+no).removeClass('father');
+						$('#price-label-'+no).removeAttr('disabled');
+						$('#disc1-'+no).removeAttr('disabled');
+						$('#disc2-'+no).removeAttr('disabled');
+						$('#disc3-'+no).removeAttr('disabled');
+					}
 
 					recalAmount(no);
 				}
@@ -872,8 +1117,9 @@ function getItemData(no) {
 			}
 		})
 	}, 200);
-
 }
+
+
 
 
 function parse_discount(d1, d2, d3, price) {
@@ -963,6 +1209,7 @@ function recalDiscount(no) {
 
 
 function recalAmount(no) {
+	let type = $('#tree-type-'+no).val();
 
 	setTimeout(function() {
 		let disc1 = $('#disc1-'+no).val();
@@ -1028,9 +1275,25 @@ function recalAmount(no) {
 			$('#line-sys-total-'+no).val(sysSellPrice * qty);
 			$('#total-label-'+no).val(addCommas(lineAmount));
 
+			if(type == 'S') {
+				recalChilds(no);
+			}
+
 			recalTotal();
 		}
 	}, 200)
+
+}
+
+
+function recalChilds(no) {
+	let uid = $('#uid-'+no).val();
+	let qty = parseDefault(parseInt($('#line-qty-'+no).val()), 0);
+	$('.'+uid).each(function() {
+		let rowNo = $(this).data('id');
+		$(this).val(qty);
+		recalAmount(rowNo);
+	});
 }
 
 
@@ -1047,7 +1310,6 @@ function getDiscDiff(old_price, new_price) {
 
 
 function recalTotal() {
-	console.log('recalTotal');
 	var total = 0.00; //--- total amount after row discount
 	var totalTaxAmount = 0.00;
 	var sysTotal = 0.00;
@@ -1187,10 +1449,10 @@ function init() {
 				setTimeout(() => {
 					$('#itemCode-'+no).val(code);
 					$('#itemName-'+no).val(name);
-					getItemData(no);
+					$('#itemName-'+no).focus();
+					//$(this).trigger('change');
+					//getItemData(no);
 				},1);
-
-
 			}
 			else {
 				$(this).val('');
@@ -1202,7 +1464,7 @@ function init() {
 	$('.item-code').change(function() {
 		let no = $(this).data('id');
 		let code = $(this).val();
-		if(code.length) {
+		if(code.length && isRequesting == 0) {
 			getItemData(no);
 		}
 	});

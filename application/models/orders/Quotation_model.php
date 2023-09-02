@@ -85,7 +85,45 @@ class Quotation_model extends CI_Model
 
 	public function get_details($code)
 	{
-		$rs = $this->db->where('quotation_code', $code)->get($this->td);
+		$rs = $this->db
+		->where('quotation_code', $code)
+		->order_by('LineNum', 'ASC')
+		->get($this->td);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+	//--- for print
+	public function get_un_child_details($code)
+	{
+		$rs = $this->db
+		->where('quotation_code', $code)
+		->where('TreeType !=', 'I')
+		->order_by('LineNum', 'ASC')
+		->get($this->td);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+	public function get_childs_row($code, $father_uid)
+	{
+		$rs = $this->db
+		->where('quotation_code', $code)
+		->where('TreeType', 'I')
+		->where('father_uid', $father_uid)
+		->order_by('LineNum', 'ASC')
+		->get($this->td);
 
 		if($rs->num_rows() > 0)
 		{
@@ -246,6 +284,11 @@ class Quotation_model extends CI_Model
 			$this->db->like('DocNum', $ds['sqNo']);
 		}
 
+		if( isset($ds['project']) && $ds['project'] != '')
+		{
+			$this->db->like('Project', $ds['project']);
+		}
+
 		if(isset($ds['from_date']) && isset($ds['to_date']) && $ds['from_date'] != '' && $ds['to_date'] != '' )
 		{
 			$this->db
@@ -316,6 +359,11 @@ class Quotation_model extends CI_Model
 			$this->db->like('SqNo', $ds['sqNo']);
 		}
 
+		if( isset($ds['project']) && $ds['project'] != '')
+		{
+			$this->db->like('Project', $ds['project']);
+		}
+
 		if( isset($ds['soNo']) && $ds['soNo'] != '')
 		{
 			$this->db->like('DocNum', $ds['soNo']);
@@ -372,6 +420,35 @@ class Quotation_model extends CI_Model
 	}
 
 
+	public function get_quotation_address($code)
+	{
+		$rs = $this->db->where('quotation_code', $code)->get('quotation_address');
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row();
+		}
+
+		return NULL;
+	}
+
+
+	public function drop_address($code)
+	{
+		return $this->db->where('quotation_code', $code)->delete('quotation_address');
+	}
+
+
+	public function add_address(array $ds = array())
+	{
+		if( ! empty($ds))
+		{
+			return $this->db->insert('quotation_address', $ds);
+		}
+
+		return FALSE;
+	}
+
 	public function get_logs($code)
 	{
 		$rs = $this->db->where('docType', 'SQ')->where('docNum', $code)->order_by('id', 'DESC')->get('access_logs');
@@ -379,6 +456,22 @@ class Quotation_model extends CI_Model
 		if($rs->num_rows() > 0)
 		{
 			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+	public function getSapDocNum($code)
+	{
+		$rs = $this->ms
+		->select('DocNum')
+		->where('U_WebNumber', $code)
+		->where('CANCELED', 'N')
+		->get('OQUT');
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->row()->DocNum;
 		}
 
 		return NULL;

@@ -6,7 +6,7 @@ class Quotation extends PS_Controller
 	public $menu_code = 'SOODSQ';
 	public $menu_group_code = 'SO';
   public $menu_sub_group_code = 'ORDER';
-	public $title = 'Quotations';
+	public $title = 'Sales Quotations';
 	public $docType = 'SQ';
 	public $segment = 4;
 	public $readOnly = FALSE;
@@ -34,6 +34,7 @@ class Quotation extends PS_Controller
 			'code' => get_filter('code', 'sq_code', ''),
 			'customer' => get_filter('customer', 'sq_customer', ''),
 			'sqNo' => get_filter('sqNo', 'sqNo', ''),
+			'project' => get_filter('project', 'project', ''),
 			'sale_id' => get_filter('sale_id', 'sq_sale_id', 'all'),
 			'emp_id' => get_filter('emp_id', 'sq_emp_id', 'all'),
 			'review' => get_filter('review', 'sq_review', 'all'),
@@ -71,10 +72,56 @@ class Quotation extends PS_Controller
   {
 		$this->load->model('masters/sales_person_model');
 		$this->load->model('masters/employee_model');
+		$order = array(
+			'code' => "",
+			'CardCode' => "",
+			'CardName' => "",
+			'ContactPerson' => "",
+			'CntctCode' => "",
+			'NumAtCard' => "",
+			'Payment' => -1,
+			'Phone' => "",
+			'PriceList' => "",
+			'SlpCode' => "",
+			'DocCur' => getConfig('DEFAULT_CURRENCY'),
+			'DocRate' => 1.00,
+			'DocTotal' => 0.00,
+			'SysTotal' => 0.00,
+			'DiscPrcnt' => 0.00,
+			'DiscAmount' => 0.00,
+			'RoundDif' => 0.00,
+			'VatSum' => 0.00,
+			'PayToCode' => "",
+			'ShipToCode' => "",
+			'Address' => "",
+			'Address2' => "",
+			'DocEntry' => NULL,
+			'DocNum' => NULL,
+			'Status' => NULL,
+			'DocDate' => date('Y-m-d'),
+			'DocDueDate' => date('Y-m-d'),
+			'TextDate' => date('Y-m-d'),
+			'OriginalSQ' => "",
+			'Owner' => $this->_user->emp_id,
+			'Attn1' => "",
+			'Attn2' => "",
+			'Type' => "",
+			'Project' => "",
+			'Comments' => "",
+			'Status' => -1,
+			'Review' => 'P',
+			'Approved' => 'P'
+		);
+
 		$ds = array(
+			'mode' => 'Add',
 			'sale_name' => $this->sales_person_model->get_name($this->_user->sale_id),
+			'sale_id' => $this->_user->sale_id,
 			'owner_name' => $this->employee_model->get_name($this->_user->emp_id),
-			'whsCode' => getConfig('DEFAULT_WAREHOUSE')
+			'whsCode' => getConfig('DEFAULT_WAREHOUSE'),
+			'order' => (object) $order,
+			'totalAmount' => 0.00,
+			'totalVat' => 0.00
 		);
 
     $this->load->view('quotation/quotation_add', $ds);
@@ -95,6 +142,7 @@ class Quotation extends PS_Controller
 			if(! empty($data))
 			{
 				$hd = $data->header;
+				$adr = $hd->Address;
 				$details = $data->details;
 
 				$docDate = db_date($hd->DocDate, FALSE);
@@ -113,6 +161,10 @@ class Quotation extends PS_Controller
 						'CntctCode' => get_null($hd->CntctCode),
 						'ContactPerson' => get_null($hd->ContactPerson),
 						'NumAtCard' => get_null($hd->NumAtCard),
+						'Attn1' => get_null($hd->Attn1),
+						'Attn2' => get_null($hd->Attn2),
+						'Type' => get_null($hd->Type),
+						'Project' => get_null($hd->Project),
 						'Phone' => trim($hd->Phone),
 						'PriceList' => get_null($customer->ListNum),
 						'SlpCode' => empty($hd->SlpCode) ? $customer->SlpCode : $hd->SlpCode,
@@ -147,7 +199,9 @@ class Quotation extends PS_Controller
 					);
 
 					$this->db->trans_begin();
+
 					$id = $this->quotation_model->add($arr);
+
 					if(! $id)
 					{
 						$sc = FALSE;
@@ -155,6 +209,13 @@ class Quotation extends PS_Controller
 					}
 					else
 					{
+						if($this->quotation_model->drop_address($code))
+						{
+							$adr->quotation_code = $code;
+							$address = (array) $adr;
+							$this->quotation_model->add_address($address);
+						}
+
 						if( ! empty($details))
 						{
 							foreach($details as $rs)
@@ -175,8 +236,8 @@ class Quotation extends PS_Controller
 										'quotation_code' => $code,
 										'LineNum' => $rs->LineNum,
 										'ItemCode' => $rs->ItemCode,
-										'ItemName' => $rs->Description,
-										'Description' => $pd->description,
+										'ItemName' => $rs->ItemName,
+										'Description' => $rs->Description,
 										'WhsCode' => empty($rs->whsCode) ? $pd->dfWhsCode : $rs->whsCode,
 										'Qty' => $rs->Quantity,
 										'UomCode' => $pd->uom_code,
@@ -201,7 +262,10 @@ class Quotation extends PS_Controller
 										'LineSysTotal' => $rs->LineSysTotal,
 										'user_id' => $this->_user->id,
 										'uname' => $this->_user->uname,
-										'sale_team' => $rs->sale_team
+										'sale_team' => $rs->sale_team,
+										'TreeType' => $rs->TreeType,
+										'uid' => $rs->uid,
+										'father_uid' => empty($rs->father_uid) ? NULL : $rs->father_uid
 									);
 
 									if(! $this->quotation_model->add_detail($arr))
@@ -234,16 +298,22 @@ class Quotation extends PS_Controller
 						$this->db->trans_rollback();
 					}
 
-					if($hd->isDraft == 0 && ! $MustReview && ! $MustApprove)
+					if(getConfig('QUOTATION_AUTO_INTERFACE'))
 					{
-						$this->load->library('api');
+						//-- 1 = Interface ทันที  0 = ต้องกดส่งทีหลัง
 
-						if( ! $this->api->exportSQ($code))
+						if($hd->isDraft == 0 && ! $MustReview && ! $MustApprove)
 						{
-							$ex = 1;
-							$this->error = "บันทึกเอกสารสำเร็จแต่ส่งข้อมูลไป SAP ไม่สำเร็จ กรุณากดส่งข้อมูลไป SAP อีกครั้งภายหลัง";
+							$this->load->library('api');
+
+							if( ! $this->api->exportSQ($code))
+							{
+								$ex = 1;
+								$this->error = "บันทึกเอกสารสำเร็จแต่ส่งข้อมูลไป SAP ไม่สำเร็จ กรุณากดส่งข้อมูลไป SAP อีกครั้งภายหลัง";
+							}
 						}
 					}
+
 				}
 				else
 				{
@@ -337,14 +407,15 @@ class Quotation extends PS_Controller
 				}
 
 				$ds = array(
+					'mode' => 'Edit',
 					'order' => $order,
 					'details' => $details,
 					'totalAmount' => $totalAmount,
 					'totalVat' => $totalVat,
-					'logs' => $this->quotation_model->get_logs($code),
-					'sale_name' => $this->sales_person_model->get_name($this->_user->sale_id),
+					'sale_name' => $this->sales_person_model->get_name($order->SlpCode),
 					'owner_name' => $this->employee_model->get_name($this->_user->emp_id),
-					'whsCode' => getConfig('DEFAULT_WAREHOUSE')
+					'whsCode' => getConfig('DEFAULT_WAREHOUSE'),
+					'Address' => $this->quotation_model->get_quotation_address($code)
 				);
 
 				$this->quotation_model->update_uuid($code, $uuid);
@@ -376,10 +447,10 @@ class Quotation extends PS_Controller
 
 			$data = json_decode($json);
 
-
 			if(! empty($data))
 			{
 				$hd = $data->header;
+				$adr = $hd->Address; //-- addres -> table quotation_address
 				$details = $data->details;
 
 				if(!empty($hd->code))
@@ -406,6 +477,10 @@ class Quotation extends PS_Controller
 									'CntctCode' => get_null($hd->CntctCode),
 									'ContactPerson' => get_null($hd->ContactPerson),
 									'NumAtCard' => get_null($hd->NumAtCard),
+									'Attn1' => get_null($hd->Attn1),
+									'Attn2' => get_null($hd->Attn2),
+									'Type' => get_null($hd->Type),
+									'Project' => get_null($hd->Project),
 									'Phone' => trim($hd->Phone),
 									'PriceList' => get_null($customer->ListNum),
 									'SlpCode' => empty($hd->SlpCode) ? $customer->SlpCode : $hd->SlpCode,
@@ -450,6 +525,14 @@ class Quotation extends PS_Controller
 								}
 								else
 								{
+									if($this->quotation_model->drop_address($code))
+									{
+										$adr->quotation_code = $code;
+										$address = (array) $adr;
+
+										$this->quotation_model->add_address($address);
+									}
+
 									if($this->quotation_model->drop_details($code))
 									{
 										if( ! empty($details))
@@ -472,8 +555,8 @@ class Quotation extends PS_Controller
 														'quotation_code' => $code,
 														'LineNum' => $rs->LineNum,
 														'ItemCode' => $rs->ItemCode,
-														'ItemName' => $rs->Description,
-														'Description' => $pd->description,
+														'ItemName' => $rs->ItemName,
+														'Description' => $rs->Description,
 														'WhsCode' => empty($rs->whsCode) ? $pd->dfWhsCode : $rs->whsCode,
 														'Qty' => $rs->Quantity,
 														'UomCode' => $pd->uom_code,
@@ -498,7 +581,10 @@ class Quotation extends PS_Controller
 														'LineSysTotal' => $rs->LineSysTotal,
 														'user_id' => $this->_user->id,
 														'uname' => $this->_user->uname,
-														'sale_team' => $rs->sale_team
+														'sale_team' => $rs->sale_team,
+														'TreeType' => $rs->TreeType,
+														'uid' => $rs->uid,
+														'father_uid' => empty($rs->father_uid) ? NULL : $rs->father_uid
 													);
 
 													if(! $this->quotation_model->add_detail($arr))
@@ -538,14 +624,19 @@ class Quotation extends PS_Controller
 									$this->db->trans_rollback();
 								}
 
-								if($hd->isDraft == 0 && ! $MustReview && ! $MustApprove)
+								if(getConfig('QUOTATION_AUTO_INTERFACE'))
 								{
-									$this->load->library('api');
+									//-- 1 = Interface ทันที  0 = ต้องกดส่งทีหลัง
 
-									if( ! $this->api->exportSQ($code))
+									if($hd->isDraft == 0 && $must_approve == 0 OR (! $MustReview && ! $MustApprove))
 									{
-										$ex = 1;
-										$this->error = "บันทึกเอกสารสำเร็จแต่ส่งข้อมูลไป SAP ไม่สำเร็จ กรุณากดส่งข้อมูลไป SAP อีกครั้งภายหลัง";
+										$this->load->library('api');
+
+										if( ! $this->api->exportSQ($code))
+										{
+											$ex = 1;
+											$this->error = "บันทึกเอกสารสำเร็จแต่ส่งข้อมูลไป SAP ไม่สำเร็จ กรุณากดส่งข้อมูลไป SAP อีกครั้งภายหลัง";
+										}
 									}
 								}
 							}
@@ -595,7 +686,6 @@ class Quotation extends PS_Controller
 
 		echo json_encode($arr);
 	}
-
 
 
 	public function approve()
@@ -661,12 +751,17 @@ class Quotation extends PS_Controller
 
 							if($sc === TRUE)
 							{
-								$this->load->library('api');
-
-								if( ! $this->api->exportSQ($code))
+								if(getConfig('QUOTATION_AUTO_INTERFACE'))
 								{
-									$ex = 1;
-									$this->error = "บันทึกเอกสารสำเร็จแต่ส่งข้อมูลไป SAP ไม่สำเร็จ กรุณากดส่งข้อมูลไป SAP อีกครั้งภายหลัง";
+									//-- 1 = Interface ทันที  0 = ต้องกดส่งทีหลัง
+
+									$this->load->library('api');
+
+									if( ! $this->api->exportSQ($code))
+									{
+										$ex = 1;
+										$this->error = "บันทึกเอกสารสำเร็จแต่ส่งข้อมูลไป SAP ไม่สำเร็จ กรุณากดส่งข้อมูลไป SAP อีกครั้งภายหลัง";
+									}
 								}
 							}
 						}
@@ -722,6 +817,7 @@ class Quotation extends PS_Controller
 	{
 		$sc = TRUE;
 		$code = trim($this->input->post('code'));
+		$reason = trim($this->input->post('reason'));
 
 		if(!empty($code))
 		{
@@ -735,7 +831,8 @@ class Quotation extends PS_Controller
 					{
 						$arr = array(
 							'Approved' => 'R',
-							'Approver' => $this->_user->uname
+							'Approver' => $this->_user->uname,
+							'message' => $reason
 						);
 
 						if( ! $this->quotation_model->update($code, $arr))
@@ -836,14 +933,19 @@ class Quotation extends PS_Controller
 							$this->user_model->add_logs($arr);
 						}
 
-						if($sc === TRUE && (! $MustApprove OR $order->must_approve == 0))
+						if(getConfig('QUOTATION_AUTO_INTERFACE'))
 						{
-							$this->load->library('api');
+							//-- 1 = Interface ทันที  0 = ต้องกดส่งทีหลัง
 
-							if( ! $this->api->exportSQ($code))
+							if($sc === TRUE && (! $MustApprove OR $order->must_approve == 0))
 							{
-								$ex = 1;
-								$this->error = "บันทึกเอกสารสำเร็จแต่ส่งข้อมูลไป SAP ไม่สำเร็จ กรุณากดส่งข้อมูลไป SAP อีกครั้งภายหลัง";
+								$this->load->library('api');
+
+								if( ! $this->api->exportSQ($code))
+								{
+									$ex = 1;
+									$this->error = "บันทึกเอกสารสำเร็จแต่ส่งข้อมูลไป SAP ไม่สำเร็จ กรุณากดส่งข้อมูลไป SAP อีกครั้งภายหลัง";
+								}
 							}
 						}
 					}
@@ -893,6 +995,7 @@ class Quotation extends PS_Controller
 	{
 		$sc = TRUE;
 		$code = trim($this->input->post('code'));
+		$reason = trim($this->input->post('reason'));
 
 		if(!empty($code))
 		{
@@ -906,7 +1009,8 @@ class Quotation extends PS_Controller
 					{
 						$arr = array(
 							'Review' => 'R',
-							'ReviewBy' => $this->_user->uname
+							'ReviewBy' => $this->_user->uname,
+							'message' => $reason
 						);
 
 						if( ! $this->quotation_model->update($code, $arr))
@@ -1013,7 +1117,6 @@ class Quotation extends PS_Controller
 				'totalVat' => $totalVat,
 				'sale_name' => $this->sales_person_model->get_name($order->SlpCode),
 				'owner' => $this->employee_model->get_name($order->OwnerCode),
-				'logs' => $this->quotation_model->get_logs($code),
 				'ap' => $ap
 			);
 
@@ -1038,7 +1141,21 @@ class Quotation extends PS_Controller
 
 			if( ! empty($order))
 			{
-				if($order->Status == -1 OR $order->Status == 0 OR $order->Status == 3)
+				$exists = FALSE;
+
+				if($order->Status == 1)
+				{
+					$docNum = $this->quotation_model->getSapDocNum($code);
+
+					if( ! empty($docNum))
+					{
+						$exists = TRUE;
+						$sc = FALSE;
+						$this->error = "กรุณายกเลิกใบเสนอราคาเลขที่ {$docNum} ใน SAP ก่อนทำการยกเลิกบน WEB";
+					}
+				}
+
+				if($exists === FALSE && ($order->Status == -1 OR $order->Status == 0 OR $order->Status == 3))
 				{
 					$this->db->trans_begin();
 					//--- set detail complete to 2 ** cancelled
@@ -1076,11 +1193,6 @@ class Quotation extends PS_Controller
 						$this->db->trans_rollback();
 					}
 				}
-				else
-				{
-					$sc = FALSE;
-					$this->error = "Invalid Document Status";
-				}
 			}
 			else
 			{
@@ -1108,7 +1220,7 @@ class Quotation extends PS_Controller
 
 		if(!empty($order))
 		{
-			if($order->Status == 1 OR $order->Status == 3 && (empty($order->DocEntry) && empty($order->DocNum)))
+			if(empty($order->DocEntry) && empty($order->DocNum))
 			{
 				$this->load->library('api');
 
@@ -1143,12 +1255,38 @@ class Quotation extends PS_Controller
 
 		$this->load->library('printer');
 		$doc = $this->quotation_model->get($code);
-		$details = $this->quotation_model->get_details($code);
+		$details = $this->quotation_model->get_un_child_details($code);
+
+		if( ! empty($details))
+		{
+			foreach($details as $rs)
+			{
+				if($rs->TreeType == 'S')
+				{
+					$childs = $this->quotation_model->get_childs_row($code, $rs->uid);
+
+					if( ! empty($childs))
+					{
+						$lineAmount = 0.00;
+						$price = 0.00;
+						foreach($childs as $ch)
+						{
+							$rs->Description .= PHP_EOL.$ch->Description;
+							$price += $ch->SellPrice;
+							$lineAmount += $ch->LineTotal;
+						}
+
+						$rs->Price = $price;
+						$rs->SellPrice = $price;
+						$rs->LineTotal = $lineAmount;
+					}
+				}
+			}
+		}
 
 		$customer = $this->customers_model->get($doc->CardCode);
 		$sale = $this->sales_person_model->get($doc->SlpCode);
-		//$payment = $this->payment_term_model->get($doc->Payment);
-		// $doc->OwnerName = empty($doc->OwnerCode) ? "" : $this->employee_model->get_name($doc->OwnerCode);
+
 		$owner = empty($doc->OwnerCode) ? NULL : $this->employee_model->get($doc->OwnerCode);
 		if( ! empty($owner))
 		{
@@ -1377,12 +1515,14 @@ class Quotation extends PS_Controller
 		{
 			$arr = array(
 				'code' => get_empty_text($adr->Address),
-				'address' => get_empty_text($adr->Street),
-				'sub_district' => get_empty_text($adr->Block),
-				'district' => get_empty_text($adr->City),
-				'province' => get_empty_text($adr->County),
+				'street' => get_empty_text($adr->Street),
+				'streetNo' => get_empty_text($adr->StreetNo),
+				'block' => get_empty_text($adr->Block),
+				'city' => get_empty_text($adr->City),
+				'county' => get_empty_text($adr->County),
 				'country' => get_empty_text($adr->Country),
-				'postcode' => get_empty_text($adr->ZipCode)
+				'zipCode' => get_empty_text($adr->ZipCode),
+				'state' => get_empty_text($adr->State)
 			);
 
 			echo json_encode($arr);
@@ -1406,12 +1546,14 @@ class Quotation extends PS_Controller
 		{
 			$arr = array(
 				'code' => get_empty_text($adr->Address),
-				'address' => get_empty_text($adr->Street),
-				'sub_district' => get_empty_text($adr->Block),
-				'district' => get_empty_text($adr->City),
-				'province' => get_empty_text($adr->County),
+				'street' => get_empty_text($adr->Street),
+				'streetNo' => get_empty_text($adr->StreetNo),
+				'block' => get_empty_text($adr->Block),
+				'city' => get_empty_text($adr->City),
+				'county' => get_empty_text($adr->County),
 				'country' => get_empty_text($adr->Country),
-				'postcode' => get_empty_text($adr->ZipCode)
+				'zipCode' => get_empty_text($adr->ZipCode),
+				'state' => get_empty_text($adr->State)
 			);
 
 			echo json_encode($arr);
@@ -1448,6 +1590,70 @@ class Quotation extends PS_Controller
 		}
 	}
 
+	public function get_reject_message()
+	{
+		$code = $this->input->get('code');
+
+		$order = $this->quotation_model->get($code);
+
+		if(!empty($order))
+		{
+			$uname = $order->Review == 'R' ? $order->ReviewBy : ($order->Approved == 'R' ? $order->Approver : NULL);
+
+			$arr = array(
+				'U_WEBORDER' => $code,
+				'CardCode' => $order->CardCode,
+				'CardName' => $order->CardName,
+				'date_upd' => thai_date($order->date_upd, TRUE),
+				'Message' => $order->message,
+				'rejected_by' => $this->user_model->get_name($uname)
+			);
+
+			echo json_encode($arr);
+		}
+		else
+		{
+			echo "No data";
+		}
+	}
+
+	public function get_logs()
+	{
+		$sc = TRUE;
+		$ds = array();
+		$code = $this->input->get('code');
+
+		if( ! empty($code))
+		{
+			$logs = $this->quotation_model->get_logs($code);
+
+			if( ! empty($logs))
+			{
+				foreach($logs as $lg)
+				{
+					$arr = array(
+						'name' => action_name($lg->action),
+						'uname' => $lg->uname,
+						'date' => thai_date($lg->date_upd, TRUE)
+					);
+
+					array_push($ds, $arr);
+				}
+			}
+			else
+			{
+				$arr = array('nodata' => 'nodata');
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			$this->error = "Missing required parameter";
+		}
+
+		echo $sc === TRUE ? json_encode($ds) : $this->error;
+	}
+
 
 	public function clear_filter()
 	{
@@ -1455,6 +1661,7 @@ class Quotation extends PS_Controller
 			'sq_code',
 			'sq_customer',
 			'sqNo',
+			'project',
 			'sq_sale_id',
 			'sq_emp_id',
 			'sq_review',

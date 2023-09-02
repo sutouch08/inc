@@ -68,6 +68,34 @@ function toggleStrongPWD(option) {
 }
 
 
+function toggleLogsJson(option) {
+	$('#logs-json').val(option);
+
+	if(option == 1) {
+		$('#btn-logs-on').addClass('btn-primary');
+		$('#btn-logs-off').removeClass('btn-primary');
+	}
+	else {
+		$('#btn-logs-on').removeClass('btn-primary');
+		$('#btn-logs-off').addClass('btn-primary');
+	}
+}
+
+
+function toggleTestMode(option) {
+	$('#test-mode').val(option);
+
+	if(option == 1) {
+		$('#btn-test-on').addClass('btn-primary');
+		$('#btn-test-off').removeClass('btn-primary');
+	}
+	else {
+		$('#btn-test-on').removeClass('btn-primary');
+		$('#btn-test-off').addClass('btn-primary');
+	}
+}
+
+
 function toggleCreditLimit(option) {
 	$('#credit-limit').val(option);
 

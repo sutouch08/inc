@@ -28,7 +28,7 @@ function select_ship_to_code($CardCode, $code = NULL)
 	{
 		foreach($options as $rs)
 		{
-			$sc .= '<option value="'.$rs->code.'" '.is_selected($rs->code, $code).'>'.$rs->code.' : '.$rs->name.'</option>';
+			$sc .= '<option value="'.$rs->code.'" data-name="'.$rs->name.'" '.is_selected($rs->code, $code).'>'.$rs->code.' : '.$rs->name.'</option>';
 		}
 	}
 
@@ -47,10 +47,56 @@ function select_bill_to_code($CardCode, $code = NULL)
 	{
 		foreach($options as $rs)
 		{
-			$sc .= '<option value="'.$rs->code.'" '.is_selected($rs->code, $code).'>'.$rs->code.' : '.$rs->name.'</option>';
+			$sc .= '<option value="'.$rs->code.'" data-name="'.$rs->name.'" '.is_selected($rs->code, $code).'>'.$rs->code.' : '.$rs->name.'</option>';
 		}
 	}
 
 	return $sc;
 }
+
+function statusName($status, $review, $approve)
+{
+	$name = "Unknow";
+
+	switch($status)
+	{
+		case -1 :
+			$name = "Draft";
+			break;
+		case 1 :
+			$name = "Success";
+			break;
+		case 2 :
+			$name = "Canceled";
+			break;
+		case 3 :
+			$name = "Failed";
+			break;
+		case 0 :
+			if($review == 'R' OR $approve == 'R')
+			{
+				$name = "Rejected";
+			}
+			elseif($review == 'P' OR $approve == 'P')
+			{
+				$name = 'Pending';
+			}
+			elseif($approve == 'S')
+			{
+				$name = "Approved by System";
+			}
+			elseif($approve == 'A')
+			{
+				$name = "Approved";
+			}
+
+			break;
+		default :
+			$name = "Unknow";
+			break;
+	}
+
+	return $name;
+}
+
  ?>

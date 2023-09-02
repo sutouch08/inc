@@ -223,6 +223,35 @@ function showMessage(code) {
 	})
 }
 
+function showReason(code) {
+	$.ajax({
+		url:HOME + 'get_reject_message',
+		type:'GET',
+		cache:false,
+		data:{
+			'code' : code
+		},
+		success:function(rs) {
+			if(isJson(rs)) {
+				let ds = $.parseJSON(rs);
+				let source = $('#reason-template').html();
+				let output = $('#reason');
+
+				render(source, ds, output);
+
+				$('#reasonModal').modal('show');
+			}
+			else {
+				swal({
+					title:'Error!',
+					text:rs,
+					type:'error'
+				})
+			}
+		}
+	})
+}
+
 
 
 $("#fromDate").datepicker({

@@ -1,51 +1,71 @@
 <!--  Add New Address Modal  --------->
 <div class="modal fade" id="billToModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="max-width:500px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title-site text-center" >Bill To Address</h4>
-            </div>
-            <div class="modal-body">
-            <form	>
-            <input type="hidden" id="b_address" />
-            <div class="row">
-                <div class="col-sm-12 col-xs-12">
-                	<label class="input-label">Street/PO Box/เลขที่ ตึก ชั้น..</label>
-                    <input type="text" class="form-control input-sm" id="bBlock" placeholder="เลขที่, หมู่บ้าน(จำเป็น)" />
+  <div class="modal-dialog" style="max-width:400px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title-site text-center" >Billing Address</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row" style="margin-left:0; margin-right:0;">
+          <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="form-horizontal">
+              <div class="form-group">
+                <label class="col-lg-4 col-md-4 col-sm-4 col-xs-4">Street/PO Box</label>
+                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                  <input type="text" class="form-control input-sm" id="b-Street" maxlength="100"/>
                 </div>
+              </div>
 
-                <div class="col-sm-12 col-xs-12">
-                	<label class="input-label">Street No./ถนน</label>
-                    <input type="text" class="form-control input-sm"  id="bStreet" placeholder="ถนน" />
+              <div class="form-group">
+                <label class="col-lg-4 col-md-4 col-sm-4 col-xs-4">Street No.</label>
+                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                  <input type="text" class="form-control input-sm" id="b-StreetNo" maxlength="100" />
                 </div>
+              </div>
 
-                <div class="col-sm-6 col-xs-12">
-                	<label class="input-label">Block/ตำบล/แขวง</label>
-                    <input type="text" class="form-control input-sm" id="bSubDistrict" placeholder="ตำบล" />
+              <div class="form-group">
+                <label class="col-lg-4 col-md-4 col-sm-4 col-xs-4">Block</label>
+                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                  <input type="text" class="form-control input-sm" id="b-Block" maxlength="100"/>
                 </div>
-                <div class="col-sm-6 col-xs-12">
-                	<label class="input-label">County/อำเภอ/เขต</label>
-                    <input type="text" class="form-control input-sm" id="bDistrict" placeholder="อำเภอ (จำเป็น)" />
+              </div>
+
+              <div class="form-group">
+                <label class="col-lg-4 col-md-4 col-sm-4 col-xs-4">City</label>
+                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                  <input type="text" class="form-control input-sm" id="b-City" maxlength="100"/>
                 </div>
-                <div class="col-sm-6 col-xs-12">
-                	<label class="input-label">City/จังหวัด</label>
-                    <input type="text" class="form-control input-sm" id="bProvince" placeholder="จังหวัด (จำเป็น)" />
+              </div>
+
+              <div class="form-group">
+                <label class="col-lg-4 col-md-4 col-sm-4 col-xs-4">Zip Code</label>
+                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                  <input type="text" class="form-control input-sm" id="b-ZipCode" maxlength="20" />
                 </div>
-                <div class="col-sm-6 col-xs-12">
-                	<label class="input-label">Country/ประเทศ</label>
-                  <input type="text" class="form-control input-sm" id="bCountry" max-maxlength="3" />                  
+              </div>
+
+              <div class="form-group">
+                <label class="col-lg-4 col-md-4 col-sm-4 col-xs-4">County</label>
+                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                  <input type="text" class="form-control input-sm" id="b-County" maxlength="100" />
                 </div>
-                <div class="col-sm-6 col-xs-12">
-                	<label class="input-label">รหัสไปรษณีย์</label>
-                    <input type="text" class="form-control input-sm" id="bPostCode" placeholder="รหัสไปรษณีย์" />
+              </div>
+
+              <div class="form-group">
+                <label class="col-lg-4 col-md-4 col-sm-4 col-xs-4">Country</label>
+                <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                  <input type="text" class="form-control input-sm" id="b-Country" maxlength="3" onkeydown="return /[A-Z]/i.test(event.key)" />
                 </div>
+              </div>
             </div>
-            </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-sm btn-success" onClick="updateBillTo()" ><i class="fa fa-save"></i> บันทึก</button>
-            </div>
+          </div>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-xs btn-success btn-100" onClick="updateBillTo()" >OK</button>
+        <button type="button" class="btn btn-xs btn-default btn-100" onclick="closeModal('billToModal')">Cancel</button>
+      </div>
     </div>
+  </div>
 </div>

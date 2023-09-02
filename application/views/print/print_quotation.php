@@ -81,12 +81,11 @@ $logo_path = base_url()."images/form-logo.png";
 //**************  กำหนดหัวตาราง  ******************************//
 $thead	= array(
           array("ลำดับที่<br/>No.", "font-size:10px; width:10mm; text-align:center; padding:3px 0px 3px 0px; border:solid 1px #555555;"),
-          array("ITEM", "font-size:10px; width:20mm; text-align:center; padding:3px 0px 3px 0px; border:solid 1px #555555; vertical-align:middle;"),
-          array("รหัสสินค้า<br/>Model", "font-size:10px; width:30mm; text-align:center; padding:3px 0px 3px 0px; border:solid 1px #555555;"),
-					array("รายละเอียด<br/>Description", "font-size:10px; width:55mm; text-align:center; padding:3px 0px 3px 0px; border:solid 1px #555555;"),
-          array("จำนวน<br/>QTY", "font-size:10px; width:15mm; text-align:center; padding:3px 0px 3px 0px; border:solid 1px #555555;"),
-					array("ราคา/หน่วย<br/>Unit Price", "font-size:10px; width:15mm; text-align:center; padding:3px 0px 3px 0px; border:solid 1px #555555;"),
-					array("ส่วนลด<br/>Disc(%)", "font-size:10px; width:12mm; text-align:center; padding:3px 0px 3px 0px; border:solid 1px #555555;"),
+          array("รหัสสินค้า<br/>Model", "font-size:10px; width:35mm; text-align:center; padding:3px 0px 3px 0px; border:solid 1px #555555;"),
+					array("รายละเอียด<br/>Description", "font-size:10px; width:65mm; text-align:center; padding:3px 0px 3px 0px; border:solid 1px #555555;"),
+          array("จำนวน<br/>QTY", "font-size:10px; width:14mm; text-align:center; padding:3px 0px 3px 0px; border:solid 1px #555555;"),
+					array("ราคา/หน่วย<br/>Unit Price", "font-size:10px; width:18mm; text-align:center; padding:3px 0px 3px 0px; border:solid 1px #555555;"),
+					array("ส่วนลด<br/>Disc(%)", "font-size:10px; width:15mm; text-align:center; padding:3px 0px 3px 0px; border:solid 1px #555555;"),
           array("ราคาสุทธิ<br/>Net Price", "font-size:10px; width:15mm; text-align:center; padding:3px 0px 3px 0px; border:solid 1px #555555;"),
           array("จำนวนเงิน<br/>Amount", "font-size:10px; width:20mm; text-align:center; padding:3px 0px 3px 0px; border:solid 1px #555555;")
           );
@@ -97,7 +96,6 @@ $this->printer->add_subheader($thead);
 //***************************** กำหนด css ของ td *****************************//
 $pattern = array(
             "font-size:10px; vertical-align:text-top; text-align:center; padding:3px; border:solid 1px #555555; min-height:5mm;", //-- ลำดับ
-            "font-size:10px; vertical-align:text-top; text-align:left; padding:3px; border:solid 1px #555555; min-height:5mm;",  //--- Item code
             "font-size:10px; vertical-align:text-top; text-align:left; padding:3px; border:solid 1px #555555; min-height:5mm;",  //--- Item name
             "font-size:10px; vertical-align:text-top; text-align:left; padding:3px; border:solid 1px #555555; min-height:5mm; white-space:pre-wrap;", //--- Description
             "font-size:10px; vertical-align:text-top; text-align:center; padding:3px; border:solid 1px #555555; min-height:5mm;", //--- จำนวน
@@ -165,10 +163,6 @@ $footer .= "<div style='width:190mm; height:5mm; margin:auto; border:none; paddi
 $this->printer->footer = $footer;
 
 $total_page  = $this->printer->total_page == 0 ? 1 : $this->printer->total_page;
-$total_price = 0;
-$total_amount = 0;  //--- มูลค่ารวม(หลังหักส่วนลด)
-$total_discount = 0;
-$total_vat = 0;
 
 $n = 1;
 $index = 0;
@@ -210,26 +204,26 @@ while($total_page > 0 )
 	$top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Address</td>";
 	$top .=					"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: {$doc->Address}</td>";
 	$top .= 			"</tr>";
-  $top .= 			"<tr>";
-  $top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Phone</td>";
-  $top .= 				"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: {$doc->Phone}</td>";
-  $top .= 			"</tr>";
+  // $top .= 			"<tr>";
+  // $top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Phone</td>";
+  // $top .= 				"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: {$doc->Phone}</td>";
+  // $top .= 			"</tr>";
 	$top .= 			"<tr>";
 	$top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Email</td>";
 	$top .= 				"<td style=''>: {$customer->E_Mail}</td>";
 	$top .= 			"</tr>";
   $top .= 			"<tr>";
   $top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Attn</td>";
-  $top .= 				"<td style=''>: {$doc->ContactPerson}</td>";
+  $top .= 				"<td style=''>: {$doc->Attn1}</td>";
   $top .= 			"</tr>";
   $top .= 			"<tr>";
   $top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Attn</td>";
-  $top .= 				"<td style=''>: {$doc->NumAtCard}</td>";
+  $top .= 				"<td style=''>: {$doc->Attn2}</td>";
   $top .= 			"</tr>";
-	// $top .= 			"<tr>";
-	// $top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Project</td>";
-	// $top .= 				"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: </td>";
-	// $top .= 			"</tr>";
+	$top .= 			"<tr>";
+	$top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Project</td>";
+	$top .= 				"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: {$doc->Project}</td>";
+	$top .= 			"</tr>";
 	$top .= 		"</table>";
 	$top .= 	"</div>";
 
@@ -309,7 +303,6 @@ while($total_page > 0 )
 
       $data = array(
         $n,
-        NULL,
         $rs->ItemName,
         $rs->Description,
         number($rs->Qty, 2),
@@ -319,16 +312,11 @@ while($total_page > 0 )
         number($rs->LineTotal, 2)
       );
 
-      $row_price = ($rs->Price * $rs->Qty);
-      $total_price += $row_price;
-      $total_discount += $row_price - $rs->LineTotal;
-      $total_amount   += $rs->LineTotal;
-      $total_vat += $rs->LineTotal * ($rs->VatRate * 0.01);
       $n++;
     }
     else
     {
-			$data = array("","&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;","&nbsp;");
+			$data = array("", "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;","&nbsp;");
     }
 
     $page .= empty($data) ? "" : $this->printer->print_row($data, $last_row);
@@ -358,7 +346,7 @@ while($total_page > 0 )
 					$i++;
 					while($i < $row)
 					{
-						$data = array("","&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;");
+						$data = array("","&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;");
 						$page .= $this->printer->print_row($data, $last_row);
 						$i++;
 					}
@@ -382,31 +370,32 @@ while($total_page > 0 )
 
   if($this->printer->current_page == $this->printer->total_page)
   {
-		$amountBfDisc = number($total_price, 2);
-		$disAmount = number($total_discount, 2);
-		$amountBfVat = number($total_amount,2);
-		$vatAmount = number($total_vat, 2);
-		$amountAfterVat = $total_amount * (1 + ($tax_rate * 0.01));
-		$netAmount = number($amountAfterVat, 2);
-		$baht_text = baht_text($amountAfterVat);
+    $totalBfDisc = ($doc->DocTotal - $doc->VatSum) + $doc->DiscAmount;
+    $amountBfVat = $totalBfDisc - $doc->DiscAmount;
+
+		$amountBfDisc = number($totalBfDisc, 2);
+		$disAmount = number($doc->DiscAmount, 2);
+    $amountBfVat = number($amountBfVat);
+		$vatAmount = number($doc->VatSum, 2);
+		$netAmount = number($doc->DocTotal, 2);
+		$baht_text = baht_text($netAmount);
 		$remark = $doc->Comments;
   }
   else
   {
-		$amountBfDisc = "";
+    $amountBfDisc = "";
 		$disAmount = "";
-		$amountBfVat = "";
+    $amountBfVat = "";
 		$vatAmount = "";
-		$amountAfterVat = "";
 		$netAmount = "";
 		$baht_text = "";
 		$remark = "";
   }
 
   $subTotal = array();
-  $fix_remark = "<u>Remark</u><br/>
+  $fix_remark = "<u>เงื่อนไข</u><br/>
                 1.กำหนดยื่นราคา 30 วันนับจากวันเสนอราคา<br/>
-                2.ชำระด้วยเงินสด/บัตรเครดิตธนาคารชาร์จ 2.5%/เงินโอนผ่านธนาคาร/เช็คธนาคาร<br/>
+                2.ชำระด้วยเงินสด / เงินโอนผ่านธนาคาร / เช็คธนาคาร / บัตรเครดิตธนาคาร(ชาร์จ 2.5%)<br/>
                 3.ลูกค้าส่งหลักฐานการชำระเงินก่อนส่งมอบสินค้า<br/>
                 4.เครดิตการค้าเป็นไปตามเงื่อนไขของบริษัทโดยผู้มีอำนาจลงนามเท่านั้น";
 
@@ -448,42 +437,10 @@ while($total_page > 0 )
 
   $page .= "<tr><td colspan='9' style='padding:0; border:solid 1px #555555;'>{$this->printer->footer}</td></tr>";
 
-/*
-	$page .= "<tr>";
-	$page .= "<td rowspan='4' colspan='4' style='font-size:10px; border:solid 1px #555555; vertical-align:top; padding:5px; '>หมายเหตุ : {$fix_remark}</td>";
-  $page .= "<td colspan='3' style='font-size:11px; border-top:solid 1px #555555; border-left:solid 1px #555555; padding:2px;'>จำนวนเงิน/Price</td>";
-  $page .= "<td colspan='2' style='font-size:11px; border-top:solid 1px #555555; border-right:solid 1px #555555; padding:2px;' class='text-right'>{$amountBfDisc}</td>";
-	$page .= "</tr>";
-
-	$page .= "<tr>";
-  $page .= "<td colspan='3' style='font-size:11px; border-left:solid 1px #555555; padding:2px;'>ส่วนลด/Discount &nbsp;&nbsp;{$doc->DiscPrcnt} %</td>";
-  $page .= "<td colspan='2' style='font-size:11px; border-right:solid 1px #555555; padding:2px;' class='text-right'>{$disAmount}</td>";
-	$page .= "</tr>";
-
-	$page .= "<tr>";
-  $page .= "<td colspan='3' style='font-size:11px; border-left:solid 1px #555555; padding:2px;'>มูลค่าหลังหักส่วนลด/Net Price</td>";
-  $page .= "<td colspan='2' style='font-size:11px; border-right:solid 1px #555555; padding:2px;' class='text-right'>{$amountBfVat}</td>";
-	$page .= "</tr>";
-
-  $page .= "<td colspan='3' style='font-size:11px; border-left:solid 1px #555555; padding:2px;'>จำนวนภาษีมูลค่าเพิ่ม &nbsp; 7.00%</td>";
-  $page .= "<td colspan='2' style='font-size:11px; border-right:solid 1px #555555; padding:2px;' class='text-right'>{$vatAmount}</td>";
-	$page .= "</tr>";
-
-	$page .= "<tr>";
-  $page .= "<td colspan='4' style='font-size:12px; vertical-align:middle; padding:5px; height:10mm;'>จำนวนเงิน : {$baht_text}</td>";
-  $page .= "<td colspan='3' style='font-size:11px; border-left:solid 1px #555555; padding:2px;'>รวมเงินสุทธิ/Total Price</td>";
-  $page .= "<td colspan='2' style='font-size:11px; border-right:solid 1px #555555; padding:2px;' class='text-right'>{$netAmount}</td>";
-	$page .= "</tr>";
-  */
 
 	$page .= $this->printer->table_end();
 
   $page .= $this->printer->content_end();
-
-  // if($this->printer->show_footer)
-  // {
-  //   $page .= $this->printer->footer;
-  // }
 
   $page .= $this->printer->page_end($footer_address);
 

@@ -139,6 +139,12 @@ function render_append(source, data, output){
 }
 
 
+function render_after(source, data, output) {
+	var template = Handlebars.compile(source);
+	var html = template(data);
+	$(html).insertAfter(output);
+}
+
 
 
 function set_rows()

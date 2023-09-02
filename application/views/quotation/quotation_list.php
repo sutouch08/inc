@@ -27,8 +27,8 @@
 	</div>
 
 	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
-		<label>SQ No</label>
-		<input type="text" class="width-100 search-box" name="sqNo" value="<?php echo $sqNo; ?>" />
+		<label>Project</label>
+		<input type="text" class="width-100 search-box" name="project" value="<?php echo $project; ?>" />
 	</div>
 
 	<div class="col-lg-2-harf col-md-2 col-sm-2 col-xs-6 padding-5">
@@ -54,6 +54,11 @@
 			<?php echo select_saleman($sale_id); ?>
 		</select>
   </div>
+
+	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+		<label>SQ No</label>
+		<input type="text" class="width-100 search-box" name="sqNo" value="<?php echo $sqNo; ?>" />
+	</div>
 
 	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 		<label>Review</label>
@@ -119,7 +124,7 @@
 
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive" id="double-scroll">
-		<table class="table table-striped table-hover dataTable border-1" style="margin-bottom:10px; min-width:1170px; border-collapse:inherit;">
+		<table class="table table-striped table-hover dataTable border-1" style="margin-bottom:10px; min-width:1260px; border-collapse:inherit;">
 			<thead>
 				<tr style="font-size:10px;">
 					<th class="middle" style="width:110px;"></th>
@@ -128,6 +133,7 @@
 					<th class="fix-width-100 middle">Web No.</th>
 					<th class="fix-width-100 middle">Customer code</th>
 					<th class="min-width-250 middle">Customer name</th>
+					<th class="fix-width-120 middle">Project</th>
 					<th class="fix-width-100 middle text-right">Amount</th>
 					<th class="fix-width-80 middle text-center">Review</th>
 					<th class="fix-width-80 middle text-center">Approval</th>
@@ -154,13 +160,14 @@
 					<td class="middle"><?php echo $rs->code; ?></td>
 					<td class="middle"><?php echo $rs->CardCode; ?></td>
 					<td class="middle"><?php echo $rs->CardName; ?></td>
+					<td class="middle"><?php echo $rs->Project; ?></td>
 					<td class="middle text-right"><?php echo number($rs->DocTotal, 2); ?></td>
 					<td class="middle text-center">
 						<?php if($rs->Status != -1 && $rs->Status != 2) : ?>
 							<?php if($rs->Review == 'A') : ?>
 								<span class="green">Confirmed</span>
 							<?php elseif($rs->Review == 'R') : ?>
-								<span class="red">Rejected</span>
+								<a href="javascript:void(0)" class="red" onclick="showReason('<?php echo $rs->code; ?>')">Rejected</a>
 							<?php elseif($rs->Review == 'S') : ?>
 								<span class="green">System</span>
 							<?php else : ?>
@@ -178,7 +185,7 @@
 								<?php elseif($rs->Approved == 'A') : ?>
 									<span class="green">Approved</span>
 								<?php elseif($rs->Approved == 'R') : ?>
-								<span class="red">Rejected</span>
+								<a href="javascript:void(0)" class="red" onclick="showReason('<?php echo $rs->code; ?>')">Rejected</a>
 								<?php endif; ?>
 							<?php endif; ?>
 						<?php endif; ?>
@@ -207,6 +214,24 @@
 	</div>
 </div>
 
+<div class="modal fade" id="reasonModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width:800px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Reject Reason</h4>
+            </div>
+            <div class="modal-body" style="padding-top:5px;">
+            <div class="row">
+              <div class="col-sm-12 col-xs-12" id="reason">
+
+              </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal fade" id="failedModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog" style="max-width:800px;">
         <div class="modal-content">
@@ -226,6 +251,21 @@
   </div>
 </div>
 
+<script id="reason-template" type="text/x-handlebarsTemplate">
+  <input type="hidden" id="U_WEBORDER" value="{{U_WEBORDER}}"/>
+  <table class="table table-bordered" style="margin-bottom:0px;">
+    <tbody style="font-size:16px;">
+      <tr><td class="width-30">Web Order</td><td class="width-70">{{U_WEBORDER}}</td></tr>
+      <tr><td class="width-30">Customer Code</td><td class="width-70">{{CardCode}}</td></tr>
+      <tr><td>Customer Name</td><td>{{CardName}}</td></tr>
+			<tr><td>Status</td><td class="red">Rejected</td></tr>
+      <tr><td>Date/Time</td><td>{{date_upd}}</td></tr>
+      <tr><td>Reason</td><td>{{Message}}</td></tr>
+			<tr><td>Rejected By</td><td>{{rejected_by}}</td></tr>
+    </tbody>
+  </table>
+</script>
+
 <script id="failed-template" type="text/x-handlebarsTemplate">
   <input type="hidden" id="U_WEBORDER" value="{{U_WEBORDER}}"/>
   <table class="table table-bordered" style="margin-bottom:0px;">
@@ -241,28 +281,11 @@
 </script>
 
 <script>
-function toggleChannels(el) {
-	if(el.is(':checked')) {
-		$('.channels').removeClass('hide');
-		$('#chk-channels').val(1);
-	}
-	else {
-		$('.channels').addClass('hide');
-		$('#chk-channels').val(0);
-	}
-}
+function showReason(reason) {
+	$('#reason').text(reason);
 
-function togglePayment(el) {
-	if(el.is(':checked')) {
-		$('.payment').removeClass('hide');
-		$('#chk-payment').val(1);
-	}
-	else {
-		$('.payment').addClass('hide');
-		$('#chk-payment').val(0);
-	}
+	$('#reasonModal').modal('show');
 }
-
 
 	$('#user_id').select2();
 	$('#sale_id').select2();

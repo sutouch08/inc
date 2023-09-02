@@ -1,3 +1,5 @@
+var rejectMode = "";
+
 function createSO(code) {
 	swal({
     title:'Create Sale Order',
@@ -68,60 +70,61 @@ function printSQ(code) {
 }
 
 
-function reject() {
-	let code = $('#code').val();
-	swal({
-		title:'Reject !',
-		text:'ต้องการ Reject '+code+' หรือไม่ ?',
-		type:'warning',
-		showCancelButton:true,
-		confirmButtonColor:'#d15b47',
-		confirmButtonText:'Yes',
-		cancelButtonText:'No',
-		closeOnConfirm:true
-	}, function() {
-		load_in();
-		setTimeout(() => {
-			$.ajax({
-				url:HOME + 'reject',
-				type:'POST',
-				cache:false,
-				data:{
-					'code' : code
-				},
-				success:function(rs) {
-					load_out();
-
-					if(rs == 'success') {
-						swal({
-							title:'Success',
-							type:'success',
-							timer:1000
-						});
-
-						setTimeout(() => {
-							window.location.reload();
-						}, 1200);
-					}
-					else {
-						swal({
-							title:'Error!',
-							text:rs,
-							type:'error'
-						});
-					}
-				},
-				error:function(xhr, textStatus) {
-					swal({
-						title:'Error !',
-						text: "Request failed : "+textStatus,
-						type:'error'
-					});
-				}
-			})
-		}, 200);
-	})
-}
+// function reject() {
+// 	let code = $('#code').val();
+// 	let url = rejectMode == 'approve' ?
+// 	swal({
+// 		title:'Reject !',
+// 		text:'ต้องการ Reject '+code+' หรือไม่ ?',
+// 		type:'warning',
+// 		showCancelButton:true,
+// 		confirmButtonColor:'#d15b47',
+// 		confirmButtonText:'Yes',
+// 		cancelButtonText:'No',
+// 		closeOnConfirm:true
+// 	}, function() {
+// 		load_in();
+// 		setTimeout(() => {
+// 			$.ajax({
+// 				url:HOME + 'reject',
+// 				type:'POST',
+// 				cache:false,
+// 				data:{
+// 					'code' : code
+// 				},
+// 				success:function(rs) {
+// 					load_out();
+//
+// 					if(rs == 'success') {
+// 						swal({
+// 							title:'Success',
+// 							type:'success',
+// 							timer:1000
+// 						});
+//
+// 						setTimeout(() => {
+// 							window.location.reload();
+// 						}, 1200);
+// 					}
+// 					else {
+// 						swal({
+// 							title:'Error!',
+// 							text:rs,
+// 							type:'error'
+// 						});
+// 					}
+// 				},
+// 				error:function(xhr, textStatus) {
+// 					swal({
+// 						title:'Error !',
+// 						text: "Request failed : "+textStatus,
+// 						type:'error'
+// 					});
+// 				}
+// 			})
+// 		}, 200);
+// 	})
+// }
 
 function approve() {
 	let code = $('#code').val();
@@ -203,11 +206,13 @@ function approve() {
 }
 
 
-function rejectReview() {
+function confirmReject(option) {
 	let code = $('#code').val();
+	rejectMode = option;
+
 	swal({
 		title:'Reject !',
-		text:'ต้องการตีกลับ '+code+' หรือไม่ ?',
+		text:'ต้องการ Reject '+code+' หรือไม่ ?',
 		type:'warning',
 		showCancelButton:true,
 		confirmButtonColor:'#d15b47',
@@ -215,47 +220,82 @@ function rejectReview() {
 		cancelButtonText:'No',
 		closeOnConfirm:true
 	}, function() {
-		load_in();
+
 		setTimeout(() => {
-			$.ajax({
-				url:HOME + 'reject_review',
-				type:'POST',
-				cache:false,
-				data:{
-					'code' : code
-				},
-				success:function(rs) {
-					load_out();
+			$('#reject-reason').val('');
+	    $('#rejectModal').modal('show');
+	    $('#rejectModal').on('shown.bs.modal', function() {
+	      $('#reject-reason').focus();
+	    });
+		}, 200);
+	})
+}
 
-					if(rs == 'success') {
-						swal({
-							title:'Success',
-							type:'success',
-							timer:1000
-						});
+function reject() {
+	let code = $('#code').val();
+	let reason = $('#reject-reason').val();
+	let url = 'reject';
 
-						setTimeout(() => {
-							window.location.reload();
-						}, 1200);
-					}
-					else {
-						swal({
-							title:'Error!',
-							text:rs,
-							type:'error'
-						});
-					}
-				},
-				error:function(xhr, textStatus) {
+	if(reason.length < 5) {
+		$('#reject-error').text('กรุณาระบุเหตุผลอย่างน้อย 5 ตัวอักษร');
+		return false;
+	}
+	else {
+		$('#reject-error').text('');
+	}
+
+	if(rejectMode != "") {
+		url = rejectMode == 'approve' ? 'reject' : 'reject_review';
+	}
+	else {
+		$('#reject-error').text('Error : Reject mode is not defined');
+		return false;
+	}
+
+	$('#rejectModal').modal('hide');	
+
+	load_in();
+
+	setTimeout(() => {
+		$.ajax({
+			url:HOME + url,
+			type:'POST',
+			cache:false,
+			data:{
+				'code' : code,
+				'reason' : reason
+			},
+			success:function(rs) {
+				load_out();
+
+				if(rs == 'success') {
 					swal({
-						title:'Error !',
-						text: "Request failed : "+textStatus,
+						title:'Success',
+						type:'success',
+						timer:1000
+					});
+
+					setTimeout(() => {
+						window.location.reload();
+					}, 1200);
+				}
+				else {
+					swal({
+						title:'Error!',
+						text:rs,
 						type:'error'
 					});
 				}
-			})
-		}, 200);
-	})
+			},
+			error:function(xhr, textStatus) {
+				swal({
+					title:'Error !',
+					text: "Request failed : "+textStatus,
+					type:'error'
+				});
+			}
+		})
+	}, 200);
 }
 
 

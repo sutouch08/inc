@@ -13,7 +13,7 @@ class Products_model extends CI_Model
   {
     $rs = $this->ms
     ->select("P.ItemCode AS code, P.ItemName AS name, P.FrgnName AS description, P.UgpEntry, P.SUoMEntry AS uom_id, P.FirmCode")
-		->select("P.DfltWH AS dfWhsCode, P.OnHand, P.IsCommited, P.OnOrder")
+		->select("P.DfltWH AS dfWhsCode, P.OnHand, P.IsCommited, P.OnOrder, P.TreeType")
     ->select("P.VatGourpSa AS vat_group")
     ->select("U.UomCode AS uom_code, U.UomName AS uom, P1.Price AS price")
     ->select("T.Rate AS vat_rate")
@@ -27,6 +27,24 @@ class Products_model extends CI_Model
     if($rs->num_rows() === 1)
     {
       return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_childs($ItemCode)
+  {
+    $rs = $this->ms
+    ->select("C.Father, C.Code AS code, C.Quantity AS qty")
+    ->from("ITT1 AS C")
+    ->join("OITT AS F", "C.Father = F.Code AND F.TreeType = 'S'")
+    ->where('C.Father', $ItemCode)
+    ->get();
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
     }
 
     return NULL;

@@ -11,21 +11,21 @@
 </style>
 <div class="row">
 	<div class="col-sm-6 col-xs-6 padding-5">
-    <h3 class="title">
+    <h4 class="title">
       <?php echo $this->title; ?>
-    </h3>
+    </h4>
     </div>
     <div class="col-sm-6 col-xs-6 padding-5">
     	<p class="pull-right top-p">
-        <button type="button" class="btn btn-sm btn-default" onclick="leave()"><i class="fa fa-arrow-left"></i> &nbsp; Back</button>
+        <button type="button" class="btn btn-xs btn-default" onclick="leave()"><i class="fa fa-arrow-left"></i> &nbsp; Back</button>
       </p>
     </div>
 </div><!-- End Row -->
 <hr class="padding-5"/>
 
-<?php $this->load->view('quotation/quotation_edit_header'); ?>
-<?php $this->load->view('quotation/quotation_edit_detail'); ?>
-<?php $this->load->view('quotation/quotation_edit_footer'); ?>
+<?php $this->load->view('quotation/quotation_header'); ?>
+<?php $this->load->view('quotation/quotation_detail'); ?>
+<?php $this->load->view('quotation/quotation_footer'); ?>
 
 <input type="hidden" id="vat_rate" value="<?php echo $order->VatRate; ?>" />
 <input type="hidden" id="vat_code" value="<?php echo $order->VatGroup; ?>" />
@@ -44,50 +44,19 @@
 
 <script id="ship-to-template" type="text/x-handlebarsTemplate">
 		{{#each this}}
-			<option value="{{code}}">{{code}}</option>
+			<option value="{{code}}" data-name="{{name}}">{{code}} : {{name}}</option>
 		{{/each}}
 </script>
 
 <script id="bill-to-template" type="text/x-handlebarsTemplate">
 		{{#each this}}
-			<option value="{{code}}">{{code}}</option>
+			<option value="{{code}}" data-name="{{name}}">{{code}} : {{name}}</option>
 		{{/each}}
 </script>
-
-
-<script id="series-template" type="text/x-handlebarsTemplate">
-	{{#each this}}
-		<option value="{{code}}" {{is_selected}}>{{name}}</option>
-	{{/each}}
-</script>
-
-
-<!--  Add New Address Modal  --------->
-<div class="modal fade" id="free-item-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog" style="max-width:800px;">
-        <div class="modal-content">
-            <div class="modal-body">
-            <div class="row">
-                <table class="table table-striped broder-1">
-									<tbody id="free-item-list">
-
-									</tbody>
-                </table>
-            </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
 
 <script src="<?php echo base_url(); ?>scripts/quotation/quotation.js?v=<?php echo date('YmdH'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/quotation/quotation_add.js?v=<?php echo date('YmdH'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/quotation/quotation_edit.js?v=<?php echo date('YmdH'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/address.js"></script>
-
-
-
 
 <?php $this->load->view('include/footer'); ?>

@@ -28,6 +28,8 @@ class Api
 		$sc = TRUE;
 		$order = $this->ci->quotation_model->get($code);
 		$details = $this->ci->quotation_model->get_details($code);
+    $adr = $this->ci->quotation_model->get_quotation_address($code);
+
     $dfWhsCode = getConfig('DEFAULT_WAREHOUSE');
 
 		if(! empty($order) && ! empty($details))
@@ -38,29 +40,63 @@ class Api
 				"CardCode" => $order->CardCode,
 				"CardName" => $order->CardName,
 				"SlpCode" => intval($order->SlpCode),
-        "SalesEmployee" => intval($order->SlpCode),
 				"GroupNum" => intval($order->Payment),
-				"DocCur" => $order->DocCur,
-				"DocRate" => round($order->DocRate, 2),
-				"DocTotal" => round($order->DocTotal, 2),
 				"DocDate" => $order->DocDate,
 				"DocDueDate" => $order->DocDueDate,
 				"TaxDate" => $order->TextDate,
         "NumAtCard" => $order->NumAtCard,
-        "CntctCode" => $order->CntctCode,
-        "Seires" => NULL,
+        "CntctCode" => intval($order->CntctCode),
+        "Seires" => 0,
         "SeriesName" => NULL,
+        "SalesEmployee" => intval($order->SlpCode),
+        "OwnerCode" => intval($order->OwnerCode),
+        "Comments" => $order->Comments,
+        "DiscPrcnt" => round($order->DiscPrcnt, 2),
+        "DiscSum" => round($order->DiscAmount, 2),
+        "DocCur" => $order->DocCur,
+        "DocRate" => round($order->DocRate, 2),
+        "DocTotal" => round($order->DocTotal, 2),
 				"PayToCode" => $order->PayToCode,
 				"ShipToCode" => $order->ShipToCode,
 				"Address" => $order->Address,
 				"Address2" =>$order->Address2,
-				"DiscPrcnt" => round($order->DiscPrcnt, 2),
-        "DiscSum" => $order->DiscAmount,
 				"RoundDif" => round($order->RoundDif, 2),
-				"Comments" => $order->Comments,
-				"OwnerCode" => intval($order->OwnerCode)
+        "U_Attn1" => $order->Attn1,
+        "U_Attn2" => $order->Attn2,
+        "U_SQ_TYPE" => $order->Type,
+        "U_SA_PROJECT" => $order->Project,
+        "ShipTo" => array(),
+        "BillTo" => array()
 			);
 
+      if(!empty($adr))
+      {
+        $billTo = array(
+          "Street_B" => $adr->bStreet,
+          "Address2_B" => $adr->bAddress,
+          "Address3_B" => $adr->bAddress2,
+          "Block_B" => $adr->bBlock,
+          "ZipCode_B" => $adr->bZipCode,
+          "County_B" => $adr->bCounty,
+          "Country_B" => $adr->bCountry,
+          "City_B" => $adr->bCity
+        );
+
+        array_push($sq['BillTo'], $billTo);
+
+        $shipTo = array(
+          "Street_S" => $adr->sStreet,
+          "Address2_S" => $adr->sAddress,
+          "Address3_S" => $adr->sAddress2,
+          "Block_S" => $adr->sBlock,
+          "ZipCode_S" => $adr->sZipCode,
+          "County_S" => $adr->sCounty,
+          "Country_S" => $adr->sCountry,
+          "City_S" => $adr->sCity
+        );
+
+        array_push($sq['ShipTo'], $shipTo);
+      }
 
 			$orderLine = array();
 
@@ -70,6 +106,7 @@ class Api
 					"LineNum" => intval($rs->LineNum),
 					"ItemCode" => $rs->ItemCode,
 					"ItemDescription" => $rs->ItemName,
+          "Text" => $rs->Description,
           "FreeText" => NULL,
 					"Quantity" => round($rs->Qty, 2),
 					//"UomEntry" => intval($rs->UomEntry),
@@ -90,7 +127,8 @@ class Api
 					"VatSum" => round($rs->totalVatAmount, 2),
 					"SlpCode" => intval($order->SlpCode),
           "NoInvTryMv" => NULL,
-          "CoGsOcrCode" => NULL
+          "CoGsOcrCode" => NULL,
+          "TreeType" => $rs->TreeType
 				);
 
 				array_push($orderLine, $line);
@@ -121,15 +159,17 @@ class Api
   		}
 
       $json = json_encode($ds, JSON_UNESCAPED_UNICODE);
-      // echo $json; exit();
 
-      $logs = array(
-        'code' => $code,
-        'status' => 'send',
-        'json' => $json
-      );
+      if($logJson)
+      {
+        $logs = array(
+          'code' => $code,
+          'status' => 'send',
+          'json' => $json
+        );
 
-      $this->ci->logs_model->order_logs($logs);
+        $this->ci->logs_model->order_logs($logs);
+      }
 
 
 			$url = getConfig('SAP_API_HOST');
@@ -186,14 +226,24 @@ class Api
 
 						$this->ci->logs_model->order_logs($logs);
 					}
-
 				}
 				else
 				{
-					$arr = array(
-						'Status' => 3,
-						'message' => $rs->errMsg
-					);
+          if( ! empty($rs->DocEntry) && ! empty($rs->DocNum))
+          {
+            $arr = array(
+              'Status' => 1,
+              'DocEntry' => $rs->DocEntry,
+              'DocNum' => $rs->DocNum
+            );
+          }
+          else
+          {
+            $arr = array(
+              'Status' => 3,
+              'message' => $rs->errMsg
+            );
+          }
 
 					$this->ci->quotation_model->update($code, $arr);
 
@@ -203,7 +253,7 @@ class Api
           $logs = array(
             'code' => $code,
             'status' => 'error',
-            'json' => $rs->errMsg
+            'json' => $response
           );
 
           $this->ci->logs_model->order_logs($logs);

@@ -10,21 +10,21 @@
 </style>
 <div class="row">
 	<div class="col-sm-6 col-xs-6 padding-5">
-    <h3 class="title">
+    <h4 class="title">
       <?php echo $this->title; ?>
-    </h3>
+    </h4>
     </div>
     <div class="col-sm-6 col-xs-6 padding-5">
     	<p class="pull-right top-p">
-        <button type="button" class="btn btn-sm btn-default" onclick="leave()"><i class="fa fa-arrow-left"></i> &nbsp; Back</button>
+        <button type="button" class="btn btn-xs btn-default" onclick="leave()"><i class="fa fa-arrow-left"></i> &nbsp; Back</button>
       </p>
     </div>
 </div><!-- End Row -->
 <hr class="padding-5"/>
 <form id="addForm" method="post" action="<?php echo $this->home; ?>/add">
-	<?php $this->load->view('quotation/quotation_add_header'); ?>
-	<?php $this->load->view('quotation/quotation_add_detail'); ?>
-	<?php $this->load->view('quotation/quotation_add_footer'); ?>
+	<?php $this->load->view('quotation/quotation_header'); ?>
+	<?php $this->load->view('quotation/quotation_detail'); ?>
+	<?php $this->load->view('quotation/quotation_footer'); ?>
 
 	<input type="hidden" id="sale_id" value="<?php echo $this->_user->sale_id; ?>" />
 	<input type="hidden" id="sale_team" value="<?php echo $this->_user->team_id; ?>" />
@@ -42,13 +42,13 @@
 
 <script id="ship-to-template" type="text/x-handlebarsTemplate">
 		{{#each this}}
-			<option value="{{code}}">{{code}} : {{name}}</option>
+			<option value="{{code}}" data-name="{{name}}">{{code}} : {{name}}</option>
 		{{/each}}
 </script>
 
 <script id="bill-to-template" type="text/x-handlebarsTemplate">
 		{{#each this}}
-			<option value="{{code}}">{{code}} : {{name}}</option>
+			<option value="{{code}}" data-name="{{name}}">{{code}} : {{name}}</option>
 		{{/each}}
 </script>
 

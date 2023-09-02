@@ -5,6 +5,10 @@
 		$strongOn = $USE_STRONG_PWD == 1 ? 'btn-primary' : '';
 		$strongOff = $USE_STRONG_PWD == 0 ? 'btn-primary' : '';
 		$disable = $this->_SuperAdmin ? "" : "disabled";
+    $log_on = $LOGS_JSON == 1 ? 'btn-primary' : '';
+    $log_off = $LOGS_JSON == 1 ? '' : 'btn-primary';
+    $test_on = $TEST == 1 ? 'btn-primary' : '';
+    $test_off = $TEST == 1 ? '' : 'btn-primary';
 ?>
 
   <form id="systemForm" method="post" action="<?php echo $this->home; ?>/update_config">
@@ -46,6 +50,29 @@
       <span class="help-block">กำหนด URL endpoint สำหรับการ Interface กับ ระบบ SAP</span>
     </div>
     <div class="divider-hidden"></div>
+
+    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12"><span class="form-control left-label">Save Interface Logs</span></div>
+    <div class="col-lg-5 col-md-9 col-sm-9 col-xs-12">
+      <div class="btn-group input-medium">
+        <button type="button" class="btn btn-sm <?php echo $log_on; ?>" style="width:50%;" id="btn-logs-on" onClick="toggleLogsJson(1)">เปิด</button>
+        <button type="button" class="btn btn-sm <?php echo $log_off; ?>" style="width:50%;" id="btn-logs-off" onClick="toggleLogsJson(0)">ปิด</button>
+      </div>
+      <span class="help-block">บันทึก Interface logs ไว้เพื่อตรวจสอบหรือไม่ หากเปิดไว้จะเก็บข้อมูลการ Interface ไว้ใน database ทำให้มีการใช้งาน disk มากขึ้น</span>
+      <input type="hidden" name="LOGS_JSON" id="logs-json" value="<?php echo $LOGS_JSON; ?>" />
+    </div>
+    <div class="divider-hidden"></div>
+
+    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12"><span class="form-control left-label">Test Interface</span></div>
+    <div class="col-lg-5 col-md-9 col-sm-9 col-xs-12">
+      <div class="btn-group input-medium">
+        <button type="button" class="btn btn-sm <?php echo $test_on; ?>" style="width:50%;" id="btn-test-on" onClick="toggleTestMode(1)">เปิด</button>
+        <button type="button" class="btn btn-sm <?php echo $test_off; ?>" style="width:50%;" id="btn-test-off" onClick="toggleTestMode(0)">ปิด</button>
+      </div>
+      <span class="help-block">เมื่อเปิด Test Mode ระบบจะไม่ส่งข้อมูลไปที่ SAP แต่จะสร้างเลขที่เอกสารหลอกขี้นมาแทน</span>
+      <input type="hidden" name="TEST" id="test-mode" value="<?php echo $TEST; ?>" />
+    </div>
+    <div class="divider-hidden"></div>
+
 		<div class="divider-hidden"></div>
 		<div class="divider-hidden"></div>
 
