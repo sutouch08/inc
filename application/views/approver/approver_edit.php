@@ -12,8 +12,8 @@
 <hr class="margin-bottom-30"/>
 <form class="form-horizontal">
 	<div class="form-group">
-    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Username</label>
-    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+    <label class="col-lg-2 col-md-2 col-sm-2 col-xs-12 control-label">Username</label>
+    <div class="col-lg-2 col-md-3 col-sm-3 col-xs-12">
 			<input type="text" class="width-100" value="<?php echo $this->user_model->get_uname($approver->user_id); ?>" disabled/>
 			<input type="hidden" id="id" value="<?php echo $approver->id; ?>" />
     </div>
@@ -23,16 +23,18 @@
 	<div class="divider-hidden">	</div>
 
 	<div class="form-group">
-    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label">Approval</label>
-    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12 table-responsive">
+    <label class="col-lg-2 col-md-2 col-sm-2 col-xs-12 control-label">Approval</label>
+    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 table-responsive">
 			<table class="table table-striped border-1" style="margin-bottom:0px;">
 				<thead>
 					<tr>
 						<th class="fix-width-100">Document</th>
 						<th class="fix-width-40 text-center">Review</th>
 						<th class="fix-width-40 text-center">Approve</th>
+						<th class="fix-width-100">Min Disc(%)</th>
 						<th class="fix-width-100">Max Disc(%)</th>
-						<th class="fix-width-100">Max Amount</th>
+						<th class="fix-width-120">Min Amount</th>
+						<th class="fix-width-120">Max Amount</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -41,7 +43,9 @@
 				<?php $reChk = empty($rules[$rs->code]['review']) ? "" : "checked"; ?>
 				<?php $apChk = empty($rules[$rs->code]['approve']) ? "" : "checked"; ?>
 				<?php $disabled = empty($rules[$rs->code]['approve']) ? "disabled" : ""; ?>
+				<?php $minDisc = empty($rules[$rs->code]['minDisc']) ? 0.00 : $rules[$rs->code]['minDisc']; ?>
 				<?php $maxDisc = empty($rules[$rs->code]['maxDisc']) ? 0.00 : $rules[$rs->code]['maxDisc']; ?>
+				<?php $minAmount = empty($rules[$rs->code]['minAmount']) ? 0.00 : $rules[$rs->code]['minAmount']; ?>
 				<?php $maxAmount = empty($rules[$rs->code]['maxAmount']) ? 0.00 : $rules[$rs->code]['maxAmount']; ?>
 				<tr>
 					<td>
@@ -51,9 +55,7 @@
 					<td class="text-center">
 						<label>
 							<input type="checkbox" class="ace chk review-<?php echo $rs->code; ?>"
-							id="review-<?php echo $rs->code; ?>"
-							onchange="toggleReview('<?php echo $rs->code; ?>')"
-							<?php echo $reChk; ?>	/>
+							id="review-<?php echo $rs->code; ?>" <?php echo $reChk; ?>	/>
 							<span class="lbl"></span>
 						</label>
 					</td>
@@ -68,11 +70,19 @@
 					</td>
 					<td>
 						<input type="number" class="form-control input-sm text-center disc"
+						id="min-disc-<?php echo $rs->code; ?>" value="<?php echo $minDisc; ?>" <?php echo $disabled; ?> />
+					</td>
+					<td>
+						<input type="number" class="form-control input-sm text-center disc disc-max"
 						id="max-disc-<?php echo $rs->code; ?>" value="<?php echo $maxDisc; ?>" <?php echo $disabled; ?> />
 					</td>
 					<td>
-						<input type="number" class="form-control input-sm text-center amount"
-						id="max-amount-<?php echo $rs->code; ?>" value="<?php echo $maxAmount; ?>" <?php echo $disabled; ?>/>
+						<input type="text" class="form-control input-sm text-center amount"
+						id="min-amount-<?php echo $rs->code; ?>" value="<?php echo number($minAmount, 2); ?>" <?php echo $disabled; ?>/>
+					</td>
+					<td>
+						<input type="text" class="form-control input-sm text-center amount"
+						id="max-amount-<?php echo $rs->code; ?>" value="<?php echo number($maxAmount, 2); ?>" <?php echo $disabled; ?>/>
 					</td>
 				</tr>
 			<?php endforeach; ?>
@@ -82,6 +92,7 @@
     </div>
   </div>
 
+<!--
 	<div class="form-group">
     <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label" style="padding-top:0px;">*</label>
     <div class="col-lg-7 col-md-7 col-sm-7 col-xs-12">
@@ -96,11 +107,11 @@
 			<span class="blue">Max Amount</span> : มูลค่าสูงสุดที่สามารอนุมัติได้ โดยคำนวนจากมูลค่ารวมหลังส่วนลดท้ายบิล
     </div>
   </div>
-
+-->
 	<div class="divider-hidden"></div>
 
 	<div class="form-group">
-    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label"></label>
+    <label class="col-lg-2 col-md-2 col-sm-2 col-xs-12 control-label"></label>
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
 			<label>
 				<input type="checkbox" class="ace" id="status" <?php echo is_checked('1', $approver->status); ?> />

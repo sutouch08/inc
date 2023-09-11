@@ -35,6 +35,7 @@ class Approver_model extends CI_Model
 		return NULL;
 	}
 
+
 	public function add(array $ds = array())
 	{
 		if(!empty($ds))
@@ -190,6 +191,18 @@ class Approver_model extends CI_Model
 		return NULL;
 	}
 
+	public function get_doc_rule($approver_id, $docType)
+	{
+		$rs = $this->db->where('id_approver', $approver_id)->where('docType', $docType)->get('approve_rule');
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row();
+		}
+
+		return NULL;
+	}
+
 
 	//--- เช็คว่ามีรายชื่ออยู่ในกลุ่มผู้อนุมัติหรือไม่ (ใช้ในหน้า Main เพื่อแจ้งเตือนการอนุมัติ)
 	public function is_approver($user_id)
@@ -202,6 +215,19 @@ class Approver_model extends CI_Model
 		}
 
 		return FALSE;
+	}
+
+
+	public function get_by_user_id($user_id)
+	{
+		$rs = $this->db->where('user_id', $user_id)->where('status', 1)->get($this->tb);
+
+		if($rs->num_rows() === 1)
+		{
+			return $rs->row();
+		}
+
+		return NULL;
 	}
 
 

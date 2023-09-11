@@ -20,22 +20,18 @@ function viewDetail(id) {
 
 function toggleAproveDoc(docType) {
 	if($('#approve-'+docType).is(':checked')) {
-		//$('#review-'+docType).prop('checked', false);
-		$('#max-disc-'+docType).removeAttr('disabled').focus();
+		$('#min-disc-'+docType).removeAttr('disabled');
+		$('#max-disc-'+docType).removeAttr('disabled');
+		$('#min-amount-'+docType).removeAttr('disabled');
 		$('#max-amount-'+docType).removeAttr('disabled');
+		$('#min-disc-'+docType).focus();
 	}
 	else {
+		$('#min-disc-'+docType).val('0.00').attr('disabled', 'disabled').removeClass('has-error');
 		$('#max-disc-'+docType).val('0.00').attr('disabled', 'disabled').removeClass('has-error');
+		$('#min-amount-'+docType).val('0.00').attr('disabled', 'disabled').removeClass('has-error');
 		$('#max-amount-'+docType).val('0.00').attr('disabled', 'disabled').removeClass('has-error');
 	}
-}
-
-
-function toggleReview(docType) {
-	// if($('#review-'+docType).is(':checked')) {
-	// 	$('#approve-'+docType).prop('checked', false);
-	// 	toggleAproveDoc(docType);
-	// }
 }
 
 
@@ -43,8 +39,28 @@ $('.disc').focus(function() {
 	$(this).select();
 });
 
+$('.disc').change(function() {
+	let val = parseDefault(parseFloat($(this).val()), 0);
+	if(val > 100) {
+		$(this).val('100.00');
+	}
+	else if(val < 0) {
+		$(this).val('0.00');
+	}
+	else {
+		$(this).val(val.toFixed(2));
+	}
+})
+
 $('.amount').focus(function() {
 	$(this).select();
+});
+
+$('.amount').change(function() {
+	let val = $(this).val();
+	let am = parseDefault(parseFloat(removeCommas(val)), 0.00);
+	let as = am.toFixed(2);
+	$(this).val(addCommas(as));
 });
 
 
@@ -68,11 +84,21 @@ function saveAdd() {
 		let code = $(this).val();
 		let is_review = $('#review-'+code).is(':checked') ? 1 : 0;
 		let is_approve = $('#approve-'+code).is(':checked') ? 1 : 0;
-		let disc = parseDefault(parseFloat($('#max-disc-'+code).val()), 0);
-		let amount = parseDefault(parseFloat($('#max-amount-'+code).val()), 0);
+		let minDisc = parseDefault(parseFloat($('#min-disc-'+code).val()), 0);
+		let maxDisc = parseDefault(parseFloat($('#max-disc-'+code).val()), 0);
+		let minAmount = parseDefault(parseFloat(removeCommas($('#min-amount-'+code).val())), 0);
+		let maxAmount = parseDefault(parseFloat(removeCommas($('#max-amount-'+code).val())), 0);
 
 		if(is_approve) {
-			if(disc == 0) {
+			if(minDisc < 0 || minDisc > maxDisc) {
+				$('#min-disc-'+code).addClass('has-error');
+				error++;
+			}
+			else {
+				$('#min-disc-'+code).removeClass('has-error');
+			}
+
+			if(maxDisc > 0 && maxDisc < minDisc) {
 				$('#max-disc-'+code).addClass('has-error');
 				error++;
 			}
@@ -80,7 +106,15 @@ function saveAdd() {
 				$('#max-disc-'+code).removeClass('has-error');
 			}
 
-			if(amount == 0) {
+			if(minAmount < 0 || minAmount > maxAmount) {
+				$('#min-amount-'+code).addClass('has-error');
+				error++;
+			}
+			else {
+				$('#min-amount-'+code).removeClass('has-error');
+			}
+
+			if(maxAmount <= 0 || maxAmount < minAmount) {
 				$('#max-amount-'+code).addClass('has-error');
 				error++;
 			}
@@ -94,13 +128,15 @@ function saveAdd() {
 		if(is_review) {
 			review++;
 		}
-
+		
 		let row = {
 			"docType" : code,
 			"review" : is_review,
 			"approve" : is_approve,
-			"maxDisc" : disc,
-			"maxAmount" : amount
+			"minDisc" : minDisc,
+			"maxDisc" : maxDisc,
+			"minAmount" : minAmount,
+			"maxAmount" : maxAmount
 		}
 
 		data.push(row);
@@ -170,11 +206,21 @@ function update() {
 		let code = $(this).val();
 		let is_review = $('#review-'+code).is(':checked') ? 1 : 0;
 		let is_approve = $('#approve-'+code).is(':checked') ? 1 : 0;
-		let disc = parseDefault(parseFloat($('#max-disc-'+code).val()), 0);
-		let amount = parseDefault(parseFloat($('#max-amount-'+code).val()), 0);
+		let minDisc = parseDefault(parseFloat($('#min-disc-'+code).val()), 0);
+		let maxDisc = parseDefault(parseFloat($('#max-disc-'+code).val()), 0);
+		let minAmount = parseDefault(parseFloat(removeCommas($('#min-amount-'+code).val())), 0);
+		let maxAmount = parseDefault(parseFloat(removeCommas($('#max-amount-'+code).val())), 0);
 
 		if(is_approve) {
-			if(disc == 0) {
+			if(minDisc < 0 || minDisc > maxDisc) {
+				$('#min-disc-'+code).addClass('has-error');
+				error++;
+			}
+			else {
+				$('#min-disc-'+code).removeClass('has-error');
+			}
+
+			if(maxDisc > 0 && maxDisc < minDisc) {
 				$('#max-disc-'+code).addClass('has-error');
 				error++;
 			}
@@ -182,7 +228,15 @@ function update() {
 				$('#max-disc-'+code).removeClass('has-error');
 			}
 
-			if(amount == 0) {
+			if(minAmount < 0 || minAmount > maxAmount) {
+				$('#min-amount-'+code).addClass('has-error');
+				error++;
+			}
+			else {
+				$('#min-amount-'+code).removeClass('has-error');
+			}
+
+			if(maxAmount <= 0 || maxAmount < minAmount) {
 				$('#max-amount-'+code).addClass('has-error');
 				error++;
 			}
@@ -201,8 +255,10 @@ function update() {
 			"docType" : code,
 			"review" : is_review,
 			"approve" : is_approve,
-			"maxDisc" : disc,
-			"maxAmount" : amount
+			"minDisc" : minDisc,
+			"maxDisc" : maxDisc,
+			"minAmount" : minAmount,
+			"maxAmount" : maxAmount
 		}
 
 		data.push(row);

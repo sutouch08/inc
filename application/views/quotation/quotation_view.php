@@ -5,34 +5,39 @@
 <?php $this->load->view('quotation/view_style_sheet'); ?>
 
 <div class="row">
-	<div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 padding-5">
+	<div class="col-lg-4 col-md-4 col-sm-4 hidden-xs padding-5">
     <h4 class="title">
       <?php echo $this->title; ?>
     </h4>
-    </div>
-    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 padding-5">
-    	<p class="pull-right top-p">
-        <button type="button" class="btn btn-xs btn-default btn-100 top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> &nbsp; Back</button>
-				<?php if($this->pm->can_add) : ?>
-					<!--<button type="button" class="btn btn-xs btn-primary top-btn" onclick="duplicateSQ('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Duplicate</button> -->
-				<?php endif; ?>
-				<?php if($pm->can_add && $order->Status == 1 && ($order->Approved == 'A' OR $order->Approved == 'S') ) : ?>
-					<!--<button type="button" class="btn btn-xs btn-success top-btn" onclick="createSO('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Create Sale Order</button>-->
-				<?php endif; ?>
-				<?php if($this->pm->can_edit && $order->Status == -1) : ?>
-					<button type="button" class="btn btn-xs btn-warning btn-100 top-btn" onclick="goEdit('<?php echo $order->code; ?>')"><i class="fa fa-pencil"></i> Edit</button>
-				<?php endif; ?>
-				<?php if($order->Status >= 0) : ?>
-				<button type="button" class="btn btn-xs btn-info btn-100 top-btn" onclick="printSQ()"><i class="fa fa-print"></i> Print</button>
-				<?php endif; ?>
-				<?php if(empty($order->DocEntry) && ($order->Status == 3 OR $order->Status == 0 OR $this->_SuperAdmin) && ($order->Approved == 'A' OR $order->Approved == 'S')) : ?>
-				<button type="button" class="btn btn-xs btn-success btn-100 top-btn" onclick="sendToSap('<?php echo $order->code; ?>')"><i class="fa fa-send"></i> Send to SAP</button>
-				<?php endif; ?>
-				<?php if($order->Status == 1 && ! empty($order->DocEntry) && !empty($order->DocNum)) : ?>
-					<!--<button type="button" class="btn btn-xs btn-danger top-btn" onclick="cancleSap('<?php echo $order->code; ?>')">Cancel On SAP</button> -->
-				<?php endif; ?>
-      </p>
-    </div>
+  </div>
+	<div class="col-xs-12 padding-5 visible-xs">
+    <h4 class="title-xs">
+      <?php echo $this->title; ?>
+    </h4>
+  </div>
+  <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 padding-5">
+  	<p class="pull-right top-p">
+      <button type="button" class="btn btn-xs btn-default btn-100 top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> &nbsp; Back</button>
+			<?php if($this->pm->can_add) : ?>
+				<!--<button type="button" class="btn btn-xs btn-primary top-btn" onclick="duplicateSQ('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Duplicate</button> -->
+			<?php endif; ?>
+			<?php if($pm->can_add && $order->Status == 1 && ($order->Approved == 'A' OR $order->Approved == 'S') ) : ?>
+				<!--<button type="button" class="btn btn-xs btn-success top-btn" onclick="createSO('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Create Sale Order</button>-->
+			<?php endif; ?>
+			<?php if($this->pm->can_edit && $order->Status == -1) : ?>
+				<button type="button" class="btn btn-xs btn-warning btn-100 top-btn" onclick="goEdit('<?php echo $order->code; ?>')"><i class="fa fa-pencil"></i> Edit</button>
+			<?php endif; ?>
+			<?php if($order->Status >= 0) : ?>
+			<button type="button" class="btn btn-xs btn-info btn-100 top-btn" onclick="printSQ()"><i class="fa fa-print"></i> Print</button>
+			<?php endif; ?>
+			<?php if(empty($order->DocEntry) && ($order->Status == 3 OR $order->Status == 0 OR $this->_SuperAdmin) && ($order->Approved == 'A' OR $order->Approved == 'S')) : ?>
+			<button type="button" class="btn btn-xs btn-success btn-100 top-btn" onclick="sendToSap('<?php echo $order->code; ?>')"><i class="fa fa-send"></i> Send to SAP</button>
+			<?php endif; ?>
+			<?php if($order->Status == 1 && ! empty($order->DocEntry) && !empty($order->DocNum)) : ?>
+				<!--<button type="button" class="btn btn-xs btn-danger top-btn" onclick="cancleSap('<?php echo $order->code; ?>')">Cancel On SAP</button> -->
+			<?php endif; ?>
+    </p>
+  </div>
 </div><!-- End Row -->
 <hr class="padding-5"/>
 

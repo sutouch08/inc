@@ -224,6 +224,10 @@ while($total_page > 0 )
 	$top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Project</td>";
 	$top .= 				"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: {$doc->Project}</td>";
 	$top .= 			"</tr>";
+  $top .= 			"<tr>";
+	$top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Type</td>";
+	$top .= 				"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: {$doc->Type}</td>";
+	$top .= 			"</tr>";
 	$top .= 		"</table>";
 	$top .= 	"</div>";
 

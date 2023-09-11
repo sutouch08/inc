@@ -9,7 +9,7 @@ class Approver extends PS_Controller
 	{
 		parent::__construct();
 		$this->home = base_url()."users/approver";
-		$this->load->model("users/approver_model");		
+		$this->load->model("users/approver_model");
 		$this->segment = 4;
 	}
 
@@ -99,7 +99,9 @@ class Approver extends PS_Controller
 								'docType' => $ap->docType,
 								'review' => $ap->review,
 								'approve' => $ap->approve,
+								'minDisc' => $ap->minDisc,
 								'maxDisc' => $ap->maxDisc,
+								'minAmount' => $ap->minAmount,
 								'maxAmount' => $ap->maxAmount
 							);
 
@@ -161,7 +163,14 @@ class Approver extends PS_Controller
 			{
 				foreach($ap as $a)
 				{
-					$as[$a->docType] =	array('review' => $a->review, 'approve' => $a->approve, 'maxDisc' => $a->maxDisc, 'maxAmount' => round($a->maxAmount, 2));
+					$as[$a->docType] =	array(
+						'review' => $a->review,
+						'approve' => $a->approve,
+						'minDisc' => $a->minDisc,
+						'maxDisc' => $a->maxDisc,
+						'minAmount' => round($a->minAmount, 2),
+						'maxAmount' => round($a->maxAmount, 2)
+					);
 				}
 			}
 
@@ -227,7 +236,9 @@ class Approver extends PS_Controller
 							'docType' => $ap->docType,
 							'review' => $ap->review,
 							'approve' => $ap->approve,
+							'minDisc' => $ap->minDisc,
 							'maxDisc' => $ap->maxDisc,
+							'minAmount' => $ap->minAmount,
 							'maxAmount' => $ap->maxAmount
 						);
 
@@ -281,7 +292,14 @@ class Approver extends PS_Controller
 		{
 			foreach($ap as $a)
 			{
-				$as[$a->docType] =	array('review' => $a->review, 'approve' => $a->approve, 'maxDisc' => $a->maxDisc, 'maxAmount' => round($a->maxAmount, 2));
+				$as[$a->docType] =	array(
+					'review' => $a->review,
+					'approve' => $a->approve,
+					'minDisc' => $a->minDisc,
+					'maxDisc' => $a->maxDisc,
+					'minAmount' => round($a->minAmount, 2),
+					'maxAmount' => round($a->maxAmount, 2)
+				);
 			}
 		}
 
