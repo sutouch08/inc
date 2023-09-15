@@ -54,6 +54,10 @@
     color: #555555 !important;
   }
 
+  .dummy > td > input.input-xs, .dummy > td > select.input-xs {
+    color: #9c27b0 !important;
+  }
+
   .father > td > input.input-xs, .father > td > select.input-xs {
     color: #3F51B5 !important;
     font-weight: bold;
@@ -69,7 +73,11 @@
 
   .child > td > input.input-xs:disabled, .child > td > select.input-xs:disabled {
     font-style: italic;
-  }  
+  }
+
+  tr.error > td > input.input-xs, tr.error > td > select.input-xs {
+    color:red !important;
+  }
 
   @media (min-width: 768px) {
 

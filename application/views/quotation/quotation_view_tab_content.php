@@ -28,7 +28,9 @@
           <?php if(!empty($details)) : ?>
     				<?php foreach($details as $rs) : ?>
               <?php $bg = $rs->TreeType == 'S' ? 'father' : ($rs->TreeType == 'I' ? 'child' : ''); ?>
-              <tr id="row-<?php echo $no; ?>" data-no="<?php echo $no; ?>" class="<?php echo $bg; ?>">
+              <?php $error = $rs->SellPrice < $rs->Cost ? 'error' : ''; ?>
+              <?php $dummy = $rs->ItemCode == 'FG-Dummy' ? 'dummy' : ''; ?>
+              <tr id="row-<?php echo $no; ?>" data-no="<?php echo $no; ?>" class="<?php echo $bg; ?> <?php echo $error; ?> <?php echo $dummy; ?>">
                 <td class="middle text-center fix-no no" scope="row"><?php echo $no; ?></td>
                 <td class="middle fix-item" scope="row"><?php echo $rs->ItemCode; ?></td>
                 <td class="middle"><?php echo $rs->ItemName; ?></td>

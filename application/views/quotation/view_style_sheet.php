@@ -36,6 +36,10 @@
     padding: 5px !important;
   }
 
+  .dummy{
+    color: #9c27b0 !important;
+  }
+
   .father {
     color: #3F51B5 !important;
     font-weight: bold;
@@ -48,6 +52,10 @@
   select.input-xs {
     padding: 0px 6px;
     border-radius: 0;
+  }
+
+  tr.error {
+    color:red !important;
   }
 
   @media (min-width: 768px) {

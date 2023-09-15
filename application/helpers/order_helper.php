@@ -99,4 +99,24 @@ function statusName($status, $review, $approve)
 	return $name;
 }
 
+
+function select_uom($uomEntry = NULL)
+{
+	$ds = "";
+	$ci =& get_instance();
+	$ci->load->model('masters/products_model');
+
+	$list = $ci->products_model->get_all_uom();
+
+	if( ! empty($list))
+	{
+		foreach($list as $rs)
+		{
+			$ds .= '<option value="'.$rs->UomEntry.'" data-code="'.$rs->UomCode.'" '.is_selected($rs->UomEntry, $uomEntry).'>'.$rs->UomName.'</option>';
+		}
+	}
+
+	return $ds;
+}
+
  ?>

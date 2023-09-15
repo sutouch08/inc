@@ -1,5 +1,29 @@
 <style>
 
+  @media (min-width: 200px) and (max-width: 767px){
+    .cancleWatermark {
+      font-size:80px !important;
+    }
+  }
+
+  @media (min-width: 768px) and (max-width: 991px){
+    .cancleWatermark {
+      font-size:100px !important;
+    }
+  }
+
+  @media (min-width: 992px) and (max-width: 1199px){
+    .cancleWatermark {
+      font-size:120px !important;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .cancleWatermark {
+      font-size:150px !important;
+    }
+  }
+
   .signature-image {
     max-width: 125px;
     max-height: 35px;
@@ -11,10 +35,24 @@ $this->load->helper('print');
 $this->load->helper('image');
 $footer_address = FALSE; //--- แสดงที่อยู่ท้ายแผ่นหรือไม่
 $row_per_page = 21; //--- จำนวนบรรทัด/หน้า
-$total_row 	= $doc->total_rows;
+$total_row 	= 0;
 $row_text = 50;
 $all_row = count($details);
 
+foreach($details as $rs)
+{
+	$Description = $rs->type == 0 ? $rs->ItemName : $rs->LineText;
+	$model = mb_strlen($Description);
+	$newline = ceil(substr_count($Description, "\n") * 0.5);
+	$text_length = $model;
+
+	$u_row = $text_length > $row_text ? ceil($text_length/$row_text) : 1;
+	$u_row = $u_row > $newline ? $u_row : $newline;
+	$total_row += $u_row;
+}
+
+
+$total_row 	= $total_row == 0 ? 1 : ($total_row < $all_row ? $all_row : $total_row);
 $name = empty($doc->DocNum) ? $doc->code : $doc->DocNum;
 
 $config = array(
@@ -156,37 +194,45 @@ while($total_page > 0 )
 	$top .= "</div>";
 
 	$top .= "<div style='width:190mm; position:relative; margin:auto; padding-top:5px; border-radius:0px;'>";
-	$top .= 	"<div style='width:125mm; float:left; padding:5px 10px 5px 10px; min-height:34mm; max-height:45mm;'>";
+	$top .= 	"<div style='width:110mm; float:left; padding:5px 10px 5px 10px; height:34mm; max-height:34mm;'>";
 	$top .= 		"<table style='border:none; font-size:12px;'>";
 	$top .= 			"<tr>";
 	$top .= 				"<td style='width:14mm; vertical-align:text-top; padding-top:0px;'>Name</td>";
-	$top .=					"<td colspan='2' style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: {$doc->CardName}</td>";
+	$top .=					"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: {$doc->CardName}</td>";
 	$top .= 			"</tr>";
 	$top .= 			"<tr>";
 	$top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Address</td>";
-	$top .=					"<td colspan='2' style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px; padding-right:40px;'>: {$doc->Address}</td>";
+	$top .=					"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: {$doc->Address}</td>";
 	$top .= 			"</tr>";
+  // $top .= 			"<tr>";
+  // $top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Phone</td>";
+  // $top .= 				"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: {$doc->Phone}</td>";
+  // $top .= 			"</tr>";
 	$top .= 			"<tr>";
 	$top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Email</td>";
-	$top .= 				"<td colspan='2' style=''>: {$customer->E_Mail}</td>";
+	$top .= 				"<td style=''>: {$customer->E_Mail}</td>";
 	$top .= 			"</tr>";
   $top .= 			"<tr>";
   $top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Attn</td>";
-  $top .= 				"<td colspan='2' style=''>: {$doc->Attn1}</td>";
+  $top .= 				"<td style=''>: {$doc->Attn1}</td>";
   $top .= 			"</tr>";
   $top .= 			"<tr>";
   $top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Attn</td>";
-  $top .= 				"<td colspan='2' style=''>: {$doc->Attn2}</td>";
+  $top .= 				"<td style=''>: {$doc->Attn2}</td>";
   $top .= 			"</tr>";
 	$top .= 			"<tr>";
 	$top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Project</td>";
-	$top .= 				"<td style='width:55mm; white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: {$doc->Project}</td>";
-  $top .= 				"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>Type &nbsp;&nbsp;: {$doc->Type}</td>";
+	$top .= 				"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: {$doc->Project}</td>";
+	$top .= 			"</tr>";
+  $top .= 			"<tr>";
+	$top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Type</td>";
+	$top .= 				"<td style='white-space:pre-wrap; vertical-align:text-top; padding-top:0px;'>: {$doc->Type}</td>";
 	$top .= 			"</tr>";
 	$top .= 		"</table>";
 	$top .= 	"</div>";
 
-	$top .= 	"<div style='width:57mm; float:left; padding:5px 10px 5px 10px; min-height:34mm; max-height:45mm;'>";
+	//$top .=  	"<div style='width:1mm; float:left;'>&nbsp;</div>";
+	$top .= 	"<div style='width:57mm; float:left; padding:5px 10px 5px 10px; height:34mm; max-height:34mm;'>";
 	$top .= 		"<table style='table-layout:fixed; width:100%; border:none; font-size:12px;'>";
 
   $top .= 			"<tr>";
@@ -226,13 +272,10 @@ while($total_page > 0 )
 
 
   $page .= $this->printer->page_start();
-
-  if($doc->Approved != 'A' && $doc->Approved != 'S')
-  {
-    $page .= '<div style="width:190mm; height:0px; position:absolute; top:100mm; line-height:0px; color:purple; font-size:200px; text-align:center; z-index:100; opacity:0.1; rotate:-30deg;">Draft</div>';
-  }
-
   $page .= $top;
+
+	//$page .= ($doc->Status == 2 ? $cancleWatermark : "");
+
   $page .= $this->printer->content_start();
   $page .= $this->printer->table_start();
   $i = 0;
@@ -247,7 +290,13 @@ while($total_page > 0 )
 
     if( ! empty($rs) )
     {
-      $use_row = $rs->use_rows;
+			$Description = $rs->Description;
+			$model = mb_strlen($Description);
+			$newline = ceil(substr_count($Description, "\n") * 0.5);
+			$text_length = $model;
+
+			$use_row = ceil($text_length/$row_text);
+			$use_row = $use_row > $newline ? $use_row : $newline;
 
 			if($use_row > 1)
 			{
@@ -260,7 +309,7 @@ while($total_page > 0 )
         $n,
         $rs->ItemName,
         $rs->Description,
-        $rs->TreeType == 'S' ? $rs->Qty :number($rs->Qty, 2),
+        $rs->Qty, //number($rs->Qty, 2),
         number($rs->Price,2),
         $rs->discLabel == 0 ? '0.00' : $rs->discLabel,
         number($rs->SellPrice, 2),
@@ -283,6 +332,13 @@ while($total_page > 0 )
 
 		if(!empty($nextrow))
 		{
+			$Description = $rs->Description;
+			$model = mb_strlen($Description);
+			$newline = ceil(substr_count($Description, "\n") * 0.5);
+			$text_length = $model;
+			$use_row = ceil($text_length/$row_text);
+			$use_row = $use_row > $newline ? $use_row : $newline;
+
 			$use_row += $i;
 
 			if($row < $use_row)

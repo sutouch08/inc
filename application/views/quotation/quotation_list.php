@@ -16,22 +16,22 @@
 <hr class="padding-5"/>
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
 <div class="row">
-  <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+  <div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
     <label>Web No.</label>
     <input type="text" class="width-100 search-box" name="code"  value="<?php echo $code; ?>" />
   </div>
 
-	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
 		<label>Customer</label>
 		<input type="text" class="width-100 search-box" name="customer" value="<?php echo $customer; ?>" />
 	</div>
 
-	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
 		<label>Project</label>
 		<input type="text" class="width-100 search-box" name="project" value="<?php echo $project; ?>" />
 	</div>
 
-	<div class="col-lg-2-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-2-harf col-md-3 col-sm-3 col-xs-6 padding-5">
 		<label>User</label>
     <select class="width-100 filter" name="user_id" id="user_id">
 			<option value="all">ทั้งหมด</option>
@@ -39,7 +39,7 @@
 		</select>
 	</div>
 
-	<div class="col-lg-2-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-2-harf col-md-3 col-sm-3 col-xs-6 padding-5">
 		<label>Owner</label>
 		<select class="width-100 filter" name="emp_id" id="emp_id">
 			<option value="all">ทั้งหมด</option>
@@ -47,7 +47,7 @@
 		</select>
 	</div>
 
-	<div class="col-lg-2-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-2-harf col-md-3 col-sm-3 col-xs-6 padding-5">
     <label>Sale Employee</label>
 		<select class="width-100 filter" name="sale_id" id="sale_id">
 			<option value="all">ทั้งหมด</option>
@@ -55,9 +55,14 @@
 		</select>
   </div>
 
-	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
-		<label>SQ No</label>
-		<input type="text" class="width-100 search-box" name="sqNo" value="<?php echo $sqNo; ?>" />
+	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
+		<label>Orignal No.</label>
+		<input type="text" class="width-100 search-box" name="originalSQ" value="<?php echo $originalSQ; ?>" />
+	</div>
+
+	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
+		<label>SAP No.</label>
+		<input type="text" class="width-100 search-box" name="doc_num" value="<?php echo $doc_num; ?>" />
 	</div>
 
 	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
@@ -72,7 +77,7 @@
 	</div>
 
 
-	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-6 padding-5">
 		<label>Approval</label>
 		<select class="width-100 filter" name="approval">
 			<option value="all">ทั้งหมด</option>
@@ -83,7 +88,7 @@
 		</select>
 	</div>
 
-	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-6 padding-5">
 		<label>สถานะ</label>
 		<select class="width-100 filter" name="status">
 			<option value="all">ทั้งหมด</option>
@@ -124,7 +129,7 @@
 
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive" id="double-scroll">
-		<table class="table table-striped table-hover dataTable border-1" style="margin-bottom:10px; min-width:1260px; border-collapse:inherit;">
+		<table class="table table-striped table-hover dataTable border-1" style="margin-bottom:10px; min-width:1460px; border-collapse:inherit;">
 			<thead>
 				<tr style="font-size:10px;">
 					<th class="middle" style="width:110px;"></th>
@@ -139,6 +144,8 @@
 					<th class="fix-width-80 middle text-center">Approval</th>
 					<th class="fix-width-80 middle text-center">Status</th>
 					<th class="fix-width-100 middle text-center">User</th>
+					<th class="fix-width-100 middle text-center">Orignal No.</th>
+					<th class="fix-width-100 middle text-center">SAP No.</th>
 				</tr>
 			</thead>
 			<tbody style="font-size:12px;">
@@ -204,6 +211,8 @@
 						<?php endif; ?>
 					</td>
 					<td class="middle text-center"><?php echo $rs->uname; ?></td>
+					<td class="middle text-center"><?php echo $rs->OriginalSQ; ?></td>
+					<td class="middle text-center"><?php echo $rs->DocNum; ?></td>
 
 				</tr>
 				<?php $no++; ?>

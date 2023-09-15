@@ -279,9 +279,14 @@ class Quotation_model extends CI_Model
 			$this->db->like('code', $ds['code']);
 		}
 
-		if( isset($ds['sqNo']) && $ds['sqNo'] != '')
+		if( isset($ds['doc_num']) && $ds['doc_num'] != '')
 		{
-			$this->db->like('DocNum', $ds['sqNo']);
+			$this->db->like('DocNum', $ds['doc_num']);
+		}
+
+		if( isset($ds['originalSQ']) && $ds['originalSQ'] != '')
+		{
+			$this->db->like('OriginalSQ', $ds['originalSQ']);
 		}
 
 		if( isset($ds['project']) && $ds['project'] != '')
@@ -354,9 +359,14 @@ class Quotation_model extends CI_Model
 			$this->db->like('code', $ds['code']);
 		}
 
-		if( isset($ds['sqNo']) && $ds['sqNo'] != '')
+		if( isset($ds['doc_num']) && $ds['doc_num'] != '')
 		{
-			$this->db->like('SqNo', $ds['sqNo']);
+			$this->db->like('DocNum', $ds['doc_num']);
+		}
+
+		if( isset($ds['originalSQ']) && $ds['originalSQ'] != '')
+		{
+			$this->db->like('OriginalSQ', $ds['originalSQ']);
 		}
 
 		if( isset($ds['project']) && $ds['project'] != '')

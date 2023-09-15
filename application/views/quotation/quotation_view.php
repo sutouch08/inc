@@ -17,18 +17,22 @@
   </div>
   <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 padding-5">
   	<p class="pull-right top-p">
-      <button type="button" class="btn btn-xs btn-default btn-100 top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> &nbsp; Back</button>
+      <button type="button" class="btn btn-xs btn-default top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> &nbsp; Back</button>
 			<?php if($this->pm->can_add) : ?>
-				<!--<button type="button" class="btn btn-xs btn-primary top-btn" onclick="duplicateSQ('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Duplicate</button> -->
+				<button type="button" class="btn btn-xs btn-primary top-btn" onclick="duplicateSQ('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Duplicate</button>
 			<?php endif; ?>
 			<?php if($pm->can_add && $order->Status == 1 && ($order->Approved == 'A' OR $order->Approved == 'S') ) : ?>
 				<!--<button type="button" class="btn btn-xs btn-success top-btn" onclick="createSO('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Create Sale Order</button>-->
 			<?php endif; ?>
 			<?php if($this->pm->can_edit && $order->Status == -1) : ?>
-				<button type="button" class="btn btn-xs btn-warning btn-100 top-btn" onclick="goEdit('<?php echo $order->code; ?>')"><i class="fa fa-pencil"></i> Edit</button>
+				<button type="button" class="btn btn-xs btn-warning top-btn" onclick="goEdit('<?php echo $order->code; ?>')"><i class="fa fa-pencil"></i> Edit</button>
 			<?php endif; ?>
-			<?php if($order->Status >= 0) : ?>
-			<button type="button" class="btn btn-xs btn-info btn-100 top-btn" onclick="printSQ()"><i class="fa fa-print"></i> Print</button>
+			<?php if($order->Status != 2) : ?>
+				<?php if($order->Approved == 'A' OR $order->Approved == 'S') : ?>
+					<button type="button" class="btn btn-xs btn-info top-btn" onclick="printSQ()"><i class="fa fa-print"></i> Print</button>
+				<?php else : ?>
+					<button type="button" class="btn btn-xs btn-info top-btn" onclick="printSQ()">Preview</button>
+				<?php endif; ?>
 			<?php endif; ?>
 			<?php if(empty($order->DocEntry) && ($order->Status == 3 OR $order->Status == 0 OR $this->_SuperAdmin) && ($order->Approved == 'A' OR $order->Approved == 'S')) : ?>
 			<button type="button" class="btn btn-xs btn-success btn-100 top-btn" onclick="sendToSap('<?php echo $order->code; ?>')"><i class="fa fa-send"></i> Send to SAP</button>

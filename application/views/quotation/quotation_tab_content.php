@@ -26,7 +26,7 @@
             <th class="fix-width-80 middle text-center">Tax Code</th>
             <th class="fix-width-100 middle text-center">Price after disc</th>
             <th class="fix-width-150 middle text-center">Amount before tax</th>
-            <th class="fix-width-60 middle text-center hide">OnHand</th>
+            <th class="fix-width-80 middle text-center">Qty in Whse</th>
             <th class="fix-width-60 middle text-center hide">Commited</th>
             <th class="fix-width-60 middle text-center hide">OnOrder</th>
           </tr>
@@ -35,16 +35,20 @@
           <?php $no = 1; ?>
           <?php $rows = 10; ?>
           <?php $select_warehouse = select_warehouse_code($whsCode); ?>
-
+          <?php $select_uom = select_uom(); ?>
           <?php if(!empty($details)) : ?>
     				<?php foreach($details as $rs) : ?>
               <?php $bg = $rs->TreeType == 'S' ? 'father' : ($rs->TreeType == 'I' ? 'child' : ''); ?>
+              <?php $error = $rs->SellPrice < $rs->Cost ? 'error' : ''; ?>
+              <?php $dummy = $rs->ItemCode == 'FG-Dummy' ? 'dummy' : ''; ?>
               <?php $i_disable = $rs->TreeType == 'I' ? 'disabled' : ''; ?>
               <?php $s_disable = $rs->TreeType == 'S' ? 'disabled' : ''; ?>
-              <tr id="row-<?php echo $no; ?>" data-no="<?php echo $no; ?>" class="<?php echo $bg; ?>">
+              <tr id="row-<?php echo $no; ?>" data-no="<?php echo $no; ?>" class="<?php echo $bg; ?> <?php echo $error; ?> <?php echo $dummy; ?>">
                 <input type="hidden" class="line-num" id="line-num-<?php echo $no; ?>" value="<?php echo $no; ?>" />
                 <input type="hidden" id="stdPrice-<?php echo $no; ?>" value="<?php echo $rs->stdPrice; ?>" />
                 <input type="hidden" id="price-<?php echo $no; ?>" value="<?php echo $rs->Price; ?>" />
+                <input type="hidden" id="cost-<?php echo $no; ?>" value="<?php echo $rs->Cost; ?>" />
+                <input type="hidden" id="bCost-<?php echo $no; ?>" value="<?php echo $rs->SellPrice < $rs->Cost ? 1 : 0; ?>" />
                 <input type="hidden" id="sellPrice-<?php echo $no; ?>" value="<?php echo $rs->SellPrice; ?>" />
                 <input type="hidden" id="sysSellPrice-<?php echo $no; ?>" value="<?php echo $rs->sysSellPrice; ?>" />
                 <input type="hidden" id="disc-amount-<?php echo $no; ?>" value="<?php echo $rs->discAmount; ?>"/>
@@ -55,8 +59,7 @@
                 <input type="hidden" id="vat-rate-<?php echo $no; ?>" value="<?php echo $rs->VatRate; ?>" />
                 <input type="hidden" id="vat-amount-<?php echo $no; ?>" value="<?php echo $rs->VatAmount; ?>" />
                 <input type="hidden" id="vat-total-<?php echo $no; ?>" value="<?php echo $rs->totalVatAmount; ?>" />
-                <input type="hidden" id="uom-code-<?php echo $no; ?>" value="<?php echo $rs->UomCode; ?>" />
-                <input type="hidden" class="disc-diff" id="disc-diff-<?php echo $no; ?>" value="<?php echo $rs->discDiff; ?>" />
+                <input type="hidden" class="disc-diff" id="disc-diff-<?php echo $no; ?>" data-no="<?php echo $no; ?>" value="<?php echo $rs->discDiff; ?>" />
                 <input type="hidden" class="disc-error" id="disc-error-<?php echo $no; ?>" value="0" data-id="<?php echo $no; ?>" />
                 <input type="hidden" id="uid-<?php echo $no; ?>" class="uid" data-no="<?php echo $no; ?>" value="<?php echo $rs->uid; ?>" />
                 <input type="hidden" id="tree-type-<?php echo $no; ?>" value="<?php echo $rs->TreeType; ?>" />
@@ -91,7 +94,10 @@
                 </td>
 
                 <td class="middle">
-                  <input type="text" class="form-control input-xs text-center" id="uom-<?php echo $no; ?>" value="<?php echo $rs->UomCode; ?>" disabled/>
+                  <select class="form-control input-xs" id="uom-<?php echo $no; ?>" <?php echo $rs->ItemCode == 'FG-Dummy' ? '' : 'disabled'; ?>>
+                    <option value=""></option>
+                    <?php echo select_uom($rs->UomEntry); ?>
+                  </select>
                 </td>
 
                 <td class="middle hide">
@@ -143,16 +149,16 @@
                   <input type="text" class="form-control input-xs text-right number input-amount" id="total-label-<?php echo $no; ?>" value="<?php echo number($rs->LineTotal, 2); ?>" readonly disabled />
                 </td>
 
-                <td class="middle hide">
-                  <input type="text" class="form-control input-xs" id="onhand-<?php echo $no; ?>" value="<?php echo number($rs->OnHand); ?>" disabled/>
+                <td class="middle">
+                  <input type="text" class="form-control input-xs text-right" id="onhand-<?php echo $no; ?>" value="<?php echo number($rs->OnHand); ?>" disabled/>
                 </td>
 
                 <td class="middle hide">
-                  <input type="text" class="form-control input-xs" id="commited-<?php echo $no; ?>" value="<?php echo number($rs->Commited); ?>" disabled/>
+                  <input type="text" class="form-control input-xs text-right" id="commited-<?php echo $no; ?>" value="<?php echo number($rs->Commited); ?>" disabled/>
                 </td>
 
                 <td class="middle hide">
-                  <input type="text" class="form-control input-xs" id="onorder-<?php echo $no; ?>" value="<?php echo number($rs->OnOrder); ?>" disabled/>
+                  <input type="text" class="form-control input-xs text-right" id="onorder-<?php echo $no; ?>" value="<?php echo number($rs->OnOrder); ?>" disabled/>
                 </td>
               </tr>
               <?php $no++; ?>
@@ -166,6 +172,8 @@
               <input type="hidden" class="line-num" id="line-num-<?php echo $no; ?>" value="<?php echo $no; ?>" />
               <input type="hidden" id="stdPrice-<?php echo $no; ?>" value="0" />
               <input type="hidden" id="price-<?php echo $no; ?>" value="0" />
+              <input type="hidden" id="cost-<?php echo $no; ?>" value="0" />
+              <input type="hidden" id="bCost-<?php echo $no; ?>" value="0" />
               <input type="hidden" id="sellPrice-<?php echo $no; ?>" value="0" />
               <input type="hidden" id="sysSellPrice-<?php echo $no; ?>" value="0" />
               <input type="hidden" id="disc-amount-<?php echo $no; ?>" value="0"/>
@@ -176,8 +184,7 @@
               <input type="hidden" id="vat-rate-<?php echo $no; ?>" value="0" />
               <input type="hidden" id="vat-amount-<?php echo $no; ?>" value="0" />
               <input type="hidden" id="vat-total-<?php echo $no; ?>" value="0" />
-              <input type="hidden" id="uom-code-<?php echo $no; ?>" value="" />
-              <input type="hidden" class="disc-diff" id="disc-diff-<?php echo $no; ?>" value="0" />
+              <input type="hidden" class="disc-diff" id="disc-diff-<?php echo $no; ?>" data-no="<?php echo $no; ?>" value="0" />
               <input type="hidden" class="disc-error" id="disc-error-<?php echo $no; ?>" value="0" data-id="<?php echo $no; ?>" />
               <input type="hidden" id="uid-<?php echo $no; ?>" class="uid" data-no="<?php echo $no; ?>" value="" />
               <input type="hidden" id="tree-type-<?php echo $no; ?>" value="N" />
@@ -205,7 +212,10 @@
                 value="" onkeyup="recalAmount(<?php echo $no; ?>)" />
               </td>
               <td class="middle">
-                <input type="text" class="form-control input-xs text-center" id="uom-<?php echo $no; ?>" value="" disabled/>
+                <select class="form-control input-xs" id="uom-<?php echo $no; ?>" disabled>
+                  <option value=""></option>
+                  <?php echo $select_uom; ?>
+                </select>
               </td>
 
               <td class="middle hide">
@@ -255,16 +265,16 @@
                 <input type="text" class="form-control input-xs text-right number input-amount" id="total-label-<?php echo $no; ?>" value="" readonly disabled />
               </td>
 
-              <td class="middle hide">
-                <input type="text" class="form-control input-xs" id="onhand-<?php echo $no; ?>" value="" disabled/>
+              <td class="middle">
+                <input type="text" class="form-control input-xs text-right" id="onhand-<?php echo $no; ?>" value="" disabled/>
               </td>
 
               <td class="middle hide">
-                <input type="text" class="form-control input-xs" id="commited-<?php echo $no; ?>" value="" disabled/>
+                <input type="text" class="form-control input-xs text-right" id="commited-<?php echo $no; ?>" value="" disabled/>
               </td>
 
               <td class="middle hide">
-                <input type="text" class="form-control input-xs" id="onorder-<?php echo $no; ?>" value="" disabled/>
+                <input type="text" class="form-control input-xs text-right" id="onorder-<?php echo $no; ?>" value="" disabled/>
               </td>
 
             </tr>

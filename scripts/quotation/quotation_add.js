@@ -13,6 +13,7 @@ function saveAdd() {
 	setTimeout(function() {
 		let mustApprove = 0;
 		let max_diff = 0;
+		let belowCost = 0;
 		let totalAmount = parseDefault(parseFloat($('#totalAmount').val()), 0);
 		let max_discount = parseDefault(parseFloat($('#max_discount').val()), 0);
 		let max_amount = parseDefault(parseFloat($('#max_amount').val()), 0);
@@ -23,6 +24,10 @@ function saveAdd() {
 		let billDiscAmount = parseDefault(parseFloat($('#discAmount').val()), 0);
 
 		$('.disc-diff').each(function() {
+			let no = $(this).data('no');
+			let bCost = parseDefault(parseInt($('#bCost-'+no).val()), 0);
+			belowCost += bCost;
+
 			if($(this).val() > 0) {
 				let diff = parseDefault(parseFloat($(this).val()), 0);
 				max_diff =  diff > max_diff ? diff : max_diff;
@@ -148,7 +153,6 @@ function saveAdd() {
 			$('#TextDate').removeClass('has-error');
 		}
 
-
 		var disc_error = 0;
 		//--- check discount
 		$('.disc-error').each(function() {
@@ -201,12 +205,13 @@ function saveAdd() {
 					"ItemCode" : itemCode,
 					"ItemName" : $('#itemName-'+no).val(),
 					"Description" : $('#itemDetail-'+no).val(),
+					"Cost" : $('#cost-'+no).val(),
 					"Price" : $('#price-'+no).val(),
 					"stdPrice" : $('#stdPrice-'+no).val(),
 					"SellPrice" : $('#sellPrice-'+no).val(),
 					"sysSellPrice" : $('#sysSellPrice-'+no).val(),
 					"Quantity" : $('#line-qty-'+no).val(),
-					"UomCode" : $('#uom-code-'+no).val(),
+					"UomEntry" : $('#uom-'+no).val(),
 					"sysDiscLabel" : $('#sys-disc-label-'+no).val(),
 					"disc1" : $('#disc1-'+no).val(),
 					"disc2" : $('#disc2-'+no).val(),
@@ -245,65 +250,91 @@ function saveAdd() {
 		data.header = ds;
 		data.details = details;
 
-		//--- หากไม่มีข้อผิดพลาด
+		if(belowCost > 0) {
+			swal({
+				title:'ราคาต่ำกว่าทุน !',
+				text:'พบรายการที่ราคาขายต่ำกว่าต้นทุน คุณต้องการบันทึกต่อไปหรือไม่',
+				type:'warning',
+				showCancelButton:true,
+				confirmButtonColor:'#f44336',
+				confirmButtonText:'Confirm',
+				cancelButtonText:'Cancel',
+				closeOnConfirm:true
+			}, function(isConfirm) {
+				if(isConfirm) {
+					setTimeout(() => {
+						add(data);
+					}, 200);
+				}
+				else {
+					$('.btn-save').removeAttr('disabled');
+				}
+			});
+		}
+		else {
+			add(data);
+		}
 
-		load_in();
+	}, 500);
+}
 
-		$.ajax({
-			url:HOME + 'add',
-			type:'POST',
-			cache:false,
-			data:JSON.stringify(data),
-			success:function(rs) {
-				load_out();
-				if(isJson(rs)) {
-					var ds = $.parseJSON(rs);
-					if(ds.status === 'success') {
-						if(ds.ex == 1) {
-							swal({
-								title:'Oops !',
-								text: ds.message,
-								type:'info'
-							}, function() {
-								setTimeout(function(){
-									viewDetail(ds.code);
-								}, 500);
-							});
-						}
-						else {
-							swal({
-								title:'Success',
-								type:'success',
-								timer:1000
-							});
 
+function add(data) {
+	load_in();
+
+	$.ajax({
+		url:HOME + 'add',
+		type:'POST',
+		cache:false,
+		data:JSON.stringify(data),
+		success:function(rs) {
+			load_out();
+			if(isJson(rs)) {
+				var ds = $.parseJSON(rs);
+				if(ds.status === 'success') {
+					if(ds.ex == 1) {
+						swal({
+							title:'Oops !',
+							text: ds.message,
+							type:'info'
+						}, function() {
 							setTimeout(function(){
 								viewDetail(ds.code);
-							}, 1200);
-						}
+							}, 500);
+						});
 					}
 					else {
 						swal({
-							title:'Error!',
-							text:ds.message,
-							type:'error'
+							title:'Success',
+							type:'success',
+							timer:1000
 						});
+
+						setTimeout(function(){
+							viewDetail(ds.code);
+						}, 1200);
 					}
 				}
 				else {
 					swal({
 						title:'Error!',
-						text:rs,
+						text:ds.message,
 						type:'error'
 					});
 				}
-
-				$('.btn-save').removeAttr('disabled');
 			}
-		});
-	}, 500);
-}
+			else {
+				swal({
+					title:'Error!',
+					text:rs,
+					type:'error'
+				});
+			}
 
+			$('.btn-save').removeAttr('disabled');
+		}
+	});
+}
 
 
 function updateAsDraft() {
@@ -322,6 +353,7 @@ function saveUpdate() {
 
 		let mustApprove = 0;
 		let max_diff = 0;
+		let belowCost = 0;
 		let max_discount = parseDefault(parseFloat($('#max_discount').val()), 0);
 		let max_amount = parseDefault(parseFloat($('#max_amount').val()), 0);
 
@@ -331,6 +363,10 @@ function saveUpdate() {
 		let billDiscAmount = parseDefault(parseFloat($('#discAmount').val()), 0);
 
 		$('.disc-diff').each(function() {
+			let no = $(this).data('no');
+			let bCost = parseDefault(parseInt($('#bCost-'+no).val()), 0);
+			belowCost += bCost;
+
 			if($(this).val() > 0) {
 				let diff = parseDefault(parseFloat($(this).val()), 0);
 				max_diff =  diff > max_diff ? diff : max_diff;
@@ -512,7 +548,7 @@ function saveUpdate() {
 					"SellPrice" : $('#sellPrice-'+no).val(),
 					"sysSellPrice" : $('#sysSellPrice-'+no).val(),
 					"Quantity" : $('#line-qty-'+no).val(),
-					"UomCode" : $('#uom-code-'+no).val(),
+					"UomEntry" : $('#uom-'+no).val(),
 					"sysDiscLabel" : $('#sys-disc-label-'+no).val(),
 					"disc1" : $('#disc1-'+no).val(),
 					"disc2" : $('#disc2-'+no).val(),
@@ -553,41 +589,70 @@ function saveUpdate() {
 
 		//--- หากไม่มีข้อผิดพลาด
 
-		load_in();
-		$.ajax({
-			url:HOME + 'update',
-			type:'POST',
-			cache:false,
-			data:JSON.stringify(data),
-			success:function(rs) {
-				load_out();
-				if(isJson(rs)) {
-					var ds = $.parseJSON(rs);
-					if(ds.status === 'success') {
-						swal({
-							title:'Success',
-							type:'success',
-							timer:1000
-						});
-
-						setTimeout(function(){
-							viewDetail(ds.code);
-						}, 1200);
-					}
+		if(belowCost > 0) {
+			swal({
+				title:'ราคาต่ำกว่าทุน !',
+				text:'พบรายการที่ราคาขายต่ำกว่าต้นทุน คุณต้องการบันทึกต่อไปหรือไม่',
+				type:'warning',
+				showCancelButton:true,
+				confirmButtonColor:'#f44336',
+				confirmButtonText:'Confirm',
+				cancelButtonText:'Cancel',
+				closeOnConfirm:true
+			}, function(isConfirm) {
+				if(isConfirm) {
+					setTimeout(() => {
+						update(data);
+					}, 200);
 				}
 				else {
-					swal({
-						title:'Error!',
-						text:rs,
-						type:'error'
-					});
+					$('.btn-save').removeAttr('disabled');
 				}
-
-				$('.btn-save').removeAttr('disabled');
-			}
-		});
+			});
+		}
+		else {
+			update(data);
+		}
 	}, 500);
 }
+
+
+function update(data) {
+	load_in();
+	$.ajax({
+		url:HOME + 'update',
+		type:'POST',
+		cache:false,
+		data:JSON.stringify(data),
+		success:function(rs) {
+			load_out();
+			if(isJson(rs)) {
+				var ds = $.parseJSON(rs);
+				if(ds.status === 'success') {
+					swal({
+						title:'Success',
+						type:'success',
+						timer:1000
+					});
+
+					setTimeout(function(){
+						viewDetail(ds.code);
+					}, 1200);
+				}
+			}
+			else {
+				swal({
+					title:'Error!',
+					text:rs,
+					type:'error'
+				});
+			}
+
+			$('.btn-save').removeAttr('disabled');
+		}
+	});
+}
+
 
 
 $('#CardCode').autocomplete({
@@ -950,6 +1015,7 @@ function addChildRows(childs, fno) {
 
 		render_after(source, ds, output);
 		$('#whs-'+no).val(ds.dfWhsCode);
+		$('#uom-'+no).val(ds.UomEntry);
 		row = no;
 		no++;
 		$('#row-no').val(no);
@@ -1059,6 +1125,7 @@ function getItemData(no) {
 					$('#stdPrice-label-'+no).val(addCommas(price.toFixed(2)));
 					$('#sellPrice-'+no).val(sellPrice);
 					$('#price-'+no).val(price);
+					$('#cost-'+no).val(ds.Cost);
 					$('#sysSellPrice-'+no).val(sellPrice);
 					$('#disc-amount-'+no).val(ds.discAmount);
 					$('#line-disc-amount-'+no).val(ds.totalDiscAmount);
@@ -1070,7 +1137,6 @@ function getItemData(no) {
 					$('#disc1-'+no).val(roundNumber(ds.disc1), 2);
 					$('#disc2-'+no).val(ds.disc2);
 					$('#disc3-'+no).val(ds.disc3);
-					$('#uom-code-'+no).val(ds.UomCode);
 					$('#itemName-'+no).val(ds.ItemName);
 					$('#itemDetail-'+no).val(ds.Description);
 					$('#whs-'+no).val(ds.dfWhsCode);
@@ -1078,7 +1144,7 @@ function getItemData(no) {
 					$('#commited-'+no).val(ds.Commited);
 					$('#onorder-'+no).val(ds.OnOrder);
 					$('#line-qty-'+no).val(ds.Qty);
-					$('#uom-'+no).val(ds.UomName);
+					$('#uom-'+no).val(ds.UomEntry);
 					$('#price-label-'+no).val(addCommas(price.toFixed(2)));
 					$('#sysSellPrice-'+no).val(sellPrice);
 					$('#disc-label-'+no).val(ds.discLabel);
@@ -1088,6 +1154,15 @@ function getItemData(no) {
 					$('#line-qty-'+no).focus();
 					$('#uid-'+no).val(ds.uid);
 					$('#tree-type-'+no).val(ds.TreeType);
+
+					if(ds.dummy == '1') {
+						$('#uom-'+no).removeAttr('disabled');
+						$('#row-'+no).addClass('dummy');
+					}
+					else {
+						$('#uom-'+no).attr('disabled', 'disabled');
+						$('#row-'+no).removeClass('dummy');
+					}
 
 					if(ds.childs.length) {
 						$('#row-'+no).addClass('father');
@@ -1218,6 +1293,12 @@ function recalAmount(no) {
 		let sysSellPrice = parseDefault(parseFloat($('#sysSellPrice-'+no).val()), 0.00);
 		let priceLabel = removeCommas($('#price-label-'+no).val());
 		let price = roundNumber(parseDefault(parseFloat(priceLabel), 0.00));
+		if(price < 0) {
+			price = 0.00;
+			$('#price-label-'+no).val(0.00);
+		}
+
+		let cost = roundNumber(parseDefault(parseFloat($('#cost-'+no).val()), 0.00));
 
 		$('#price-'+no).val(price);
 		$('#price-label-'+no).val(addCommas(price));
@@ -1275,6 +1356,15 @@ function recalAmount(no) {
 			$('#line-sys-total-'+no).val(sysSellPrice * qty);
 			$('#total-label-'+no).val(addCommas(lineAmount));
 
+			if(sellPrice < cost) {
+				$('#row-'+no).addClass('has-error');
+				$('#bCost-'+no).val(1);
+			}
+			else {
+				$('#row-'+no).removeClass('has-error');
+				$('#bCost-'+no).val(0);
+			}
+
 			if(type == 'S') {
 				recalChilds(no);
 			}
@@ -1291,7 +1381,9 @@ function recalChilds(no) {
 	let qty = parseDefault(parseInt($('#line-qty-'+no).val()), 0);
 	$('.'+uid).each(function() {
 		let rowNo = $(this).data('id');
-		$(this).val(qty);
+		let baseQty = parseDefault(parseFloat($(this).data('qty')), 1);
+		let newQty = qty * baseQty;
+		$(this).val(newQty);
 		recalAmount(rowNo);
 	});
 }
@@ -1532,12 +1624,9 @@ $('#discAmount').keyup(function(e) {
 })
 
 
-
 $(document).ready(function(){
 	init();
 })
-
-
 
 
 $('.autosize').autosize({append: "\n"});
@@ -1545,12 +1634,12 @@ $('.autosize').autosize({append: "\n"});
 
 function duplicateSQ(code) {
 	swal({
-    title:'Duplicate Sale Quotation',
+    title:'Duplicate',
     text:'ต้องการสร้างใบเสนอราคาใหม่ เหมือนใบเสนอราคานี้หรือไม่ ?',
     type:'warning',
     showCancelButton:true,
-    cancelButtonText:'Cancle',
-    confirmButtonText:'Duplicate',
+		confirmButtonText:'Yes',
+    cancelButtonText:'No',
 		closeOnConfirm:true
   },
   function(){
@@ -1568,24 +1657,23 @@ function duplicateSQ(code) {
 				if(isJson(rs)) {
 					var ds = $.parseJSON(rs);
 					if(ds.status === 'success') {
-						setTimeout(function() {
+						setTimeout(() => {
 							swal({
 								title:'Success',
-								text: 'Duplicate success : ' + ds.code,
 								type:'success',
 								timer:1000
 							});
 
-							setTimeout(function(){
+							setTimeout(() => {
 								goEdit(ds.code);
-							},1200)
-						}, 500)
+							},1200);
+						}, 500);
 
 					}
 					else {
 						swal({
 							title:"Error!",
-							text:ds.error,
+							text:ds.message,
 							type:'error'
 						});
 					}

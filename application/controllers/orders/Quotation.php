@@ -33,7 +33,8 @@ class Quotation extends PS_Controller
 		$filter = array(
 			'code' => get_filter('code', 'sq_code', ''),
 			'customer' => get_filter('customer', 'sq_customer', ''),
-			'sqNo' => get_filter('sqNo', 'sqNo', ''),
+			'doc_num' => get_filter('doc_num', 'sq_doc_num', ''),
+			'originalSQ' => get_filter('originalSQ', 'originalSQ', ''),
 			'project' => get_filter('project', 'project', ''),
 			'sale_id' => get_filter('sale_id', 'sq_sale_id', 'all'),
 			'emp_id' => get_filter('emp_id', 'sq_emp_id', 'all'),
@@ -232,6 +233,17 @@ class Quotation extends PS_Controller
 								{
 									$discLabel = discountLabel($rs->disc1, $rs->disc2, $rs->disc3);
 
+									if($rs->ItemCode == 'FG-Dummy')
+									{
+										$uom = $this->products_model->get_uom($rs->UomEntry);
+
+										if( ! empty($uom))
+										{
+											$pd->uom_code = $uom->UomCode;
+											$pd->uom_id = $uom->UomEntry;
+										}
+									}
+
 									$arr = array(
 										'quotation_id' => $id,
 										'quotation_code' => $code,
@@ -243,6 +255,7 @@ class Quotation extends PS_Controller
 										'Qty' => $rs->Quantity,
 										'UomCode' => $pd->uom_code,
 										'UomEntry' => $pd->uom_id,
+										'Cost' => empty($pd->cost) ? 0.00 : $pd->cost,
 										'Price' => $rs->Price,
 										'SellPrice' => $rs->SellPrice,
 										'sysSellPrice' => $rs->sysSellPrice,
@@ -552,6 +565,17 @@ class Quotation extends PS_Controller
 												{
 													$discLabel = discountLabel($rs->disc1, $rs->disc2, $rs->disc3);
 
+													if($rs->ItemCode == 'FG-Dummy')
+													{
+														$uom = $this->products_model->get_uom($rs->UomEntry);
+
+														if( ! empty($uom))
+														{
+															$pd->uom_code = $uom->UomCode;
+															$pd->uom_id = $uom->UomEntry;
+														}
+													}
+
 													$arr = array(
 														'quotation_id' => $order->id,
 														'quotation_code' => $code,
@@ -563,6 +587,7 @@ class Quotation extends PS_Controller
 														'Qty' => $rs->Quantity,
 														'UomCode' => $pd->uom_code,
 														'UomEntry' => $pd->uom_id,
+														'Cost' => empty($pd->cost) ? 0.00 : $pd->cost,
 														'Price' => $rs->Price,
 														'SellPrice' => $rs->SellPrice,
 														'sysSellPrice' => $rs->sysSellPrice,
@@ -684,6 +709,205 @@ class Quotation extends PS_Controller
 			'message' => $sc === TRUE ? ($ex == 1 ? $this->error : 'success') : $this->error,
 			'code' => $sc === TRUE ? $code : NULL,
 			'ex' => $ex
+		);
+
+		echo json_encode($arr);
+	}
+
+
+	public function duplicate_quotation()
+	{
+		$sc = TRUE;
+		$sqCode = $this->input->post('code');
+
+		if($this->pm->can_add)
+		{
+			$hd = $this->quotation_model->get($sqCode);
+
+			if( ! empty($hd))
+			{
+				$details = $this->quotation_model->get_details($sqCode);
+				$adr = $this->quotation_model->get_quotation_address($sqCode);
+				$MustReview = getConfig('QUOTATION_REVIEW') == 1 ? TRUE : FALSE;
+				$MustApprove = getConfig('QUOTATION_APPROVE') == 1 ? TRUE : FALSE;
+
+				$code = $this->get_new_code();
+				$arr = array(
+					'code' => $code,
+					'CardCode' => $hd->CardCode,
+					'CardName' => $hd->CardName,
+					'CntctCode' => get_null($hd->CntctCode),
+					'ContactPerson' => get_null($hd->ContactPerson),
+					'NumAtCard' => get_null($hd->NumAtCard),
+					'Attn1' => get_null($hd->Attn1),
+					'Attn2' => get_null($hd->Attn2),
+					'Type' => get_null($hd->Type),
+					'Project' => get_null($hd->Project),
+					'Type' => get_null($hd->Type),
+					'Phone' => trim($hd->Phone),
+					'PriceList' => get_null($hd->PriceList),
+					'SlpCode' => $hd->SlpCode,
+					'Payment' => $hd->Payment,
+					'DocCur' => $hd->DocCur,
+					'DocRate' => $hd->DocRate,
+					'DocTotal' => $hd->DocTotal,
+					'SysTotal' => $hd->SysTotal,
+					'DocDate' => date('Y-m-d'),
+					'DocDueDate' => date('Y-m-d'),
+					'TextDate' => date('Y-m-d'),
+					'PayToCode' => $hd->PayToCode,
+					'ShipToCode' => $hd->ShipToCode,
+					'Address' => $hd->Address,
+					'Address2' => $hd->Address2,
+					'DiscPrcnt' => $hd->DiscPrcnt,
+					'DiscAmount' => $hd->DiscAmount,
+					'VatSum' => $hd->VatSum,
+					'RoundDif' => $hd->RoundDif,
+					'sale_team' => $hd->sale_team,
+					'user_id' => $this->_user->id,
+					'uname' => $this->_user->uname,
+					'Comments' => get_null($hd->Comments),
+					'must_approve' => $hd->must_approve,
+					'disc_diff' => $hd->disc_diff,
+					'VatGroup' => $hd->VatGroup,
+					'VatRate' => $hd->VatRate,
+					'Status' => -1,
+					'is_duplicate' => 1,
+					'OriginalSQ' => $sqCode,
+					'Review' => $MustReview ? 'P' : 'S',
+					'Approved' => $MustApprove ? ($hd->must_approve == 1 ? 'P' : 'S') : 'S',
+					'OwnerCode' => $this->_user->emp_id
+				);
+
+				$this->db->trans_begin();
+				$id = $this->quotation_model->add($arr);
+
+				if( ! empty($id))
+				{
+					if( ! empty($adr))
+					{
+						$address = array(
+							'quotation_code' => $code,
+							'bAddress' => $adr->bAddress,
+							'bAddress2' => $adr->bAddress2,
+							'bStreet' => $adr->bStreet,
+							'bStreetNo' => $adr->bStreetNo,
+							'bBlock' => $adr->bBlock,
+							'bCity' => $adr->bCity,
+							'bCounty' => $adr->bCounty,
+							'bZipCode' => $adr->bZipCode,
+							'bCountry' => $adr->bCountry,
+							'sAddress' => $adr->sAddress,
+							'sAddress2' => $adr->sAddress2,
+							'sStreet' => $adr->sStreet,
+							'sStreetNo' => $adr->sStreetNo,
+							'sBlock' => $adr->sBlock,
+							'sCity' => $adr->sCity,
+							'sCounty' => $adr->sCounty,
+							'sZipCode' => $adr->sZipCode,
+							'sCountry' => $adr->sCountry
+						);
+
+						$this->quotation_model->add_address($address);
+					}
+
+					if( ! empty($details))
+					{
+						foreach($details as $rs)
+						{
+							if($sc === FALSE)
+							{
+								break;
+							}
+
+							$arr = array(
+								'quotation_id' => $id,
+								'quotation_code' => $code,
+								'LineNum' => $rs->LineNum,
+								'ItemCode' => $rs->ItemCode,
+								'ItemName' => $rs->ItemName,
+								'Description' => $rs->Description,
+								'WhsCode' => $rs->WhsCode,
+								'Qty' => $rs->Qty,
+								'UomCode' => $rs->UomCode,
+								'UomEntry' => $rs->UomEntry,
+								'Cost' => $rs->Cost,
+								'Price' => $rs->Price,
+								'SellPrice' => $rs->SellPrice,
+								'sysSellPrice' => $rs->sysSellPrice,
+								'disc1' => $rs->disc1,
+								'disc2' => $rs->disc2,
+								'disc3' => $rs->disc3,
+								'sysDisc' => $rs->sysDisc,
+								'discLabel' => $rs->discLabel,
+								'discDiff' => $rs->discDiff,
+								'DiscPrcnt' => $rs->DiscPrcnt,
+								'discAmount' => $rs->discAmount,
+								'totalDiscAmount' => $rs->totalDiscAmount,
+								'VatGroup' => $rs->VatGroup,
+								'VatRate' => $rs->VatRate,
+								'VatAmount' => $rs->VatAmount,
+								'totalVatAmount' => $rs->totalVatAmount,
+								'LineTotal' => $rs->LineTotal,
+								'LineSysTotal' => $rs->LineSysTotal,
+								'user_id' => $this->_user->id,
+								'uname' => $this->_user->uname,
+								'sale_team' => $rs->sale_team,
+								'TreeType' => $rs->TreeType,
+								'uid' => $rs->uid,
+								'father_uid' => empty($rs->father_uid) ? NULL : $rs->father_uid
+							);
+
+							if(! $this->quotation_model->add_detail($arr))
+							{
+								$sc = FALSE;
+								$this->error = "Insert detail failed";
+							}
+						}
+					}
+
+					if($sc === TRUE)
+					{
+						$this->db->trans_commit();
+
+						$arr = array(
+							'user_id' => $this->_user->id,
+							'uname' => $this->_user->uname,
+							'docType' => 'SQ',
+							'docNum' => $code,
+							'action' => 'add',
+							'ip_address' => $_SERVER['REMOTE_ADDR']
+						);
+
+						$this->user_model->add_logs($arr);
+					}
+					else
+					{
+						$this->db->trans_rollback();
+					}
+				}
+				else
+				{
+					$sc = FALSE;
+					$this->error = "Duplicate Quotation failed";
+				}
+			}
+			else
+			{
+				$sc = FALSE;
+				set_error('required');
+			}
+		}
+		else
+		{
+			$sc = FALSE;
+			set_error('permission');
+		}
+
+		$arr = array(
+			'status' => $sc === TRUE ? 'success' : 'failed',
+			'message' => $sc === TRUE ? 'success' : $this->error,
+			'code' => $sc === TRUE ? $code : NULL
 		);
 
 		echo json_encode($arr);
@@ -1258,11 +1482,13 @@ class Quotation extends PS_Controller
 		$this->load->library('printer');
 		$doc = $this->quotation_model->get($code);
 		$details = $this->quotation_model->get_un_child_details($code);
-
+		$doc->total_rows = 1;
 		if( ! empty($details))
 		{
 			foreach($details as $rs)
 			{
+				$rs->use_rows = 1;
+
 				if($rs->TreeType == 'S')
 				{
 					$childs = $this->quotation_model->get_childs_row($code, $rs->uid);
@@ -1271,18 +1497,25 @@ class Quotation extends PS_Controller
 					{
 						$lineAmount = 0.00;
 						$price = 0.00;
+						$qty = number($rs->Qty, 2);
+
 						foreach($childs as $ch)
 						{
-							$rs->Description .= PHP_EOL.$ch->Description;
+							$rs->Description .= "<br>".$ch->Description;
 							$price += $ch->SellPrice;
 							$lineAmount += $ch->LineTotal;
+							$qty .= "<br>".number($ch->Qty, 2);
+							$rs->use_rows++;
 						}
 
+						$rs->Qty = $qty;
 						$rs->Price = $price;
 						$rs->SellPrice = $price;
 						$rs->LineTotal = $lineAmount;
 					}
 				}
+
+				$doc->total_rows += $rs->use_rows;
 			}
 		}
 
@@ -1662,7 +1895,8 @@ class Quotation extends PS_Controller
 		$filter = array(
 			'sq_code',
 			'sq_customer',
-			'sqNo',
+			'sq_doc_num',
+			'originalSQ',
 			'project',
 			'sq_sale_id',
 			'sq_emp_id',

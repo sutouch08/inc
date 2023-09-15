@@ -1,10 +1,13 @@
 <?php $select_warehouse = select_warehouse_code($whsCode); ?>
+<?php $select_uom = select_uom(); ?>
 
 <script id="row-template" type="text/x-handlebarsTemplate">
 <tr id="row-{{no}}" data-no="{{no}}">
   <input type="hidden" class="line-num" id="line-num-{{no}}" value="{{no}}" />
   <input type="hidden" id="stdPrice-{{no}}" value="0" />
 	<input type="hidden" id="price-{{no}}" value="0" />
+  <input type="hidden" id="cost-{{no}}" value="0" />
+  <input type="hidden" id="bCost-{{no}}" value="0" />
 	<input type="hidden" id="sellPrice-{{no}}" value="0" />
   <input type="hidden" id="sysSellPrice-{{no}}" value="0" />
 	<input type="hidden" id="disc-amount-{{no}}" value="0"/>
@@ -15,8 +18,7 @@
 	<input type="hidden" id="vat-rate-{{no}}" value="0" />
 	<input type="hidden" id="vat-amount-{{no}}" value="0" />
 	<input type="hidden" id="vat-total-{{no}}" value="0" />
-	<input type="hidden" id="uom-code-{{no}}" value="" />
-	<input type="hidden" class="disc-diff" id="disc-diff-{{no}}" value="0" />
+	<input type="hidden" class="disc-diff" id="disc-diff-{{no}}" data-no="{{no}}" value="0" />
 	<input type="hidden" class="disc-error" id="disc-error-{{no}}" value="0" data-id="{{no}}"/>
   <input type="hidden" id="uid-{{no}}" class="uid" data-no="{{no}}" />
   <input type="hidden" id="tree-type-{{no}}" value="N"/>
@@ -45,7 +47,10 @@
 	</td>
 
 	<td class="middle">
-		<input type="text" class="form-control input-xs text-center" id="uom-{{no}}" disabled/>
+    <select class="form-control input-xs" id="uom-{{no}}" disabled>
+      <option value=""></option>
+      <?php echo $select_uom; ?>
+    </select>
 	</td>
 
   <td class="middle hide">
@@ -91,7 +96,7 @@
 		<input type="text" class="form-control input-xs text-right number input-amount" id="total-label-{{no}}" readonly disabled />
 	</td>
 
-  <td class="middle hide">
+  <td class="middle">
 		<input type="text" class="form-control input-xs" id="onhand-{{no}}" disabled/>
 	</td>
 	<td class="middle hide">
@@ -109,7 +114,9 @@
 <tr id="row-{{no}}" data-no="{{no}}" class="child">
   <input type="hidden" class="line-num" id="line-num-{{no}}" value="{{no}}" />
   <input type="hidden" id="stdPrice-{{no}}" value="{{Price}}" />
+  <input type="hidden" id="cost-{{no}}" value="{{Cost}}" />
 	<input type="hidden" id="price-{{no}}" value="{{Price}}" />
+  <input type="hidden" id="bCost-{{no}}" value="0" />
 	<input type="hidden" id="sellPrice-{{no}}" value="{{SellPrice}}" />
   <input type="hidden" id="sysSellPrice-{{no}}" value="{{SellPrice}}" />
 	<input type="hidden" id="disc-amount-{{no}}" value="{{discAmount}}"/>
@@ -120,8 +127,7 @@
 	<input type="hidden" id="vat-rate-{{no}}" value="{{VatRate}}" />
 	<input type="hidden" id="vat-amount-{{no}}" value="{{VatAmount}}" />
 	<input type="hidden" id="vat-total-{{no}}" value="{{TotalVatAmount}}" />
-	<input type="hidden" id="uom-code-{{no}}" value="{{UomCode}}" />
-	<input type="hidden" class="disc-diff" id="disc-diff-{{no}}" value="0" />
+	<input type="hidden" class="disc-diff" id="disc-diff-{{no}}" data-no="{{no}}" value="0" />
 	<input type="hidden" class="disc-error" id="disc-error-{{no}}" value="0" data-id="{{no}}"/>
   <input type="hidden" id="uid-{{no}}" class="uid" data-no="{{no}}" value="{{uid}}"/>
   <input type="hidden" id="tree-type-{{no}}" value="{{TreeType}}" value="N"/>
@@ -147,10 +153,13 @@
   </td>
 
 	<td class="middle">
-		<input type="number" class="form-control input-xs text-right line-qty {{father_uid}}" data-id="{{no}}" id="line-qty-{{no}}" value="{{Qty}}" disabled/>
+		<input type="number" class="form-control input-xs text-right line-qty {{father_uid}}" data-id="{{no}}" data-qty="{{Qty}}" id="line-qty-{{no}}" value="{{Qty}}" disabled/>
 	</td>
 	<td class="middle">
-		<input type="text" class="form-control input-xs text-center" id="uom-{{no}}" value="{{UomName}}" disabled/>
+    <select class="form-control input-xs" id="uom-{{no}}" disabled>
+      <option value=""></option>
+      <?php echo $select_uom; ?>
+    </select>
 	</td>
 
   <td class="middle hide">
@@ -196,15 +205,15 @@
 		<input type="text" class="form-control input-xs text-right number input-amount" id="total-label-{{no}}" value="{{lineTotalLabel}}" readonly disabled />
 	</td>
 
-  <td class="middle hide">
-		<input type="text" class="form-control input-xs" id="onhand-{{no}}" value="{{OnHand}}" disabled/>
+  <td class="middle">
+		<input type="text" class="form-control input-xs text-right" id="onhand-{{no}}" value="{{OnHand}}" disabled/>
 	</td>
 	<td class="middle hide">
-		<input type="text" class="form-control input-xs" id="commited-{{no}}" value="{{Commited}}" disabled/>
+		<input type="text" class="form-control input-xs text-right" id="commited-{{no}}" value="{{Commited}}" disabled/>
 	</td>
 
 	<td class="middle hide">
-		<input type="text" class="form-control input-xs" id="onorder-{{no}}" value="{{OnOrder}}" disabled/>
+		<input type="text" class="form-control input-xs text-right" id="onorder-{{no}}" value="{{OnOrder}}" disabled/>
 	</td>
 
 </tr>

@@ -279,7 +279,7 @@ public function page_start()
 	{
 		$page_break = "";
 	}
-	return "<div class='page_layout' style='width:".$this->page_width."mm; padding-top:0mm; height:".$this->page_height."mm; margin:auto; ".$page_break."'>"; //// page start
+	return "<div class='page_layout' style='position:relative; width:".$this->page_width."mm; padding-top:0mm; height:".$this->page_height."mm; margin:auto; ".$page_break."'>"; //// page start
 }
 
 
