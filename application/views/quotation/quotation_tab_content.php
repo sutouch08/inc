@@ -6,10 +6,11 @@
     </div>
     <div class="divider-hidden"></div>
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive" style="height:300px; max-height:300px; overflow:scroll; padding:0px; border-top:solid 1px #dddddd;">
-      <table class="table table-bordered tableFixHead" style="min-width:1680px;">
+      <table class="table table-bordered tableFixHead" style="min-width:1720px;">
         <thead>
           <tr class="font-size-10 freez">
             <th class="fix-width-40 middle text-center fix-no fix-header"></th>
+            <th class="fix-width-40 middle text-center fix-add fix-header"></th>
             <th class="fix-width-40 middle text-center fix-img fix-header"></th>
             <th class="fix-width-150 middle text-center fix-item fix-header">Item Code</th>
             <th class="fix-width-150 middle text-center">Item Description.</th>
@@ -68,6 +69,11 @@
                 <input type="hidden" class="child-<?php echo $rs->father_uid; ?>" data-no="<?php echo $no; ?>" value="<?php echo $rs->father_uid; ?>" />
                 <?php endif; ?>
                 <td class="middle text-center fix-no no" scope="row"><?php echo $no; ?></td>
+                <td class="middle text-center fix-add" scope="row">
+                  <?php if($rs->TreeType != 'I') : ?>
+                    <a class="pointer" href="javascript:insertBefore(<?php echo $no; ?>)"><i class="fa fa-plus"></i></a>
+                  <?php endif; ?>
+                </td>
                 <td class="middle text-center fix-img" scope="row">
                   <?php if($rs->TreeType != 'I') : ?>
                   <label id="chk-label-<?php echo $no; ?>" class="">
@@ -191,6 +197,9 @@
               <input type="hidden" id="father-uid-<?php echo $no; ?>" value="" />
 
               <td class="middle text-center fix-no no" scope="row"><?php echo $no; ?></td>
+              <td class="middle text-center fix-add" scope="row">
+                <a class="pointer" href="javascript:insertBefore(<?php echo $no; ?>)"><i class="fa fa-plus"></i></a>
+              </td>
               <td class="middle text-center fix-img" scope="row">
                 <input type="checkbox" class="ace del-chk" value="<?php echo $no; ?>"/>
                 <span class="lbl"></span>

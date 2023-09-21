@@ -511,7 +511,7 @@ class Quotation_approval_model extends CI_Model
 			->where('DocDate <=', to_date($ds['to_date']));
 		}
 
-		->get($this->tb);
+		$this->db->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{

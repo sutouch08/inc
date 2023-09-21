@@ -44,14 +44,14 @@
     <div class="form-group">
       <label class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-4 control-label-xs no-padding-right">Type</label>
       <div class="col-lg-7 col-md-7-harf col-sm-8-harf col-xs-8">
-        <input type="text" id="Type" class="form-control input-xs" maxlength="40" value="<?php echo $order->Type; ?>" />
+        <input type="text" id="Type" class="form-control input-xs" maxlength="20" value="<?php echo $order->Type; ?>" />
       </div>
     </div>
 
     <div class="form-group">
       <label class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-4 control-label-xs no-padding-right">Project</label>
       <div class="col-lg-7 col-md-7-harf col-sm-8-harf col-xs-8">
-        <input type="text" class="form-control input-xs" maxlength="100" id="Project" value="<?php echo $order->Project; ?>" />
+        <input type="text" class="form-control input-xs" maxlength="150" id="Project" value="<?php echo $order->Project; ?>" />
       </div>
 		</div>
   </div>

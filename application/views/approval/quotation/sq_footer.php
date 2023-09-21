@@ -75,7 +75,7 @@
         </div>
       </div>
     </div>
-    <div class="divider-hidden"></div>
+    <p class="text-right" style="margin-bottom:0px;">*** ส่วนลดสูงสุด  <?php echo $order->disc_diff; ?> % ***</p>    
     <div class="divider-hidden"></div>
     <div class="divider-hidden"></div>
     <p class="pull-right" style="margin-bottom:0px;">
@@ -85,7 +85,6 @@
               <button type="button" class="btn btn-xs btn-primary btn-100" id="btn-review-confirm" onclick="confirmReview()">Confirm</button>
               <button type="button" class="btn btn-xs btn-warning btn-100" id="btn-review-reject" onclick="confirmReject('review')">Reject</button>
       <?php endif; ?>
-
       <?php if($ap->approve && $order->Approved == 'P' && ($order->Review == 'A' OR $order->Review == 'S')) : ?>
         <?php if($ap->maxDisc >= $order->disc_diff && $ap->maxAmount >= $order->DocTotal) : ?>
           <button type="button" class="btn btn-xs btn-primary btn-100" id="btn-approve" onclick="approve()">Approve</button>

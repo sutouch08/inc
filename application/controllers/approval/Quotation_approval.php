@@ -64,7 +64,7 @@ class Quotation_approval extends PS_Controller
           $filter['maxAmount'] = $rule->maxAmount;
         }
       }
-
+			
 			$rows = empty($rule) ? 0 : $this->quotation_model->count_approval_rows($filter);
 			//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
 			$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);

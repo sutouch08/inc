@@ -75,7 +75,7 @@
         </div>
       </div>
     </div>
-    <div class="divider-hidden"></div>
+    <p class="text-right" style="margin-bottom:0px;">*** ส่วนลดสูงสุด  <?php echo $order->disc_diff; ?> % ***</p>
     <div class="divider-hidden"></div>
     <div class="divider-hidden"></div>
     <p class="pull-right" style="margin-bottom:0px;">

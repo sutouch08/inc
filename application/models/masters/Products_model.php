@@ -13,14 +13,13 @@ class Products_model extends CI_Model
   {
     $rs = $this->ms
     ->select("P.ItemCode AS code, P.ItemName AS name, P.FrgnName AS description, P.UgpEntry, P.SUoMEntry AS uom_id, P.FirmCode")
-		->select("P.DfltWH AS dfWhsCode, P.OnHand, P.IsCommited, P.OnOrder, P.TreeType")
+		->select("P.DfltWH AS dfWhsCode, P.OnHand, P.IsCommited, P.OnOrder, P.TreeType, P.LstEvlPric AS cost")
     ->select("P.VatGourpSa AS vat_group")
-    ->select("U.UomEntry AS uom_id, U.UomCode AS uom_code, U.UomName AS uom, P1.Price AS price, P2.Price AS cost")
+    ->select("U.UomEntry AS uom_id, U.UomCode AS uom_code, U.UomName AS uom, P1.Price AS price")
     ->select("T.Rate AS vat_rate")
     ->from("OITM AS P")
 		->join("OUOM AS U", "P.SUoMEntry = U.UomEntry", "left")
     ->join("ITM1 AS P1", "P.ItemCode = P1.ItemCode AND P1.PriceList = {$priceList}", "left")
-    ->join("ITM1 AS P2", "P.ItemCode = P2.ItemCode AND P2.PriceList = {$this->CostList}", "left")
     ->join("OVTG AS T", "T.Code = P.VatGourpSa", "left")
     ->where("P.ItemCode", $ItemCode)
     ->get();
@@ -288,16 +287,15 @@ class Products_model extends CI_Model
 
   public function get_item_cost($code)
 	{
-		$rs = $this->ms
-    ->select('Price AS cost')
+    $rs = $this->ms
+    ->select('LstEvlPric AS cost')
     ->where('ItemCode', $code)
-    ->where('PriceList', $this->CostList)
-    ->get('ITM1');
+    ->get('OITM');
 
-    if($rs->num_rows() === 1)
+		if($rs->num_rows() === 1)
     {
       return $rs->row()->cost;
-    }
+    }    
 
     return 0;
 	}

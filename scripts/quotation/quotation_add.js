@@ -193,6 +193,7 @@ function saveAdd() {
 		var count = 0;
 		var details = [];
 		var lineNum = 0;
+		var uomError = 0;
 
 		$('.item-code').each(function() {
 			let no = $(this).data('id');
@@ -200,6 +201,8 @@ function saveAdd() {
 
 			if(itemCode.length) {
 				//--- ถ้ามีการระบุข้อมูล
+				let uomEntry = $('#uom-'+no).val();
+
 				var row = {
 					"LineNum" : lineNum,
 					"ItemCode" : itemCode,
@@ -211,7 +214,7 @@ function saveAdd() {
 					"SellPrice" : $('#sellPrice-'+no).val(),
 					"sysSellPrice" : $('#sysSellPrice-'+no).val(),
 					"Quantity" : $('#line-qty-'+no).val(),
-					"UomEntry" : $('#uom-'+no).val(),
+					"UomEntry" : uomEntry,
 					"sysDiscLabel" : $('#sys-disc-label-'+no).val(),
 					"disc1" : $('#disc1-'+no).val(),
 					"disc2" : $('#disc2-'+no).val(),
@@ -233,6 +236,14 @@ function saveAdd() {
 					'father_uid' : $('#father-uid-'+no).val()
 				}
 
+				if(uomEntry == "") {
+					uomError++;
+					$('#uom-'+no).addClass('has-error');
+				}
+				else {
+					$('#uom-'+no).removeClass('has-error');
+				}
+
 				details.push(row);
 				count++;
 				lineNum++;
@@ -242,6 +253,12 @@ function saveAdd() {
 
 		if(count === 0) {
 			swal("ไม่พบรายการสินค้า");
+			$('.btn-save').removeAttr('disabled');
+			return false;
+		}
+
+		if(uomError > 0) {
+			swal("กรุณาระบุ Uom");
 			$('.btn-save').removeAttr('disabled');
 			return false;
 		}
@@ -530,6 +547,7 @@ function saveUpdate() {
 		var count = 0;
 		var details = [];
 		var lineNum = 0;
+		var uomError = 0;
 
 		$('.item-code').each(function() {
 			let no = $(this).data('id');
@@ -538,6 +556,8 @@ function saveUpdate() {
 
 			if(itemCode.length) {
 				//--- ถ้ามีการระบุข้อมูล
+				let uomEntry = $('#uom-'+no).val();
+
 				var row = {
 					"LineNum" : lineNum,
 					"ItemCode" : itemCode,
@@ -548,7 +568,7 @@ function saveUpdate() {
 					"SellPrice" : $('#sellPrice-'+no).val(),
 					"sysSellPrice" : $('#sysSellPrice-'+no).val(),
 					"Quantity" : $('#line-qty-'+no).val(),
-					"UomEntry" : $('#uom-'+no).val(),
+					"UomEntry" : uomEntry,
 					"sysDiscLabel" : $('#sys-disc-label-'+no).val(),
 					"disc1" : $('#disc1-'+no).val(),
 					"disc2" : $('#disc2-'+no).val(),
@@ -570,6 +590,14 @@ function saveUpdate() {
 					'father_uid' : $('#father-uid-'+no).val()
 				}
 
+				if(uomEntry == "") {
+					$('#uom-'+no).addClass('has-error');
+					uomError++;
+				}
+				else {
+					$('#uom-'+no).removeClass('has-error');
+				}
+
 				details.push(row);
 				count++;
 				lineNum++;
@@ -579,6 +607,12 @@ function saveUpdate() {
 
 		if(count === 0) {
 			swal("ไม่พบรายการสินค้า");
+			$('.btn-save').removeAttr('disabled');
+			return false;
+		}
+
+		if(uomError > 0) {
+			swal("กรุณาระบุ Uom");
 			$('.btn-save').removeAttr('disabled');
 			return false;
 		}
@@ -973,6 +1007,23 @@ function get_address_bill_to() {
 }
 
 
+function insertBefore(rowNo) {
+	setTimeout(() => {
+		var no = $('#row-no').val();
+		var data = {"no" : no, "uid" : uniqueId()};
+		var source = $('#row-template').html();
+		var output = $('#row-'+rowNo);
+
+		render_before(source, data, output);
+		reIndex();
+		init();
+		//$('#itemCode-'+no).focus();
+		no++;
+		$('#row-no').val(no);
+		return no;
+	}, 100)
+}
+
 function addRow() {
 	setTimeout(() => {
 		var no = $('#row-no').val();
@@ -1345,7 +1396,7 @@ function recalAmount(no) {
 			}
 
 			$('#disc-error-'+no).val(0);
-			$('.disc-' + no).removeClass('has-error');
+			$('.disc-' + no).removeClass('error');
 			$('#disc-amount-'+no).val(discountAmount.toFixed(2));
 			$('#line-disc-amount-'+no).val(lineDiscAmount);
 			$('#sellPrice-'+no).val(sellPrice);
@@ -1357,11 +1408,11 @@ function recalAmount(no) {
 			$('#total-label-'+no).val(addCommas(lineAmount));
 
 			if(sellPrice < cost) {
-				$('#row-'+no).addClass('has-error');
+				$('#row-'+no).addClass('error');
 				$('#bCost-'+no).val(1);
 			}
 			else {
-				$('#row-'+no).removeClass('has-error');
+				$('#row-'+no).removeClass('error');
 				$('#bCost-'+no).val(0);
 			}
 

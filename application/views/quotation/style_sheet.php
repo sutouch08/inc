@@ -15,7 +15,7 @@
   .tableFixHead {
     table-layout: fixed;
     min-width: 100%;
-    width:1680px;
+    width:17200px;
     margin-top:-1px;
     margin-left:-1px;
     margin-right:0px;
@@ -87,13 +87,18 @@
       background-color: #eee !important;
     }
 
+    .fix-add {
+      left: 40px;
+      position: sticky;
+    }
+
     .fix-img {
-      left:40px;
+      left:80px;
       position: sticky;
     }
 
     .fix-item {
-      left:80px;
+      left:120px;
       position: sticky;
     }
 

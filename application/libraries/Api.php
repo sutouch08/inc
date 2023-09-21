@@ -106,6 +106,7 @@ class Api
 					"LineNum" => intval($rs->LineNum),
 					"ItemCode" => $rs->ItemCode,
 					"ItemDescription" => $rs->ItemName,
+          "ItemDetails" => $rs->Description,
           "Text" => $rs->Description,
           "FreeText" => NULL,
 					"Quantity" => round($rs->Qty, 2),

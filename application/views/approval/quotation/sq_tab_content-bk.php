@@ -10,7 +10,7 @@
             <th class="min-width-250 middle text-center">Item Details.</th>
             <th class="fix-width-80 middle text-center">Quantity</th>
             <th class="fix-width-80 middle text-center">Uom</th>
-            <th class="fix-width-100 middle text-center">Std Price</th>
+            <th class="fix-width-100 middle text-center hide">Std Price</th>
             <th class="fix-width-100 middle text-center">Price</th>
             <th class="fix-width-100 middle text-center hide">SysDisc(%)</th>
             <th class="fix-width-80 middle text-center">Disc1(%)</th>
@@ -28,16 +28,14 @@
           <?php if(!empty($details)) : ?>
     				<?php foreach($details as $rs) : ?>
               <?php $bg = $rs->TreeType == 'S' ? 'father' : ($rs->TreeType == 'I' ? 'child' : ''); ?>
-              <?php $error = $rs->SellPrice < $rs->Cost ? 'error' : ''; ?>
-              <?php $dummy = $rs->ItemCode == 'FG-Dummy' ? 'dummy' : ''; ?>
-              <tr id="row-<?php echo $no; ?>" data-no="<?php echo $no; ?>" class="<?php echo $bg; ?> <?php echo $error; ?> <?php echo $dummy; ?>">
+              <tr id="row-<?php echo $no; ?>" data-no="<?php echo $no; ?>" class="<?php echo $bg; ?>">
                 <td class="middle text-center fix-no no" scope="row"><?php echo $no; ?></td>
                 <td class="middle fix-item" scope="row"><?php echo $rs->ItemCode; ?></td>
                 <td class="middle fix-desc" scope="row"><?php echo $rs->ItemName; ?></td>
                 <td class="middle"><?php echo $rs->Description; ?></td>
                 <td class="middle text-right"><?php echo number($rs->Qty); ?></td>
                 <td class="middle text-center"><?php echo $rs->UomCode; ?></td>
-                <td class="middle text-right"><?php echo number($rs->stdPrice, 2); ?></td>
+                <td class="middle text-right hide"><?php echo number($rs->stdPrice, 2); ?></td>
                 <td class="middle text-right"><?php echo number($rs->Price, 2); ?></td>
                 <td class="middle text-right hide"><?php echo $rs->sysDisc; ?></td>
                 <td class="middle text-right"><?php echo $rs->disc1; ?></td>
@@ -61,7 +59,7 @@
               <td class="middle"></td>
               <td class="middle text-right"></td>
               <td class="middle text-center"></td>
-              <td class="middle text-right"></td>
+              <td class="middle text-right hide"></td>
               <td class="middle text-right"></td>
               <td class="middle text-right hide"></td>
               <td class="middle text-right"></td>

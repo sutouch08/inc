@@ -25,6 +25,9 @@
   <input type="hidden" id="father-uid-{{no}}" value="" />
 
   <td class="middle text-center fix-no no" scope="row">{{no}}</td>
+  <td class="middle text-center fix-add" scope="row">
+    <a  class="pointer" href="javascript:insertBefore({{no}})"><i class="fa fa-plus"></i></a>
+  </td>
 	<td class="middle text-center fix-img" scope="row">
     <label id="chk-label-{{no}}">
 		  <input type="checkbox" class="ace del-chk" value="{{no}}"/>
@@ -135,6 +138,7 @@
   <input type="hidden" id="father-uid-{{no}}" value="{{father_uid}}" />
 
   <td class="middle text-center fix-no no" scope="row">{{no}}</td>
+  <td class="middle text-center fix-add" scope="row"></td>
 	<td class="middle text-center fix-img" scope="row">
     <label id="chk-label-{{no}}" class="hide">
       <input type="checkbox" class="ace del-chk" value="{{no}}"/>

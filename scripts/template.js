@@ -145,6 +145,12 @@ function render_after(source, data, output) {
 	$(html).insertAfter(output);
 }
 
+function render_before(source, data, output) {
+	var template = Handlebars.compile(source);
+	var html = template(data);
+	$(html).insertBefore(output);
+}
+
 
 
 function set_rows()

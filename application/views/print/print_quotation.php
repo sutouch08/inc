@@ -229,7 +229,7 @@ while($total_page > 0 )
 
   if($doc->Approved != 'A' && $doc->Approved != 'S')
   {
-    $page .= '<div style="width:190mm; height:0px; position:absolute; top:100mm; line-height:0px; color:purple; font-size:200px; text-align:center; z-index:100; opacity:0.1; rotate:-30deg;">Draft</div>';
+    $page .= '<div style="width:190mm; height:0px; position:absolute; top:100mm; line-height:0px; color:#6d6a6a; font-size:200px; text-align:center; z-index:100; opacity:0.1; rotate:-30deg;">Draft</div>';
   }
 
   $page .= $top;

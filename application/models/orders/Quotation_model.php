@@ -490,39 +490,37 @@ class Quotation_model extends CI_Model
 
 	public function get_approval_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
-		$this->db
-		->where('Status', 0)
-		->where('must_approve', 1)
-		->where_in('Review', array('A', 'S'))
-		->where('Approved', 'P')
-		->where('disc_diff >=', $ds['minDisc'], FALSE)
-		->where('disc_diff <=', $ds['maxDisc'], FALSE)
-		->where('DocTotal >=', $ds['minAmount'], FALSE)
-		->where('DocTotal <=', $ds['maxAmount'], FALSE);
+		$qr  = "SELECT * FROM quotation ";
+		$qr .= "WHERE Status = 0 ";
+		$qr .= "AND must_approve = 1 ";
+		$qr .= "AND Review IN('A', 'S') ";
+		$qr .= "AND Approved == 'P' ";
+		$qr .= "AND ((disc_diff >= {$ds['minDisc']} AND disc_diff <= {$ds['maxDisc']}) OR (DocTotal >= {$ds['minAmount']} AND DocTotal <= {$ds['maxAmount']})) ";
 
 		if( ! empty($ds['code']))
 		{
-			$this->db->like('code', $ds['code']);
+			$qr .= "AND code LIKE '%{$ds['code']}%' ";
 		}
 
 		if( ! empty($ds['customer']))
 		{
-			$this->db->group_start()->like('CardCode', $ds['customer'])->or_like('CardName', $ds['customer'])->group_end();
+			$cust = $ds['customer'];
+			$qr .= "AND (CardCode LIKE '%{$cust}%' OR CardName LIKE '%{$cust}%') ";
 		}
 
 		if( ! empty($ds['project']))
 		{
+			$qr .= "AND Project LIKE '%{$ds['project']}%' ";
 			$this->db->like('Project', $ds['project']);
 		}
 
 		if(isset($ds['from_date']) && isset($ds['to_date']) && $ds['from_date'] != '' && $ds['to_date'] != '' )
 		{
-			$this->db
-			->where('DocDate >=', from_date($ds['from_date']))
-			->where('DocDate <=', to_date($ds['to_date']));
+			$qr .= "AND DocDate >= '".from_date($ds['from_date'])."' ";
+			$qr .= "AND DocDate <= '".to_date($ds['to_date'])."' ";
 		}
 
-		$rs = $this->db->get($this->tb);
+		$rs = $this->db->query($qr);
 
 		if($rs->num_rows() > 0)
 		{
@@ -535,39 +533,39 @@ class Quotation_model extends CI_Model
 
 	public function count_approval_rows(array $ds = array())
 	{
-		$this->db
-		->where('Status', 0)
-		->where('must_approve', 1)
-		->where_in('Review', array('A', 'S'))
-		->where('Approved', 'P')
-		->where('disc_diff >=', $ds['minDisc'], FALSE)
-		->where('disc_diff <=', $ds['maxDisc'], FALSE)
-		->where('DocTotal >=', $ds['minAmount'], FALSE)
-		->where('DocTotal <=', $ds['maxAmount'], FALSE);
+		$qr  = "SELECT COUNT(*) AS num_rows FROM quotation ";
+		$qr .= "WHERE Status = 0 ";
+		$qr .= "AND must_approve = 1 ";
+		$qr .= "AND Review IN('A', 'S') ";
+		$qr .= "AND Approved == 'P' ";
+		$qr .= "AND ((disc_diff >= {$ds['minDisc']} AND disc_diff <= {$ds['maxDisc']}) OR (DocTotal >= {$ds['minAmount']} AND DocTotal <= {$ds['maxAmount']})) ";
 
 		if( ! empty($ds['code']))
 		{
-			$this->db->like('code', $ds['code']);
+			$qr .= "AND code LIKE '%{$ds['code']}%' ";
 		}
 
 		if( ! empty($ds['customer']))
 		{
-			$this->db->group_start()->like('CardCode', $ds['customer'])->or_like('CardName', $ds['customer'])->group_end();
+			$cust = $ds['customer'];
+			$qr .= "AND (CardCode LIKE '%{$cust}%' OR CardName LIKE '%{$cust}%') ";
 		}
 
 		if( ! empty($ds['project']))
 		{
+			$qr .= "AND Project LIKE '%{$ds['project']}%' ";
 			$this->db->like('Project', $ds['project']);
 		}
 
 		if(isset($ds['from_date']) && isset($ds['to_date']) && $ds['from_date'] != '' && $ds['to_date'] != '' )
 		{
-			$this->db
-			->where('DocDate >=', from_date($ds['from_date']))
-			->where('DocDate <=', to_date($ds['to_date']));
+			$qr .= "AND DocDate >= '".from_date($ds['from_date'])."' ";
+			$qr .= "AND DocDate <= '".to_date($ds['to_date'])."' ";
 		}
 
-		return $this->db->count_all_results($this->tb);
+		$rs = $this->db->query($qr);
+
+		return $rs->row()->num_rows;
 	}
 
 } //---- End class

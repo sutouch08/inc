@@ -51,6 +51,14 @@
     border-radius: 0;
   }
 
+  .dummy{
+    color: #9c27b0 !important;
+  }
+
+  tr.error {
+    color:red !important;
+  }
+
   @media (min-width: 768px) {
 
     .fix-no {
