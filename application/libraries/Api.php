@@ -129,7 +129,8 @@ class Api
 					"SlpCode" => intval($order->SlpCode),
           "NoInvTryMv" => NULL,
           "CoGsOcrCode" => NULL,
-          "TreeType" => $rs->TreeType
+          "TreeType" => $rs->TreeType,
+          "Text" => $rs->LineText
 				);
 
 				array_push($orderLine, $line);

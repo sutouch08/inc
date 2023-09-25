@@ -198,10 +198,10 @@ function saveAdd() {
 		$('.item-code').each(function() {
 			let no = $(this).data('id');
 			let itemCode = $('#itemCode-'+no).val();
-
 			if(itemCode.length) {
 				//--- ถ้ามีการระบุข้อมูล
 				let uomEntry = $('#uom-'+no).val();
+				let uid = $('#uid-'+no).val();
 
 				var row = {
 					"LineNum" : lineNum,
@@ -232,8 +232,9 @@ function saveAdd() {
 					'sale_team' : $('#sale_team').val(),
 					'whsCode' : $('#whs-'+no).val(),
 					'TreeType' : $('#tree-type-'+no).val(),
-					'uid' : $('#uid-'+no).val(),
-					'father_uid' : $('#father-uid-'+no).val()
+					'uid' : uid,
+					'father_uid' : $('#father-uid-'+no).val(),
+					'LineText' : $.trim($('#text-'+uid).val())
 				}
 
 				if(uomEntry == "") {
@@ -557,6 +558,7 @@ function saveUpdate() {
 			if(itemCode.length) {
 				//--- ถ้ามีการระบุข้อมูล
 				let uomEntry = $('#uom-'+no).val();
+				let uid = $('#uid-'+no).val();
 
 				var row = {
 					"LineNum" : lineNum,
@@ -586,8 +588,9 @@ function saveUpdate() {
 					'sale_team' : $('#sale_team').val(),
 					'whsCode' : $('#whs-'+no).val(),
 					'TreeType' : $('#tree-type-'+no).val(),
-					'uid' : $('#uid-'+no).val(),
-					'father_uid' : $('#father-uid-'+no).val()
+					'uid' : uid,
+					'father_uid' : $('#father-uid-'+no).val(),
+					'LineText' : $.trim($('#text-'+uid).val())
 				}
 
 				if(uomEntry == "") {
@@ -1017,7 +1020,7 @@ function insertBefore(rowNo) {
 		render_before(source, data, output);
 		reIndex();
 		init();
-		//$('#itemCode-'+no).focus();
+		$('#itemCode-'+no).focus();
 		no++;
 		$('#row-no').val(no);
 		return no;
@@ -1034,7 +1037,7 @@ function addRow() {
 		render_append(source, data, output);
 		reIndex();
 		init();
-		//$('#itemCode-'+no).focus();
+		$('#itemCode-'+no).focus();
 		no++;
 		$('#row-no').val(no);
 		return no;
@@ -1078,7 +1081,66 @@ function addChildRows(childs, fno) {
 }
 
 
-function removeRow() {
+function insertTextRow(rowNo) {
+	setTimeout(() => {
+		var no = $('#row-no').val();
+		var uid = $('#uid-'+rowNo).val();
+		var data = {"no" : no, "parentNo" : rowNo, "uid" : uid};
+		var source = $('#text-template').html();
+		var output = $('#row-'+rowNo);
+
+		render_after(source, data, output);
+		reIndex();
+		init();
+		$('#text-'+uid).focus();
+		no++;
+		$('#row-no').val(no);
+		$('#add-text-'+rowNo).addClass('hide');
+		return no;
+	}, 100)
+}
+
+function removeTextRow(rowNo, parentNo) {
+	$('#row-'+rowNo).remove();
+	$('#add-text-'+parentNo).removeClass('hide');
+	reIndex();
+	recalTotal();
+}
+
+function removeRow(no) {
+	var type = $('#tree-type-'+no).val();
+	var uid = $('#uid-'+no).val();
+
+	if($('#text-'+uid).length) {
+		textNo = $('#text-'+uid).data('no');
+		$('#row-'+textNo).remove();
+	}
+	
+	if(type == 'S') {
+		let uid = $('#uid-'+no).val();
+		if(uid.length) {
+			$('.child-'+uid).each(function() {
+				let rowNo = $(this).data('no');
+				cuid = $('#uid-'+rowNo).val();
+
+				if($('#text-'+cuid).length) {
+					textNo = $('#text-'+cuid).data('no');
+					$('#row-'+textNo).remove();
+				}
+
+				$('#row-'+rowNo).remove();
+			});
+		}
+	}
+
+	$('#row-'+no).remove();
+
+	reIndex();
+	recalTotal();
+}
+
+
+function removeRows() {
 	$('.del-chk').each(function() {
 		if($(this).is(':checked')) {
 			var no = $(this).val();
@@ -1108,8 +1170,8 @@ function removeChildRows(no, recal) {
 	let uid = $('#uid-'+no).val();
 
 	if(uid.length) {
-		$('.'+uid).each(function() {
-			rowNo = $(this).data('id');
+		$('.child-'+uid).each(function() {
+			rowNo = $(this).data('no');
 			$('#row-'+rowNo).remove();
 		});
 
@@ -1119,6 +1181,51 @@ function removeChildRows(no, recal) {
 		}
 	}
 }
+
+function clearRow(no) {
+	var data = {"no" : no};
+	var source = $('#normal-template').html();
+	var output = $('#row-'+no);
+	render(source, data, output);
+	$('#row-'+no).removeClass('error');
+	$('#row-'+no).removeClass('dummy');
+	$('#row-'+no).removeClass('father');
+	init();
+}
+
+
+function clearRowData(no) {
+	var type = $('#tree-type-'+no).val();
+	var uid = $('#uid-'+no).val();
+
+	if($('#text-'+uid).length) {
+		textNo = $('#text-'+uid).data('no');
+		$('#row-'+textNo).remove();
+	}
+
+	if(type == 'S') {
+		let uid = $('#uid-'+no).val();
+
+		if(uid.length) {
+			$('.child-'+uid).each(function() {
+				rowNo = $(this).data('no');
+				cuid = $('#uid-'+rowNo).val();
+
+				if($('#text-'+cuid).length) {
+					textNo = $('#text-'+cuid).data('no');
+					$('#row-'+textNo).remove();
+				}
+
+				$('#row-'+rowNo).remove();
+			});
+		}
+	}
+
+	clearRow(no);
+	reIndex();
+	recalTotal();
+}
+
 
 
 function getItemData(no) {
@@ -1145,7 +1252,7 @@ function getItemData(no) {
 		return false;
 	}
 
-	removeChildRows(no, 0);
+	//removeChildRows(no, 0);
 
 	setTimeout(function() {
 		load_in();
@@ -1205,6 +1312,8 @@ function getItemData(no) {
 					$('#line-qty-'+no).focus();
 					$('#uid-'+no).val(ds.uid);
 					$('#tree-type-'+no).val(ds.TreeType);
+
+					$('#add-text-'+no).removeClass('hide');
 
 					if(ds.dummy == '1') {
 						$('#uom-'+no).removeAttr('disabled');
@@ -1612,6 +1721,14 @@ function init() {
 		}
 	});
 
+	$('.item-code').focusout(function() {
+		let no = $(this).data('id');
+		let code = $(this).val();
+		if(code.length == 0 && isRequesting == 0) {
+			clearRowData(no);
+		}
+	});
+
 	$('.line-qty').change(function() {
 		let no = $(this).data('id');
 		recalAmount(no);
@@ -1663,6 +1780,9 @@ function init() {
 		$(this).select();
 	});
 
+	$('.autosize').autosize();
+	//$('.autosize').autosize({append: "\n"});
+
 } //--- end init
 
 
@@ -1678,9 +1798,6 @@ $('#discAmount').keyup(function(e) {
 $(document).ready(function(){
 	init();
 })
-
-
-$('.autosize').autosize({append: "\n"});
 
 
 function duplicateSQ(code) {
@@ -1740,7 +1857,6 @@ function duplicateSQ(code) {
 		})
   });
 }
-
 
 function toggleText(el) {
 	var no = el.data('id');

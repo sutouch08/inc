@@ -1,7 +1,7 @@
 <div class="tab-pane fade active in" id="content">
   <div class="row" style="margin-left:0; margin-right:0;">
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive" style="height:300px; max-height:300px; overflow:scroll; padding:0px; border-top:solid 1px #dddddd;">
-      <table class="table table-bordered tableFixHead" style="min-width:1680px;">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive" style="min-height:300px; overflow:auto; padding:0px; border-top:solid 1px #dddddd;">
+      <table class="table table-bordered tableFixHead" style="min-width:1680px; margin-bottom:20px;">
         <thead>
           <tr class="font-size-10 freez">
             <th class="fix-width-45 middle text-center fix-no fix-header"></th>
@@ -31,23 +31,24 @@
               <?php $error = $rs->SellPrice < $rs->Cost ? 'error' : ''; ?>
               <?php $dummy = $rs->ItemCode == 'FG-Dummy' ? 'dummy' : ''; ?>
               <tr id="row-<?php echo $no; ?>" data-no="<?php echo $no; ?>" class="<?php echo $bg; ?> <?php echo $error; ?> <?php echo $dummy; ?>">
-                <td class="middle text-center fix-no no" scope="row"><?php echo $no; ?></td>
-                <td class="middle fix-item" scope="row"><?php echo $rs->ItemCode; ?></td>
-                <td class="middle"><?php echo $rs->ItemName; ?></td>
-                <td class="middle"><?php echo $rs->Description; ?></td>
-                <td class="middle text-right"><?php echo number($rs->Qty); ?></td>
-                <td class="middle text-center"><?php echo $rs->UomCode; ?></td>
-                <td class="middle text-right hide"><?php echo number($rs->stdPrice, 2); ?></td>
-                <td class="middle text-right"><?php echo number($rs->Price, 2); ?></td>
-                <td class="middle text-right hide"><?php echo $rs->sysDisc; ?></td>
-                <td class="middle text-right"><?php echo $rs->disc1; ?></td>
-                <td class="middle text-right"><?php echo $rs->disc2; ?></td>
-                <td class="middle text-right"><?php echo $rs->disc3; ?></td>
-                <td class="middle"><?php echo $rs->WhsCode; ?></td>
-                <td class="middle text-center"><?php echo $rs->VatGroup; ?></td>
-                <td class="middle text-right"><?php echo number($rs->SellPrice, 2); ?></td>
-                <td class="middle text-right"><?php echo number($rs->LineTotal, 2); ?></td>
+                <td class="text-center fix-no no" scope="row"><?php echo $no; ?></td>
+                <td class="fix-item" scope="row"><?php echo $rs->ItemCode; ?></td>
+                <td class=""><?php echo $rs->ItemName; ?></td>
+                <td class=""><?php echo $rs->Description; ?></td>
+                <td class="text-right"><?php echo number($rs->Qty); ?></td>
+                <td class="text-center"><?php echo $rs->UomCode; ?></td>
+                <td class="text-right hide"><?php echo number($rs->stdPrice, 2); ?></td>
+                <td class="text-right"><?php echo number($rs->Price, 2); ?></td>
+                <td class="text-right hide"><?php echo $rs->sysDisc; ?></td>
+                <td class="text-right"><?php echo $rs->disc1; ?></td>
+                <td class="text-right"><?php echo $rs->disc2; ?></td>
+                <td class="text-right"><?php echo $rs->disc3; ?></td>
+                <td class=""><?php echo $rs->WhsCode; ?></td>
+                <td class="text-center"><?php echo $rs->VatGroup; ?></td>
+                <td class="text-right"><?php echo number($rs->SellPrice, 2); ?></td>
+                <td class="text-right"><?php echo number($rs->LineTotal, 2); ?></td>
               </tr>
+              <?php $parent_no = $no; ?>
               <?php $no++; ?>
               <?php $rows--; ?>
             <?php endforeach; ?>

@@ -280,7 +280,8 @@ class Quotation extends PS_Controller
 										'sale_team' => $rs->sale_team,
 										'TreeType' => $rs->TreeType,
 										'uid' => $rs->uid,
-										'father_uid' => empty($rs->father_uid) ? NULL : $rs->father_uid
+										'father_uid' => empty($rs->father_uid) ? NULL : $rs->father_uid,
+										'LineText' => get_null(trim($rs->LineText))
 									);
 
 									if(! $this->quotation_model->add_detail($arr))
@@ -613,7 +614,8 @@ class Quotation extends PS_Controller
 														'sale_team' => $rs->sale_team,
 														'TreeType' => $rs->TreeType,
 														'uid' => $rs->uid,
-														'father_uid' => empty($rs->father_uid) ? NULL : $rs->father_uid
+														'father_uid' => empty($rs->father_uid) ? NULL : $rs->father_uid,
+														'LineText' => get_null(trim($rs->LineText))
 													);
 
 													if(! $this->quotation_model->add_detail($arr))
@@ -855,6 +857,7 @@ class Quotation extends PS_Controller
 								'user_id' => $this->_user->id,
 								'uname' => $this->_user->uname,
 								'sale_team' => $rs->sale_team,
+								'LineText' => $rs->LineText,
 								'TreeType' => $rs->TreeType,
 								'uid' => $rs->uid,
 								'father_uid' => empty($rs->father_uid) ? NULL : $rs->father_uid
@@ -1317,6 +1320,11 @@ class Quotation extends PS_Controller
 			{
 				foreach($details as $rs)
 				{
+					if( ! empty($rs->LineText))
+					{
+						$rs->Description .= empty($rs->Description) ? nl2br($rs->LineText) : "<br>".nl2br($rs->LineText);
+					}
+
 					$totalAmount += $rs->LineTotal;
 					$totalVat += $rs->totalVatAmount;
 				}
@@ -1491,6 +1499,13 @@ class Quotation extends PS_Controller
 			{
 				$rs->use_rows = 1;
 
+				if( ! empty($rs->LineText))
+				{
+					$lines = substr_count( $rs->LineText, "\n" );
+					$rs->Description .= empty($rs->Description) ? nl2br($rs->LineText) : "<br>".nl2br($rs->LineText);
+					$rs->use_rows += $lines;
+				}
+
 				if($rs->TreeType == 'S')
 				{
 					$childs = $this->quotation_model->get_childs_row($code, $rs->uid);
@@ -1504,6 +1519,13 @@ class Quotation extends PS_Controller
 						foreach($childs as $ch)
 						{
 							$rs->Description .= "<br>".$ch->Description;
+							if(! empty($ch->LineText))
+							{
+								$lines = substr_count( $ch->LineText, "\n" );
+								$rs->Description .= empty($rs->Description) ? nl2br($ch->LineText) : "<br>".nl2br($ch->LineText);
+								$rs->use_rows += $lines;
+							}
+
 							$price += $ch->SellPrice;
 							$lineAmount += $ch->LineTotal;
 							$qty .= "<br>".number($ch->Qty, 2);

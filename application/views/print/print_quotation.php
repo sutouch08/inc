@@ -10,7 +10,7 @@
 $this->load->helper('print');
 $this->load->helper('image');
 $footer_address = FALSE; //--- แสดงที่อยู่ท้ายแผ่นหรือไม่
-$row_per_page = 21; //--- จำนวนบรรทัด/หน้า
+$row_per_page = 23; //--- จำนวนบรรทัด/หน้า
 $total_row 	= $doc->total_rows;
 $row_text = 50;
 $all_row = count($details);
