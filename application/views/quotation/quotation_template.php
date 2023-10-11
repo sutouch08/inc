@@ -143,12 +143,7 @@
 
     <td class=" text-center fix-no no" scope="row">{{no}}</td>
     <td class=" text-center fix-add" scope="row"></td>
-  	<td class=" text-center fix-img" scope="row">
-      <label id="chk-label-{{no}}" class="hide">
-        <input type="checkbox" class="ace del-chk" value="{{no}}"/>
-          <span class="lbl"></span>
-      </label>
-  	</td>
+  	<td class=" text-center fix-img" scope="row"></td>
     <td class=" text-center fix-text" scope="row">
       <a class="pointer" id="add-text-{{no}}" href="javascript:insertTextRow({{no}})" title="Insert text row"><i class="fa fa-plus-square-o fa-lg"></i></a>
     </td>
@@ -233,9 +228,7 @@
 <script id="text-template" type="text/x-handlebarsTemplate">
   <tr id="row-{{no}}" data-no="{{no}}" class="rows">
     <td class=" text-center fix-no no" scope="row">{{no}}</td>
-    <td class=" text-center fix-add" scope="row">
-
-    </td>
+    <td class=" text-center fix-add" scope="row"></td>
     <td class=" text-center fix-img" scope="row">
       <a class="pointer" href="javascript:removeTextRow({{no}}, {{parentNo}})" title="Remove this row"><i class="fa fa-trash fa-lg red"></i></a>
     </td>

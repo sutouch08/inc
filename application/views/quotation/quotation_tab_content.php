@@ -224,8 +224,7 @@
                 <a class="pointer" href="javascript:insertBefore(<?php echo $no; ?>)"><i class="fa fa-plus"></i></a>
               </td>
               <td class=" text-center fix-img" scope="row">
-                <input type="checkbox" class="ace del-chk" value="<?php echo $no; ?>"/>
-                <span class="lbl"></span>
+                <a class="pointer" href="javascript:removeRow(<?php echo $no; ?>)" title="Remove this row"><i class="fa fa-trash fa-lg red"></i></a>
               </td>
               <td class=" text-center fix-text" scope="row">
                 <a class="pointer hide" id="add-text-<?php echo $no; ?>" href="javascript:insertTextRow(<?php echo $no; ?>)" title="Insert text row"><i class="fa fa-plus-square-o fa-lg"></i></a>

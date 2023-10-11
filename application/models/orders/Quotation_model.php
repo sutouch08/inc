@@ -494,7 +494,7 @@ class Quotation_model extends CI_Model
 		$qr .= "WHERE Status = 0 ";
 		$qr .= "AND must_approve = 1 ";
 		$qr .= "AND Review IN('A', 'S') ";
-		$qr .= "AND Approved == 'P' ";
+		$qr .= "AND Approved = 'P' ";
 		$qr .= "AND ((disc_diff >= {$ds['minDisc']} AND disc_diff <= {$ds['maxDisc']}) OR (DocTotal >= {$ds['minAmount']} AND DocTotal <= {$ds['maxAmount']})) ";
 
 		if( ! empty($ds['code']))
@@ -537,7 +537,7 @@ class Quotation_model extends CI_Model
 		$qr .= "WHERE Status = 0 ";
 		$qr .= "AND must_approve = 1 ";
 		$qr .= "AND Review IN('A', 'S') ";
-		$qr .= "AND Approved == 'P' ";
+		$qr .= "AND Approved = 'P' ";
 		$qr .= "AND ((disc_diff >= {$ds['minDisc']} AND disc_diff <= {$ds['maxDisc']}) OR (DocTotal >= {$ds['minAmount']} AND DocTotal <= {$ds['maxAmount']})) ";
 
 		if( ! empty($ds['code']))
