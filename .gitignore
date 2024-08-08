@@ -1,3 +1,4 @@
+.htaccess
 *.png
 *.jpg
 *.gif
@@ -6,3 +7,7 @@
 *.pdf
 *.xls
 *.xlsx
+.htaccess
+index.php
+/application/config/config.php
+/application/config/database.php

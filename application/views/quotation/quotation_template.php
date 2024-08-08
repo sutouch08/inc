@@ -23,6 +23,7 @@
   <input type="hidden" id="uid-{{no}}" class="uid" data-no="{{no}}" />
   <input type="hidden" id="tree-type-{{no}}" value="N"/>
   <input type="hidden" id="father-uid-{{no}}" value="" />
+  <input type="hidden" id="is-blank-{{no}}" value="1" data-no="{{no}}"/>
 
   <td class=" text-center fix-no no" scope="row">{{no}}</td>
   <td class=" text-center fix-add" scope="row">
@@ -140,6 +141,7 @@
     <input type="hidden" id="tree-type-{{no}}" value="{{TreeType}}" value="N"/>
     <input type="hidden" class="child-{{father_uid}}" id="child-{{no}}" data-no="{{no}}" />
     <input type="hidden" id="father-uid-{{no}}" value="{{father_uid}}" />
+    <input type="hidden" id="is-blank-{{no}}" value="0" data-no="{{no}}"/>
 
     <td class=" text-center fix-no no" scope="row">{{no}}</td>
     <td class=" text-center fix-add" scope="row"></td>
@@ -262,6 +264,7 @@
   <input type="hidden" id="uid-{{no}}" class="uid" data-no="{{no}}" />
   <input type="hidden" id="tree-type-{{no}}" value="N"/>
   <input type="hidden" id="father-uid-{{no}}" value="" />
+  <input type="hidden" id="is-blank-{{no}}" value="1" data-no="{{no}}"/>
 
   <td class=" text-center fix-no no" scope="row">{{no}}</td>
   <td class=" text-center fix-add" scope="row">

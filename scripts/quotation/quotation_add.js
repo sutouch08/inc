@@ -314,7 +314,8 @@ function add(data) {
 						swal({
 							title:'Oops !',
 							text: ds.message,
-							type:'info'
+							type:'info',
+							html:true
 						}, function() {
 							setTimeout(function(){
 								viewDetail(ds.code);
@@ -325,6 +326,7 @@ function add(data) {
 						swal({
 							title:'Success',
 							type:'success',
+							html:true,
 							timer:1000
 						});
 
@@ -337,7 +339,8 @@ function add(data) {
 					swal({
 						title:'Error!',
 						text:ds.message,
-						type:'error'
+						type:'error',
+						html:true
 					});
 				}
 			}
@@ -345,7 +348,8 @@ function add(data) {
 				swal({
 					title:'Error!',
 					text:rs,
-					type:'error'
+					type:'error',
+					html:true
 				});
 			}
 
@@ -1115,7 +1119,7 @@ function removeRow(no) {
 		textNo = $('#text-'+uid).data('no');
 		$('#row-'+textNo).remove();
 	}
-	
+
 	if(type == 'S') {
 		let uid = $('#uid-'+no).val();
 		if(uid.length) {
@@ -1312,6 +1316,7 @@ function getItemData(no) {
 					$('#line-qty-'+no).focus();
 					$('#uid-'+no).val(ds.uid);
 					$('#tree-type-'+no).val(ds.TreeType);
+					$('#is-blank-'+no).val(0);
 
 					$('#add-text-'+no).removeClass('hide');
 
@@ -1696,11 +1701,13 @@ function init() {
 			let no = $(this).data('id');
 			let code = ui.item.code;
 			let name = ui.item.name;
+			let description = ui.item.description;
 
 			if(code.length && name.length) {
 				setTimeout(() => {
 					$('#itemCode-'+no).val(code);
 					$('#itemName-'+no).val(name);
+					$('#itemDetail-'+no).val(description)
 					$('#itemName-'+no).focus();
 					//$(this).trigger('change');
 					//getItemData(no);
@@ -1723,8 +1730,9 @@ function init() {
 
 	$('.item-code').focusout(function() {
 		let no = $(this).data('id');
+		let isBlank = $('#is-blank-'+no).val();
 		let code = $(this).val();
-		if(code.length == 0 && isRequesting == 0) {
+		if(isBlank == 0 && code.length == 0 && isRequesting == 0) {
 			clearRowData(no);
 		}
 	});

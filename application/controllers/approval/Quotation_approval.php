@@ -64,11 +64,11 @@ class Quotation_approval extends PS_Controller
           $filter['maxAmount'] = $rule->maxAmount;
         }
       }
-			
-			$rows = empty($rule) ? 0 : $this->quotation_model->count_approval_rows($filter);
+
+			$rows = empty($rule) ? 0 : ($rule->approve == 1 ? $this->quotation_model->count_approval_rows($filter) : 0);
 			//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
 			$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
-			$filter['data'] = empty($rule) ? NULL : $this->quotation_model->get_approval_list($filter, $perpage, $this->uri->segment($this->segment));
+			$filter['data'] = empty($rule) ? NULL : ($rule->approve == 1 ? $this->quotation_model->get_approval_list($filter, $perpage, $this->uri->segment($this->segment)) : NULL);
 			$this->pagination->initialize($init);
 			$this->load->view('approval/quotation/sq_list', $filter);
 		}

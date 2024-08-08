@@ -166,7 +166,6 @@ class Quotation extends PS_Controller
 						'Attn2' => get_null($hd->Attn2),
 						'Type' => get_null($hd->Type),
 						'Project' => get_null($hd->Project),
-						'Type' => get_null($hd->Type),
 						'Phone' => trim($hd->Phone),
 						'PriceList' => get_null($customer->ListNum),
 						'SlpCode' => empty($hd->SlpCode) ? $customer->SlpCode : $hd->SlpCode,
@@ -1492,19 +1491,27 @@ class Quotation extends PS_Controller
 		$this->load->library('printer');
 		$doc = $this->quotation_model->get($code);
 		$details = $this->quotation_model->get_un_child_details($code);
-		$doc->total_rows = 1;
+		$doc->total_rows = 0;
 		if( ! empty($details))
 		{
 			foreach($details as $rs)
 			{
-				$rs->use_rows = 1;
+				$rs->use_rows = 0;
+				$row_text = 50;
+
+				$count = mb_strlen( $rs->Description);
+				$u_row = $count > $row_text ? ceil($count/$row_text) : 1;
+				// $rs->use_rows += $u_row;
 
 				if( ! empty($rs->LineText))
 				{
-					$lines = substr_count( $rs->LineText, "\n" );
+					$lines = 1 + substr_count( $rs->LineText, "\n" );
 					$rs->Description .= empty($rs->Description) ? nl2br($rs->LineText) : "<br>".nl2br($rs->LineText);
-					$rs->use_rows += $lines;
+					$u_row += $lines;
+					// $rs->use_rows += $lines;
 				}
+
+				$rs->use_rows += $u_row > 2 ? ($u_row - 1) : $u_row;
 
 				if($rs->TreeType == 'S')
 				{
@@ -1519,14 +1526,15 @@ class Quotation extends PS_Controller
 						foreach($childs as $ch)
 						{
 							$rs->Description .= "<br>".$ch->Description;
+
 							if(! empty($ch->LineText))
 							{
-								$lines = substr_count( $ch->LineText, "\n" );
+								$lines = 1 + substr_count( $ch->LineText, "\n" );
 								$rs->Description .= empty($rs->Description) ? nl2br($ch->LineText) : "<br>".nl2br($ch->LineText);
 								$rs->use_rows += $lines;
 							}
 
-							$price += $ch->SellPrice;
+							$price += $ch->SellPrice * ($ch->Qty/$rs->Qty);
 							$lineAmount += $ch->LineTotal;
 							$qty .= "<br>".number($ch->Qty, 2);
 							$rs->use_rows++;
@@ -1544,6 +1552,7 @@ class Quotation extends PS_Controller
 		}
 
 		$customer = $this->customers_model->get($doc->CardCode);
+		$doc->email = empty($customer) ? NULL : $customer->E_Mail;
 		$sale = $this->sales_person_model->get($doc->SlpCode);
 
 		$owner = empty($doc->OwnerCode) ? NULL : $this->employee_model->get($doc->OwnerCode);

@@ -55,9 +55,9 @@ class PS_Controller extends CI_Controller
     {
       $this->load->view('deny_page');
     }
-    
+
     $this->ms = $this->load->database('ms', TRUE);
-    $this->mc = $this->load->database('mc', TRUE);
+    // $this->mc = $this->load->database('mc', TRUE);
 
   }
 

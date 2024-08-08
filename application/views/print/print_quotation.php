@@ -10,10 +10,8 @@
 $this->load->helper('print');
 $this->load->helper('image');
 $footer_address = FALSE; //--- แสดงที่อยู่ท้ายแผ่นหรือไม่
-$row_per_page = 23; //--- จำนวนบรรทัด/หน้า
+$row_per_page = 19; //--- จำนวนบรรทัด/หน้า
 $total_row 	= $doc->total_rows;
-$row_text = 50;
-$all_row = count($details);
 
 $name = empty($doc->DocNum) ? $doc->code : $doc->DocNum;
 
@@ -59,7 +57,7 @@ $this->printer->add_subheader($thead);
 $pattern = array(
             "font-size:10px; vertical-align:text-top; text-align:center; padding:3px; border:solid 1px #555555; min-height:5mm;", //-- ลำดับ
             "font-size:10px; vertical-align:text-top; text-align:left; padding:3px; border:solid 1px #555555; min-height:5mm;",  //--- Item name
-            "font-size:10px; vertical-align:text-top; text-align:left; padding:3px; border:solid 1px #555555; min-height:5mm; white-space:nowrap; max-width:65mm; overflow:hidden;", //--- Description
+            "font-size:10px; vertical-align:text-top; text-align:left; padding:3px; border:solid 1px #555555; min-height:5mm;", //" white-space:nowrap; max-width:65mm; overflow:hidden;", //--- Description
             "font-size:10px; vertical-align:text-top; text-align:right; padding:3px; border:solid 1px #555555; min-height:5mm;", //--- จำนวน
 						"font-size:10px; vertical-align:text-top; text-align:right; padding:3px; border:solid 1px #555555; min-height:5mm;", //---- หน่วยละ
             "font-size:10px; vertical-align:text-top; text-align:center; padding:3px; border:solid 1px #555555; min-height:5mm;", //--- ส่วนลด
@@ -168,7 +166,7 @@ while($total_page > 0 )
 	$top .= 			"</tr>";
 	$top .= 			"<tr>";
 	$top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Email</td>";
-	$top .= 				"<td colspan='2' style=''>: {$customer->E_Mail}</td>";
+	$top .= 				"<td colspan='2' style=''>: {$doc->email}</td>";
 	$top .= 			"</tr>";
   $top .= 			"<tr>";
   $top .= 				"<td style='vertical-align:text-top; padding-top:0px;'>Attn</td>";
@@ -237,7 +235,7 @@ while($total_page > 0 )
   $page .= $this->printer->table_start();
   $i = 0;
 
-	$row = $this->printer->row;
+	$row = $row_per_page; //$this->printer->row;
 
 	$last_row = FALSE;
 
@@ -248,13 +246,7 @@ while($total_page > 0 )
     if( ! empty($rs) )
     {
       $use_row = $rs->use_rows;
-
-			if($use_row > 1)
-			{
-				//--- คำนวนบรรทัดที่ต้องใช้ต่อ 1 รายการ
-				$use_row -= 1;
-				$i += $use_row;
-			}
+      $i += $use_row;
 
       $data = array(
         $n,
@@ -283,37 +275,24 @@ while($total_page > 0 )
 
 		if(!empty($nextrow))
 		{
-			$use_row += $i;
-
-			if($row < $use_row)
+			$use_row = $nextrow->use_rows; //$i; //-- จำนวนบรรทัดที่ต้องใช้
+      $a_row = $row - $use_row; ///----- จำนวนบรรทัดคงเหลือ
+			if($a_row < $use_row)  //--- ถ้าจำนวนที่ใช้ มากกว่าจำนวนบรรทัดคงเหลือ ใส่บรรทัดเปล่าจนจบหน้า
 			{
-				if($i < $row)
-				{
-					$i++;
-					$i++;
-					$i++;
-					while($i < $row)
-					{
-						$data = array("","&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;");
-						$page .= $this->printer->print_row($data, $last_row);
-						$i++;
-					}
-				}
+        while($i < $row) //--- เติมบรรทัดเปล่าๆ จนครบ
+        {
+          $data = array("","&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;", "&nbsp;");
+          $page .= $this->printer->print_row($data, $last_row);
+          $i++;
+        }
 
-				$i = $use_row;
 				$last_row = TRUE;
-			}
-			else
-			{
-				$i++;
 			}
 		}
 		else
 		{
 			$i++;
 		}
-
-		$total_row--;
   }
 
   if($this->printer->current_page == $this->printer->total_page)
@@ -340,21 +319,26 @@ while($total_page > 0 )
 		$remark = "";
   }
 
+
+
   $subTotal = array();
   $fix_remark = "<u>เงื่อนไข</u><br/>
                 1.กำหนดยื่นราคา 30 วันนับจากวันเสนอราคา<br/>
                 2.ชำระด้วยเงินสด / เงินโอนผ่านธนาคาร / เช็คธนาคาร / บัตรเครดิตธนาคาร(ชาร์จ 2.5%)<br/>
                 3.ลูกค้าส่งหลักฐานการชำระเงินก่อนส่งมอบสินค้า<br/>
                 4.เครดิตการค้าเป็นไปตามเงื่อนไขของบริษัทโดยผู้มีอำนาจลงนามเท่านั้น";
+                //--- หมายเหต
+  $page .= "</table></div>";
 
-  //--- หมายเหต
-  $page .= "<tr>";
-	$page .= "<td colspan='9' style='font-size:12px; vertical-align:top; padding:5px; border:none; height:15mm; min-height:15mm;'>หมายเหตุ : {$doc->Comments}</td>";
-	$page .= "</tr>";
 
+  $page .= "<div style='width:190mm; position:absolute; bottom:15px; left:15px; margin:auto; padding-top:5px; border-radius:0px;'>";
+  $page .= "<table class='table'>";
   $page .= "<tr>";
-  $page .= "<td colspan='4' style='font-size:10px; border:solid 1px #555555; vertical-align:top; padding:5px; '>{$fix_remark}</td>";
-  $page .= "<td colspan='5' rowspan='2' style='padding:0; border:solid 1px #555555;'>";
+  $page .= "<td colspan='2' style='font-size:12px; vertical-align:top; padding:5px; border:none; height:10mm; min-height:10mm;'>หมายเหตุ : {$doc->Comments}</td>";
+  $page .= "</tr>";
+  $page .= "<tr>";
+  $page .= "<td style='width:120mm; font-size:10px; border:solid 1px #555555; vertical-align:top; padding:5px; '>{$fix_remark}</td>";
+  $page .= "<td rowspan='2' style='width:70mm; padding:0; border:solid 1px #555555;'>";
   $page .=  "<table style='width:100%; margin-top:0; margin-bottom:0;'>";
   $page .=    "<tr>";
   $page .=      "<td style='width:60%; font-size:11px; padding:2px;'>จำนวนเงิน/Price</td>";
@@ -380,13 +364,15 @@ while($total_page > 0 )
   $page .= "</td>";
   $page .= "</tr>";
   $page .= "<tr>";
-  $page .= "<td colspan='4' style='font-size:12px; vertical-align:middle; padding:5px; height:10mm; border:solid 1px #555555;'>จำนวนเงิน : {$baht_text}</td>";
+  $page .= "<td style='font-size:12px; vertical-align:middle; padding:5px; height:10mm; border:solid 1px #555555;'>จำนวนเงิน : {$baht_text}</td>";
   $page .= "</tr>";
 
-  $page .= "<tr><td colspan='9' style='padding:0; border:solid 1px #555555;'>{$this->printer->footer}</td></tr>";
+  $page .= "<tr><td colspan='2' style='padding:0; border:solid 1px #555555;'>{$this->printer->footer}</td></tr>";
+  $page .= "</table>";
+  $page .= "</div>";
 
 
-	$page .= $this->printer->table_end();
+	// $page .= $this->printer->table_end();
 
   $page .= $this->printer->content_end();
 

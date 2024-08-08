@@ -74,11 +74,11 @@ $active_group = 'default';
 $query_builder = TRUE;
 
 $db['default'] = array(
-	'dsn'	=> 'mysql:host=localhost;port=3306;dbname=bex_inc',
+	'dsn'	=> 'mysql:host=localhost;port=3306;dbname=bex_inc_new',
 	'hostname' => 'localhost',
 	'username' => 'root',
 	'password' => 'ZT20o15u21c3H808',
-	'database' => 'bex_inc',
+	'database' => 'bex_inc_new',
 	'dbdriver' => 'pdo',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
@@ -124,29 +124,6 @@ $db['ms'] = array(
 	'username' => 'wrx_admin',
 	'password' => 'W@rr1X$p0rt',
 	'database' => 'DB_SBO_INC',
-	'dbdriver' => 'sqlsrv',
-	'dbprefix' => '',
-	'pconnect' => FALSE,
-	'db_debug' => (ENVIRONMENT !== 'production'),
-	'cache_on' => FALSE,
-	'cachedir' => '',
-	'char_set' => 'utf8',
-	'dbcollat' => 'utf8_general_ci',
-	'swap_pre' => '',
-	'encrypt' => FALSE,
-	'compress' => FALSE,
-	'stricton' => FALSE,
-	'failover' => array(),
-	'save_queries' => TRUE
-);
-
-
-$db['mc'] = array(
-	'dsn'	=> '',
-	'hostname' => 'localhost',
-	'username' => 'wrx_admin',
-	'password' => 'W@rr1X$p0rt',
-	'database' => 'SHOTemp',
 	'dbdriver' => 'sqlsrv',
 	'dbprefix' => '',
 	'pconnect' => FALSE,

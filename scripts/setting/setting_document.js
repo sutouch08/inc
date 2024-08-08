@@ -1,8 +1,16 @@
+function validPrefix(input){
+  var regex = /[^a-z]/gi;
+  input.value = input.value.replace(regex, '');
+  input.value = input.value.toUpperCase();
+}
+
+
 function checkDocumentSetting(){
   var pre = {};
   var data = {};
   var prefix_error = 0;
-  var error_message = 'รหัสเอกสารซ้ำ ';
+  var error_message = 'Prefix ซ้ำ';
+
   $('.prefix').each(function(index, el){
     name = $(this).attr('name');
     value = $(this).val();
@@ -13,9 +21,9 @@ function checkDocumentSetting(){
       prefix_error++;
     }
 
-    if(value.length != 2){
+    if(value.length < 2 || value.length > 3){
       $(this).addClass('has-error');
-      error_message ='กรุณากำหนดรหัสเอกสาร 2 ตัวอักษร';
+      error_message ='กรุณากำหนดรหัสเอกสาร 2 - 3 ตัวอักษร';
       prefix_error++;
       return false;
     }

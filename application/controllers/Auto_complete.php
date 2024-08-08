@@ -53,7 +53,7 @@ class Auto_complete extends CI_Controller
 
     $sc = array();
 
-    $qr = "SELECT ItemCode AS code, ItemName AS name ";
+    $qr = "SELECT ItemCode AS code, ItemName AS name, FrgnName AS description ";
     $qr .= "FROM OITM ";
     $qr .= "WHERE ItemType = 'I' AND validFor = 'Y' AND SellItem = 'Y' ";
 
@@ -61,16 +61,19 @@ class Auto_complete extends CI_Controller
     {
       foreach($arr as $ar)
       {
-        $qr .= "AND (ItemCode LIKE N'%{$this->ms->escape_str($ar)}%' OR ItemName LIKE N'%{$this->ms->escape_str($ar)}%') ";
+        $text = $this->ms->escape_str($ar);
+
+        $qr .= "AND (ItemCode LIKE N'%{$text}%' OR ItemName LIKE N'%{$text}%' OR FrgnName LIKE N'%{$text}%') ";
       }
     }
     else
     {
-      $qr .= "AND (ItemCode LIKE N'%{$this->ms->escape_str($txt)}%' OR ItemName LIKE N'%{$this->ms->escape_str($txt)}%') ";
+      $text = $this->ms->escape_str($txt);
+      $qr .= "AND (ItemCode LIKE N'%{$text}%' OR ItemName LIKE N'%{$text}%' OR FrgnName LIKE N'%{$text}%') ";
     }
 
-    $qr .= "ORDER BY ItemCode ASC ";
-    $qr .= "OFFSET 0 ROWS FETCH NEXT 20 ROWS ONLY";
+    $qr .= "ORDER BY ItemName ASC ";
+    $qr .= "OFFSET 0 ROWS FETCH NEXT 100 ROWS ONLY";
 
     $rs = $this->ms->query($qr);
 
@@ -81,7 +84,8 @@ class Auto_complete extends CI_Controller
         $sc[] = array(
           'code' => $rd->code,
           'name' => $rd->name,
-          'label' => $rd->code.' | '.$rd->name
+          'description' => $rd->description,
+          'label' => $rd->name.' | '.$rd->description
         );
       }
     }

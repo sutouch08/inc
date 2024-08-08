@@ -22,7 +22,7 @@
 				<button type="button" class="btn btn-xs btn-primary top-btn" onclick="duplicateSQ('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Duplicate</button>
 			<?php endif; ?>
 			<?php if($pm->can_add && $order->Status == 1 && ($order->Approved == 'A' OR $order->Approved == 'S') ) : ?>
-				<!--<button type="button" class="btn btn-xs btn-success top-btn" onclick="createSO('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Create Sale Order</button>-->
+				<button type="button" class="btn btn-xs btn-success top-btn" onclick="createSO('<?php echo $order->code; ?>')"><i class="fa fa-copy"></i> Create Sale Order</button>
 			<?php endif; ?>
 			<?php if($this->pm->can_edit && $order->Status == -1) : ?>
 				<button type="button" class="btn btn-xs btn-warning top-btn" onclick="goEdit('<?php echo $order->code; ?>')"><i class="fa fa-pencil"></i> Edit</button>

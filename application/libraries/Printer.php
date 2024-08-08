@@ -43,14 +43,15 @@ public function config(array $data)
 	{
 		$this->$key = $val;
 	}
+
 	if( ! $this->footer)
 	{
 		$this->row += $this->footer_row;
 		$this->footer_row = 0;
 	}
 
-	$this->row -= ($this->sub_total_row + $this->ex_row + $this->header_rows);
-	$this->total_page = ceil($this->total_row/$this->row);
+	// $this->row -= ($this->sub_total_row + $this->ex_row + $this->header_rows);
+	// $this->total_page = ceil($this->total_row/$this->row);
 	return true;
 }
 
@@ -317,11 +318,17 @@ public function top_page()
 
 
 
+// public function content_start()
+// {
+// 	$height = ($this->row + $this->sub_total_row+1) * $this->row_height+2;
+// 	$border = $this->content_border == 0 ? '' : "border:solid 0px #555555;";
+// 	return  "<div style='width:".$this->content_width."mm; height:".$height."mm; margin:auto; margin-bottom:2mm; margin-top:2mm; ".$border." border-radius: 0px;'>";
+// }
+
 public function content_start()
 {
-	$height = ($this->row + $this->sub_total_row+1) * $this->row_height+2;
 	$border = $this->content_border == 0 ? '' : "border:solid 0px #555555;";
-	return  "<div style='width:".$this->content_width."mm; height:".$height."mm; margin:auto; margin-bottom:2mm; margin-top:2mm; ".$border." border-radius: 0px;'>";
+	return  "<div style='width:".$this->content_width."mm; margin:auto; margin-bottom:2mm; margin-top:2mm; ".$border." border-radius: 0px;'>";
 }
 
 

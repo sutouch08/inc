@@ -10,52 +10,8 @@ function createSO(code) {
     confirmButtonText:'ใช่ ฉันต้องการ',
 		closeOnConfirm:true
   },
-  function(){
-		load_in();
-		$.ajax({
-			url: BASE_URL + 'orders/orders/create_from_sq',
-			type:'POST',
-			cache:false,
-			data:{
-				'sq_code' : code
-			},
-			success:function(rs) {
-				load_out();
-				var rs = $.trim(rs);
-				if(isJson(rs)) {
-					var ds = $.parseJSON(rs);
-					if(ds.status === 'success') {
-						setTimeout(function() {
-							swal({
-								title:'Success',
-								text: 'Sale Order Created Successfull : ' + ds.code,
-								type:'success',
-								timer:1000
-							});
-
-							setTimeout(function(){
-								window.location.href = BASE_URL + 'orders/orders/edit/'+ds.code;
-							},1200)
-						}, 500)
-
-					}
-					else {
-						swal({
-							title:"Error!",
-							text:ds.error,
-							type:'error'
-						});
-					}
-				}
-				else {
-					swal({
-						title:'Error!',
-						text:rs,
-						type:'error'
-					})
-				}
-			}
-		})
+  function() {
+		window.location.href = BASE_URL + 'orders/orders/create_from_sq/'+code;
   });
 }
 
@@ -252,7 +208,7 @@ function reject() {
 		return false;
 	}
 
-	$('#rejectModal').modal('hide');	
+	$('#rejectModal').modal('hide');
 
 	load_in();
 

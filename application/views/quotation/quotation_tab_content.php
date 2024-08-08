@@ -61,6 +61,7 @@
                 <input type="hidden" id="uid-<?php echo $no; ?>" class="uid" data-no="<?php echo $no; ?>" value="<?php echo $rs->uid; ?>" />
                 <input type="hidden" id="tree-type-<?php echo $no; ?>" value="<?php echo $rs->TreeType; ?>" />
                 <input type="hidden" id="father-uid-<?php echo $no; ?>" value="<?php echo $rs->father_uid; ?>" />
+                <input type="hidden" id="is-blank-<?php echo $no; ?>" value="0" data-no="<?php echo $no; ?>"/>
                 <?php if($rs->TreeType == 'I') : ?>
                 <input type="hidden" class="child-<?php echo $rs->father_uid; ?>" data-no="<?php echo $no; ?>" value="<?php echo $rs->father_uid; ?>" />
                 <?php endif; ?>
@@ -218,6 +219,7 @@
               <input type="hidden" id="uid-<?php echo $no; ?>" class="uid" data-no="<?php echo $no; ?>" value="" />
               <input type="hidden" id="tree-type-<?php echo $no; ?>" value="N" />
               <input type="hidden" id="father-uid-<?php echo $no; ?>" value="" />
+              <input type="hidden" id="is-blank-<?php echo $no; ?>" value="1" data-no="<?php echo $no; ?>"/>
 
               <td class=" text-center fix-no no" scope="row"><?php echo $no; ?></td>
               <td class=" text-center fix-add" scope="row">

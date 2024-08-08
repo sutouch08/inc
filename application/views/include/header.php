@@ -33,10 +33,10 @@
 	</style>
 	</head>
 	<body class="no-skin">
-		<div id="loader">
+		<div id="loader" style="z-index:10000;">
         <div class="loader"></div>
 		</div>
-		<div id="loader-backdrop" style="position: fixed; width:100vw; height:100vh; background-color:white; opacity:0.3; display:none; z-index:9;">
+		<div id="loader-backdrop" style="position: fixed; width:100vw; height:100vh; background-color:white; opacity:0.3; display:none; z-index:9999;">
 		</div>
 
 		<!-- #section:basics/navbar.layout -->

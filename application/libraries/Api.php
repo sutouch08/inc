@@ -108,7 +108,7 @@ class Api
 					"ItemDescription" => $rs->ItemName,
           "ItemDetails" => $rs->Description,
           "Text" => $rs->Description,
-          "FreeText" => NULL,
+          "FreeText" => $rs->LineText,
 					"Quantity" => round($rs->Qty, 2),
 					//"UomEntry" => intval($rs->UomEntry),
           "UnitPrice" => round($rs->Price, 2),
@@ -129,8 +129,7 @@ class Api
 					"SlpCode" => intval($order->SlpCode),
           "NoInvTryMv" => NULL,
           "CoGsOcrCode" => NULL,
-          "TreeType" => $rs->TreeType,
-          "Text" => $rs->LineText
+          "TreeType" => $rs->TreeType
 				);
 
 				array_push($orderLine, $line);
