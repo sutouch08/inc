@@ -1256,8 +1256,6 @@ function getItemData(no) {
 		return false;
 	}
 
-	//removeChildRows(no, 0);
-
 	setTimeout(function() {
 		load_in();
 
@@ -1278,6 +1276,8 @@ function getItemData(no) {
 				var rs = $.trim(rs);
 				if(isJson(rs)) {
 
+					removeChildRows(no, 0);
+					
 					var ds = $.parseJSON(rs);
 					var price = parseFloat(ds.Price);
 					var sellPrice = parseDefault(parseFloat(ds.SellPrice), 0.00);

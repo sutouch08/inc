@@ -1176,7 +1176,10 @@ function removeChildRows(no, recal) {
 	if(uid.length) {
 		$('.child-'+uid).each(function() {
 			rowNo = $(this).data('no');
+			cuid = $('#uid-'+rowNo).val();
+			textNo = $('#text-'+cuid).data('no');
 			$('#row-'+rowNo).remove();
+			removeTextRow(textNo, rowNo);
 		});
 
 		reIndex();
@@ -1239,6 +1242,7 @@ function getItemData(no) {
 	let priceList = $('#priceList').val();
 	let docDate = $('#DocDate').val();
 	let payment = $('#payment').val();
+	let uid = $('#uid-'+no).val();
 
 	if(cardCode == "") {
 		swal({
@@ -1255,8 +1259,6 @@ function getItemData(no) {
 		isRequesting = 0;
 		return false;
 	}
-
-	//removeChildRows(no, 0);
 
 	setTimeout(function() {
 		load_in();
@@ -1277,6 +1279,13 @@ function getItemData(no) {
 				isRequesting = 0;
 				var rs = $.trim(rs);
 				if(isJson(rs)) {
+
+					if($('#text-'+uid).length) {
+						rowNo = $('#text-'+uid).data('no');
+						removeTextRow(rowNo, no);
+					}
+
+					removeChildRows(no, 0);
 
 					var ds = $.parseJSON(rs);
 					var price = parseFloat(ds.Price);
