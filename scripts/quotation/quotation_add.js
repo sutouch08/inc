@@ -64,6 +64,7 @@ function saveAdd() {
 			'Project' : $('#Project').val(),
 			'Phone' : $('#phone').val(),
 			'Payment' : $('#payment').val(),
+			'developer' : $('#developer').val(),
 			'OwnerCode' : $('#owner').val(),
 			'ShipToCode' : $('#shipToCode').val(),
 			'ShipTo' : $('#ShipTo').val(),
@@ -151,6 +152,16 @@ function saveAdd() {
 		}
 		else {
 			$('#TextDate').removeClass('has-error');
+		}
+
+		if(ds.developer == "") {
+			swal("Please Select Owner");
+			$('#developer').addClass('has-error');
+			$('.btn-save').removeAttr('disabled');
+			return false;
+		}
+		else {
+			$('#developer').removeClass('has-error');
 		}
 
 		var disc_error = 0;
@@ -426,6 +437,7 @@ function saveUpdate() {
 			'Project' : $('#Project').val(),
 			'Phone' : $('#phone').val(),
 			'Payment' : $('#payment').val(),
+			'developer' : $('#developer').val(),
 			'OwnerCode' : $('#owner').val(),
 			'ShipToCode' : $('#shipToCode').val(),
 			'ShipTo' : $('#ShipTo').val(),
@@ -513,6 +525,15 @@ function saveUpdate() {
 			$('#TextDate').removeClass('has-error');
 		}
 
+		if(ds.developer == "") {
+			swal("Please Select Owner");
+			$('#developer').addClass('has-error');
+			$('.btn-save').removeAttr('disabled');
+			return false;
+		}
+		else {
+			$('#developer').removeClass('has-error');
+		}
 
 		var disc_error = 0;
 		//--- check discount

@@ -119,4 +119,24 @@ function select_uom($uomEntry = NULL)
 	return $ds;
 }
 
- ?>
+
+function select_developer($val = NULL)
+{
+	$ds = "";
+	$ci =& get_instance();
+	$ci->load->model('orders/quotation_model');
+
+	$list = $ci->quotation_model->get_developer_list();
+
+	if( ! empty($list))
+	{
+		foreach($list as $rs)
+		{
+			$ds .= '<option value="'.$rs->code.'" data-name="'.$rs->name.'" '.is_selected($rs->code, $val).'>'.$rs->code.' &nbsp; - &nbsp; '.$rs->name.'</option>';
+		}
+	}
+
+	return $ds;
+}
+
+?>

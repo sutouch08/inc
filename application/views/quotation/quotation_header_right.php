@@ -51,13 +51,15 @@
 			</div>
 		</div>
 
-<!--
 		<div class="form-group">
-      <label class="col-lg-2 col-md-2 control-label-xs no-padding-right">Project</label>
-      <div class="col-lg-10 col-md-10 col-sm-12 col-xs-12">
-        <textarea id="Project" class="autosize autosize-transition form-control input-xs" maxlength="100"><?php echo $order->Project; ?></textarea>
-      </div>
+			<label class="col-lg-3-harf col-md-8 col-sm-7 col-xs-12 control-label-xs no-padding-right">Owner</label>
+			<div class="col-lg-8-harf col-md-4 col-sm-5 col-xs-12">
+				<select class="form-control input-xs" id="developer" name="developer">
+					<option value="">&nbsp;</option>
+					<?php echo select_developer($order->developer); ?>
+				</select>
+			</div>
 		</div>
-	-->
+
 	</div>
 </div>

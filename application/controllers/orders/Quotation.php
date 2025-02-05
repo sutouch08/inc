@@ -111,7 +111,8 @@ class Quotation extends PS_Controller
 			'Comments' => "",
 			'Status' => -1,
 			'Review' => 'P',
-			'Approved' => 'P'
+			'Approved' => 'P',
+			'developer' => NULL
 		);
 
 		$ds = array(
@@ -196,7 +197,8 @@ class Quotation extends PS_Controller
 						'Status' => $hd->isDraft == 1 ? -1 : 0,
 						'Review' => $MustReview ? 'P' : 'S',
 						'Approved' => $MustApprove ? ($must_approve == 1 ? 'P' : 'S') : 'S',
-						'OwnerCode' => $hd->OwnerCode
+						'OwnerCode' => $hd->OwnerCode,
+						'developer' => get_null($hd->developer)
 					);
 
 					$this->db->trans_begin();
@@ -529,7 +531,8 @@ class Quotation extends PS_Controller
 									'ReviewBy' => NULL,
 									'Approved' => $MustApprove ? ($must_approve == 1 ? 'P' : 'S') : 'S',
 									'Approver' => NULL,
-									'OwnerCode' => $hd->OwnerCode
+									'OwnerCode' => $hd->OwnerCode,
+									'developer' => get_null($hd->developer)
 								);
 
 								$this->db->trans_begin();
@@ -1501,15 +1504,28 @@ class Quotation extends PS_Controller
 
 				$count = mb_strlen( $rs->Description);
 				$u_row = $count > $row_text ? ceil($count/$row_text) : 1;
-				// $rs->use_rows += $u_row;
 
 				if( ! empty($rs->LineText))
 				{
 					$lines = 1 + substr_count( $rs->LineText, "\n" );
+					$text = explode("\n", $rs->LineText);
+
+					foreach($text as $tx)
+					{
+						$count = mb_strlen($tx);
+						$lines += $count > $row_text ? ceil($count/$row_text) : 0;
+					}
+
 					$rs->Description .= empty($rs->Description) ? nl2br($rs->LineText) : "<br>".nl2br($rs->LineText);
 					$u_row += $lines;
-					// $rs->use_rows += $lines;
 				}
+
+				// if( ! empty($rs->LineText))
+				// {
+				// 	$lines = 1 + substr_count( $rs->LineText, "\n" );
+				// 	$rs->Description .= empty($rs->Description) ? nl2br($rs->LineText) : "<br>".nl2br($rs->LineText);
+				// 	$u_row += $lines;
+				// }
 
 				$rs->use_rows += $u_row > 2 ? ($u_row - 1) : $u_row;
 
@@ -1527,9 +1543,19 @@ class Quotation extends PS_Controller
 						{
 							$rs->Description .= "<br>".$ch->Description;
 
+							$lines = 1 + substr_count( $ch->LineText, "\n" );
+
 							if(! empty($ch->LineText))
 							{
 								$lines = 1 + substr_count( $ch->LineText, "\n" );
+								$text = explode("\n", $ch->LineText);
+
+								foreach($text as $tx)
+								{
+									$count = mb_strlen($tx);
+									$lines += $count > $row_text ? ceil($count/$row_text) : 0;
+								}
+
 								$rs->Description .= empty($rs->Description) ? nl2br($ch->LineText) : "<br>".nl2br($ch->LineText);
 								$rs->use_rows += $lines;
 							}

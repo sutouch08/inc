@@ -488,6 +488,23 @@ class Quotation_model extends CI_Model
 	}
 
 
+	public function get_developer_list()
+  {
+    $rs = $this->ms
+    ->select('FldValue AS code, Descr AS name')
+    ->where('TableID', 'OQUT')
+    ->where('FieldID', 59)
+    ->order_by('IndexID', 'ASC')
+    ->get('UFD1');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
 	public function get_approval_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
 		$qr  = "SELECT * FROM quotation ";

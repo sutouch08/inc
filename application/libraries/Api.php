@@ -65,6 +65,7 @@ class Api
         "U_Attn2" => $order->Attn2,
         "U_SQ_TYPE" => $order->Type,
         "U_SA_PROJECT" => $order->Project,
+        "U_Developers" => get_null($order->developer),
         "ShipTo" => array(),
         "BillTo" => array()
 			);

@@ -57,5 +57,15 @@
 				</select>
 			</div>
 		</div>
+
+		<div class="form-group">
+			<label class="col-lg-3-harf col-md-8 col-sm-7 col-xs-12 control-label-xs no-padding-right">Owner</label>
+			<div class="col-lg-8-harf col-md-4 col-sm-5 col-xs-12">
+				<select class="form-control input-xs" id="developer" name="developer" disabled>
+					<option value="">&nbsp;</option>
+					<?php echo select_developer($order->developer); ?>
+				</select>
+			</div>
+		</div>
 	</div>
 </div>
